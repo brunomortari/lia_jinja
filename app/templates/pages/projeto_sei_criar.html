@@ -1,0 +1,109 @@
+{% extends "app.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title">Criar Processo SEI</h2>
+        <p class="card-subtitle">Vincular Projeto: {{ projeto.titulo }}</p>
+    </div>
+
+    {% if success_message %}
+    <div class="alert alert-success">
+        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <div>
+            <strong>Sucesso!</strong><br>
+            {{ success_message }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Número do Processo</label>
+        <div
+            style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-md); border: 2px solid var(--border); font-family: monospace; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>{{ sei_data.numero }}</span>
+            <a href="{{ sei_data.link }}" target="_blank" class="btn btn-sm btn-ghost" title="Abrir no SEI">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <a href="/projetos" class="btn btn-primary btn-block">Voltar para Projetos</a>
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-info"
+        style="background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary);">
+        <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"
+                style="margin-top: 2px; flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <div>
+                <p style="margin: 0;">Este formulário simula a integração com o Sistema Eletrônico de Informações (SEI).
+                    Os dados inseridos retornarão um número de protocolo fictício para fins de demonstração.</p>
+            </div>
+        </div>
+    </div>
+
+    <form action="/projetos/{{ projeto.id }}/sei/criar" method="POST">
+        {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% endif %}
+
+        <div class="form-group">
+            <label for="assunto">Assunto do Processo</label>
+            <input type="text" id="assunto" name="assunto" required
+                placeholder="Ex: Contratação de serviço de limpeza e conservação predial"
+                value="Contratação referente ao projeto: {{ projeto.titulo }}">
+            <span class="form-hint">O assunto principal que identificará o processo no SEI.</span>
+        </div>
+
+        <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="tema">Tema/Classificação</label>
+                <input type="text" id="tema" name="tema" required placeholder="Ex: Licitação: Pregão Eletrônico"
+                    value="Licitação e Contratos">
+            </div>
+
+            <div class="form-group">
+                <label for="data_autuacao">Data de Autuação</label>
+                <input type="date" id="data_autuacao" name="data_autuacao" required
+                    value="{{ request.state.today if request.state.today else '' }}">
+                <script>
+                    // Preenche com a data atual se não vier do backend
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const dateInput = document.getElementById('data_autuacao');
+                        if (!dateInput.value) {
+                            dateInput.valueAsDate = new Date();
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="/projetos" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary" style="background-color: var(--color-primary);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                Gerar Número SEI
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

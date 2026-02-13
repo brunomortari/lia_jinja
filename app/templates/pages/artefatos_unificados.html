@@ -1,0 +1,528 @@
+{% extends "app.html" %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-icon" style="background: #4e73df20; color: #4e73df;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+        </div>
+        <div>
+            <h1 class="page-title">Artefatos</h1>
+            <p class="page-subtitle">Gerencie todos os artefatos do sistema</p>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Overview -->
+<div class="stats-overview">
+    <!-- ... existing stats ... -->
+</div>
+
+
+
+<!-- Tabs Navigation -->
+<div class="tabs-container">
+    <div class="tabs-nav">
+        <button class="tab-button active" data-tab="todos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            Todos
+            <span class="tab-badge">{{ stats.total }}</span>
+        </button>
+        <button class="tab-button" data-tab="dfd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            DFD
+            <span class="tab-badge" style="background: #3182CE;">{{ stats.dfd }}</span>
+        </button>
+        <button class="tab-button" data-tab="pesquisa-precos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            PP
+            <span class="tab-badge" style="background: #319795;">{{ stats.pesquisa_precos }}</span>
+        </button>
+        <button class="tab-button" data-tab="riscos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            PGR
+            <span class="tab-badge" style="background: #E53E3E;">{{ stats.riscos }}</span>
+        </button>
+        <button class="tab-button" data-tab="etp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                </path>
+            </svg>
+            ETP
+            <span class="tab-badge" style="background: #38A169;">{{ stats.etp }}</span>
+        </button>
+        <button class="tab-button" data-tab="tr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="M9 15h6"></path>
+            </svg>
+            TR
+            <span class="tab-badge" style="background: #D69E2E;">{{ stats.tr }}</span>
+        </button>
+        <button class="tab-button" data-tab="edital">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+            </svg>
+            Edital
+            <span class="tab-badge" style="background: #805AD5;">{{ stats.edital }}</span>
+        </button>
+    </div>
+
+    <!-- Tab Content - TODOS -->
+    <div class="tab-content active" id="tab-todos">
+        <div class="artefatos-grid">
+            {% if artefatos_todos %}
+            {% for item in artefatos_todos %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #4e73df20; color: #4e73df;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3>Nenhum artefato encontrado</h3>
+                <p>Você ainda não criou nenhum artefato em seus projetos.</p>
+                <a href="/projetos" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Ver Projetos
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab Content - DFD -->
+    <div class="tab-content" id="tab-dfd">
+        <div class="artefatos-grid">
+            {% if artefatos_dfd %}
+            {% for item in artefatos_dfd %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #3182CE20; color: #3182CE;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </div>
+                <h3>Nenhum DFD encontrado</h3>
+                <p>Crie um DFD em um de seus projetos.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab Content - PP -->
+    <div class="tab-content" id="tab-pesquisa-precos">
+        <div class="artefatos-grid">
+            {% if artefatos_pesquisa_precos %}
+            {% for item in artefatos_pesquisa_precos %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #31979520; color: #319795;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <h3>Nenhuma Pesquisa de Preços encontrada</h3>
+                <p>Gere uma pesquisa de preços em um de seus projetos.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab Content - Riscos -->
+    <div class="tab-content" id="tab-riscos">
+        <div class="artefatos-grid">
+            {% if artefatos_riscos %}
+            {% for item in artefatos_riscos %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #E53E3E20; color: #E53E3E;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                        </path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </div>
+                <h3>Nenhum PGR encontrado</h3>
+                <p>Crie um Plano de Gerenciamento de Riscos em um de seus projetos.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab Content - ETP -->
+    <div class="tab-content" id="tab-etp">
+        <div class="artefatos-grid">
+            {% if artefatos_etp %}
+            {% for item in artefatos_etp %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #38A16920; color: #38A169;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                        </path>
+                    </svg>
+                </div>
+                <h3>Nenhum ETP encontrado</h3>
+                <p>Crie um Estudo Técnico Preliminar em um de seus projetos.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab Content - TR -->
+    <div class="tab-content" id="tab-tr">
+        <div class="artefatos-grid">
+            {% if artefatos_tr %}
+            {% for item in artefatos_tr %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #D69E2E20; color: #D69E2E;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M9 15h6"></path>
+                    </svg>
+                </div>
+                <h3>Nenhum TR encontrado</h3>
+                <p>Crie um Termo de Referência em um de seus projetos.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab Content - Edital -->
+    <div class="tab-content" id="tab-edital">
+        <div class="artefatos-grid">
+            {% if artefatos_edital %}
+            {% for item in artefatos_edital %}
+            {% include 'components/artefato_card.html' %}
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon" style="background: #805AD520; color: #805AD5;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                    </svg>
+                </div>
+                <h3>Nenhum Edital encontrado</h3>
+                <p>Crie um Edital de Licitação em um de seus projetos.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Page Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .page-header-left {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .page-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+    <!-- Dropdown de Modelos de IA (Canto inferior esquerdo) -->
+    <div id="ia-model-selector" style="position: fixed; left: 24px; bottom: 24px; z-index: 1000; background: var(--bg-secondary); border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 16px 20px; min-width: 260px; max-width: 320px;">
+        <label for="ia-model-dropdown" style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px; display: block;">Modelo de IA</label>
+        <select id="ia-model-dropdown" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 1rem;">
+            {% for modelo in modelos_ia %}
+            <option value="{{ modelo.nome }}" {% if modelo.nome == modelo_default %}selected{% endif %} {% if not modelo.online %}disabled{% endif %}>
+                {{ modelo.nome }} {% if modelo.online %}🟢 Online{% else %}🔴 Offline{% endif %}
+            </option>
+            {% endfor %}
+        </select>
+        <small style="color: var(--text-secondary); display: block; margin-top: 6px;">Selecione o modelo de IA para esta conversa. Modelos offline não podem ser usados.</small>
+    </div>
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    /* Tabs Container */
+    .tabs-container {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+        display: flex;
+        background: var(--bg-tertiary);
+        border-bottom: 2px solid var(--border);
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .tabs-nav::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .tabs-nav::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+
+    .tabs-nav::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+    }
+
+    .tab-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 20px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        position: relative;
+    }
+
+    .tab-button:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .tab-button.active {
+        background: var(--bg-secondary);
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+
+    .tab-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 6px;
+        background: var(--color-primary);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 11px;
+    }
+
+    .tab-button.active .tab-badge {
+        animation: pulse 0.3s ease;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+        padding: var(--spacing-lg);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Artefatos Grid */
+    .artefatos-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    /* Empty State */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .empty-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .tabs-nav {
+            justify-content: flex-start;
+        }
+
+        .tab-button {
+            padding: 12px 16px;
+            font-size: 0.8125rem;
+        }
+
+        .tab-button svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+</style>
+
+<script>
+    // Tab Switching Logic
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const tabId = this.getAttribute('data-tab');
+
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding content
+                this.classList.add('active');
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+
+                // Save to localStorage
+                localStorage.setItem('activeArtefatoTab', tabId);
+            });
+        });
+
+        // Restore last active tab
+        const savedTab = localStorage.getItem('activeArtefatoTab');
+        if (savedTab) {
+            const savedButton = document.querySelector(`[data-tab="${savedTab}"]`);
+            if (savedButton) {
+                savedButton.click();
+            }
+        }
+    });
+</script>
+
+{% endblock %}

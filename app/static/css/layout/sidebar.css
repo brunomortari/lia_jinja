@@ -1,0 +1,311 @@
+/**
+ * Sistema LIA - Layout: Sidebar
+ * ==============================
+ */
+
+/* ========== SIDEBAR BASE ========== */
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: var(--z-fixed);
+    overflow: hidden;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* ========== SIDEBAR HEADER ========== */
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border);
+    min-height: var(--header-height);
+    gap: var(--spacing-sm);
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    overflow: hidden;
+}
+
+.brand-icon {
+    width: 32px;
+    height: 32px;
+    stroke: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.brand-text {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-accent);
+    white-space: nowrap;
+    transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.sidebar.collapsed .brand-text {
+    opacity: 0;
+    width: 0;
+}
+
+/* ========== TOGGLE BUTTON ========== */
+
+.sidebar-toggle {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.sidebar-toggle:hover {
+    background: var(--color-gray-200);
+}
+
+.sidebar-toggle svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle svg {
+    transform: rotate(180deg);
+}
+
+/* ========== SIDEBAR NAVIGATION ========== */
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--spacing-md);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ========== NAV ITEM ========== */
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 10px 12px;
+    margin-bottom: 4px;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.nav-item:hover {
+    background: var(--color-gray-200);
+}
+
+.nav-item.active {
+    background: var(--color-accent);
+    color: white;
+}
+
+.nav-item.active .nav-icon {
+    stroke: white;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    flex-shrink: 0;
+    stroke: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.nav-item:hover .nav-icon {
+    stroke: var(--color-accent);
+}
+
+.nav-item.active:hover .nav-icon {
+    stroke: white;
+}
+
+.nav-text {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: opacity 0.2s ease, width 0.2s ease;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .nav-text {
+    opacity: 0;
+    width: 0;
+}
+
+/* ========== SEPARATOR ========== */
+
+.nav-separator {
+    height: 1px;
+    background: var(--border);
+    margin: var(--spacing-md) 0;
+}
+
+/* ========== ACCORDION ========== */
+
+.nav-accordion {
+    margin-bottom: 4px;
+}
+
+.nav-accordion-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: left;
+}
+
+.nav-accordion-trigger:hover {
+    background: var(--color-gray-200);
+}
+
+.nav-accordion-trigger .nav-icon {
+    flex-shrink: 0;
+}
+
+.nav-accordion-trigger .nav-text {
+    flex: 1;
+    overflow: hidden;
+}
+
+.nav-arrow {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    stroke: var(--text-secondary);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    flex-shrink: 0;
+}
+
+.nav-accordion-trigger.open .nav-arrow {
+    transform: rotate(180deg);
+}
+
+.sidebar.collapsed .nav-arrow {
+    opacity: 0;
+    width: 0;
+    min-width: 0;
+}
+
+/* ========== ACCORDION CONTENT ========== */
+
+.nav-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.nav-accordion-content.open {
+    max-height: 300px;
+}
+
+.sidebar.collapsed .nav-accordion-content {
+    display: none;
+}
+
+/* ========== SUBITEM ========== */
+
+.nav-subitem {
+    display: block;
+    padding: 8px 12px 8px 44px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.nav-subitem:hover {
+    background: var(--color-gray-100);
+    color: var(--text-primary);
+}
+
+.nav-subitem.active {
+    background: var(--color-accent-light);
+    color: white;
+}
+
+/* ========== SIDEBAR FOOTER ========== */
+
+.sidebar-footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.version-text {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .version-text {
+    opacity: 0;
+}
+
+/* ========== MAIN AREA MARGIN ========== */
+
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar-collapsed .main-area {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* ========== RESPONSIVO ========== */
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar:not(.collapsed) {
+        transform: translateX(0);
+    }
+
+    .app-container .main-area,
+    .sidebar-collapsed .main-area {
+        margin-left: 0;
+    }
+}

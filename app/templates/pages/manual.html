@@ -1,0 +1,910 @@
+{% extends "app.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/manual.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/manual_fluxo.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+        </div>
+        <div>
+            <h1 class="page-title">Manual do Sistema LIA</h1>
+            <p class="page-subtitle">Licitações com Inteligência Artificial</p>
+        </div>
+    </div>
+</div>
+
+<!-- Índice de Navegação Rápida -->
+<div class="quick-nav">
+    <a href="#sobre" class="quick-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        Sobre o Sistema
+    </a>
+    <a href="#fluxo" class="quick-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        Fluxo de Trabalho
+    </a>
+    <a href="#fluxo-processo" class="quick-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+            <line x1="4" y1="21" x2="20" y2="21"></line>
+        </svg>
+        Fluxo Licitatório
+    </a>
+    <a href="#artefatos" class="quick-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        Artefatos
+    </a>
+    <a href="#usuarios" class="quick-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Usuários
+    </a>
+</div>
+
+<!-- Seção: Sobre o Sistema -->
+<div class="manual-section" id="sobre">
+    <div class="section-header">
+        <div class="section-icon" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        <div>
+            <h2 class="section-title">Sobre o Sistema LIA</h2>
+            <p class="section-description">Entenda o propósito e os benefícios da plataforma</p>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <h3>🎯 O que é o Sistema LIA?</h3>
+        <p>O <strong>Sistema LIA (Licitações com Inteligência Artificial)</strong> é uma plataforma desenvolvida para o
+            TRE-GO que otimiza e automatiza o processo de elaboração de documentos licitatórios, integrando Inteligência
+            Artificial para acelerar e padronizar a criação de artefatos.</p>
+
+        <div class="highlight-box">
+            <h4>✨ Principais Benefícios</h4>
+            <ul>
+                <li><strong>Agilidade:</strong> Reduz drasticamente o tempo de elaboração de documentos</li>
+                <li><strong>Padronização:</strong> Garante conformidade com normas e melhores práticas</li>
+                <li><strong>Qualidade:</strong> Utiliza IA para sugerir conteúdos completos e bem estruturados</li>
+                <li><strong>Rastreabilidade:</strong> Mantém histórico completo de versões e alterações</li>
+                <li><strong>Integração:</strong> Conecta-se ao PAC 2025 e bases de dados governamentais</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Seção: Fluxo de Trabalho -->
+<div class="manual-section" id="fluxo">
+    <div class="section-header">
+        <div class="section-icon" style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+        </div>
+        <div>
+            <h2 class="section-title">Fluxo de Trabalho</h2>
+            <p class="section-description">Como funciona o processo de criação de licitações</p>
+        </div>
+    </div>
+
+    <div class="workflow-container">
+        <div class="workflow-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+                <h3>Seleção do PAC</h3>
+                <p>Escolha um ou mais itens do <strong>Plano Anual de Contratações (PAC 2025)</strong> que serão a base
+                    do seu projeto de licitação.</p>
+            </div>
+        </div>
+
+        <div class="workflow-arrow">→</div>
+
+        <div class="workflow-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+                <h3>Criação do Projeto</h3>
+                <p>Crie um novo projeto informando título e descrição. O sistema organizará todos os artefatos
+                    relacionados.</p>
+            </div>
+        </div>
+
+        <div class="workflow-arrow">→</div>
+
+        <div class="workflow-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+                <h3>DFD - Documento de Formalização</h3>
+                <p>Primeiro artefato obrigatório. Utilize a <strong>IA</strong> para gerar automaticamente ou preencha
+                    manualmente.</p>
+            </div>
+        </div>
+
+        <div class="workflow-arrow">→</div>
+
+        <div class="workflow-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+                <h3>Artefatos Complementares</h3>
+                <p>Crie sequencialmente: <strong>PGR</strong> (Riscos), <strong>PP</strong> (Pesquisa de Preços),
+                    <strong>ETP</strong>, <strong>TR</strong> e <strong>Edital</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div class="workflow-arrow">→</div>
+
+        <div class="workflow-step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+                <h3>Revisão e Exportação</h3>
+                <p>Revise os documentos, aprove as versões e exporte em <strong>PDF</strong> ou <strong>DOCX</strong>
+                    para uso oficial.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seção: Fluxo do Processo Licitatório -->
+<div class="manual-section" id="fluxo-processo">
+    <div class="section-header">
+        <div class="section-icon" style="background: linear-gradient(135deg, #3182CE 0%, #2B6CB0 100%);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+                <line x1="4" y1="21" x2="20" y2="21"></line>
+            </svg>
+        </div>
+        <div>
+            <h2 class="section-title">Fluxo do Processo Licitatório</h2>
+            <p class="section-description">Visualização completa do processo e das decisões automáticas do sistema</p>
+        </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="fluxo-legenda">
+        <div class="legenda-item">
+            <div class="legenda-dot" style="background: #334155;"></div>
+            Início / Fim
+        </div>
+        <div class="legenda-item">
+            <div class="legenda-dot" style="background: #3182CE; border-radius: 4px;"></div>
+            Artefato / Documento
+        </div>
+        <div class="legenda-item">
+            <div class="legenda-diamond" style="background: #D69E2E;"></div>
+            Gateway (Decisão)
+        </div>
+        <div class="legenda-item">
+            <div class="legenda-dot" style="background: #805AD5;"></div>
+            Fluxo ARP
+        </div>
+        <div class="legenda-item">
+            <div class="legenda-dot" style="background: #DD6B20;"></div>
+            Fluxo Dispensa
+        </div>
+        <div class="legenda-item">
+            <div class="legenda-dot" style="background: #3182CE;"></div>
+            Fluxo Licitação
+        </div>
+    </div>
+
+    <div class="fluxo-container">
+        <div class="fluxo-visual">
+
+            <!-- INÍCIO -->
+            <div class="fluxo-start">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                Início do Processo
+            </div>
+
+            <!-- Conector -->
+            <div class="fluxo-connector">
+                <div class="fluxo-connector-line"></div>
+                <div class="fluxo-connector-arrow"></div>
+            </div>
+
+            <!-- GATEWAY INICIAL: PAC -->
+            <div class="fluxo-gateway">
+                <div class="gateway-diamond gateway-pac">
+                    <span class="gateway-diamond-inner">?</span>
+                </div>
+                <span class="gateway-label">Item consta no PAC?</span>
+                <span class="gateway-sublabel">projeto.intra_pac</span>
+            </div>
+
+            <!-- Branches PAC -->
+            <div class="fluxo-branches branches-2">
+                <!-- SIM - Está no PAC -->
+                <div class="fluxo-branch">
+                    <span class="branch-condition condition-yes">SIM - Está no PAC</span>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-dfd" data-tooltip="Sempre obrigatório - ponto de partida">
+                        <div class="fluxo-node-icon">DFD</div>
+                        <div class="fluxo-node-info">
+                            <h4>Documento de Formalização da Demanda</h4>
+                            <p>Formaliza a necessidade da contratação</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NÃO - Fora do PAC -->
+                <div class="fluxo-branch">
+                    <span class="branch-condition condition-no">NÃO - Fora do PAC</span>
+                    <div class="branch-condition-detail">intra_pac = False</div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-je">
+                        <div class="fluxo-node-icon">JE</div>
+                        <div class="fluxo-node-info">
+                            <h4>Justificativa de Excepcionalidade</h4>
+                            <p>Justifica contratação fora do PAC</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-dfd">
+                        <div class="fluxo-node-icon">DFD</div>
+                        <div class="fluxo-node-info">
+                            <h4>Documento de Formalização da Demanda</h4>
+                            <p>Formaliza a necessidade da contratação</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conector -->
+            <div class="fluxo-connector">
+                <div class="fluxo-connector-line" style="height: 32px;"></div>
+                <div class="fluxo-connector-arrow"></div>
+            </div>
+
+            <!-- ETP -->
+            <div class="fluxo-node node-etp">
+                <div class="fluxo-node-icon">ETP</div>
+                <div class="fluxo-node-info">
+                    <h4>Estudo Técnico Preliminar</h4>
+                    <p>Opção do usuário: Pesquisa de ARP (Atas de Registro de Preço)</p>
+                </div>
+            </div>
+
+            <!-- Conector -->
+            <div class="fluxo-connector">
+                <div class="fluxo-connector-line"></div>
+                <div class="fluxo-connector-arrow"></div>
+            </div>
+
+            <!-- GATEWAY ETP: Modalidade -->
+            <div class="fluxo-gateway">
+                <div class="gateway-diamond gateway-etp">
+                    <span class="gateway-diamond-inner">?</span>
+                </div>
+                <span class="gateway-label">Qual modalidade sugerida?</span>
+                <span class="gateway-sublabel">etps.modalidade_sugerida</span>
+            </div>
+
+            <!-- 3 Branches da modalidade -->
+            <div class="fluxo-branches branches-3">
+
+                <!-- BRANCH 1: Adesão ARP -->
+                <div class="fluxo-branch">
+                    <span class="branch-condition condition-arp">Adesão a ARP</span>
+                    <div class="branch-condition-detail">modalidade_sugerida = adesao_ata</div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-rdve">
+                        <div class="fluxo-node-icon">RDVE</div>
+                        <div class="fluxo-node-info">
+                            <h4>Rel. Demonstração Vantagem Econômica</h4>
+                            <p>Demonstra vantagem econômica da adesão</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-jva">
+                        <div class="fluxo-node-icon">JVA</div>
+                        <div class="fluxo-node-info">
+                            <h4>Justificativa da Vantagem da Adesão</h4>
+                            <p>Justifica a opção pela adesão à ata</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-tafo">
+                        <div class="fluxo-node-icon">TAFO</div>
+                        <div class="fluxo-node-info">
+                            <h4>Termo de Aceite Fornecedor/Órgão</h4>
+                            <p>Aceite do fornecedor e órgão gerenciador</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-end">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        FIM DO PROCESSO
+                    </div>
+                </div>
+
+                <!-- BRANCH 2: Dispensa Valor Baixo -->
+                <div class="fluxo-branch">
+                    <span class="branch-condition condition-baixo">Dispensa Valor Baixo</span>
+                    <div class="branch-condition-detail">modalidade_sugerida = dispensa_valor_baixo</div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-trs">
+                        <div class="fluxo-node-icon">TRS</div>
+                        <div class="fluxo-node-info">
+                            <h4>TR Simplificado</h4>
+                            <p>Termo de referência simplificado</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-ade">
+                        <div class="fluxo-node-icon">ADE</div>
+                        <div class="fluxo-node-info">
+                            <h4>Aviso de Dispensa Eletrônica</h4>
+                            <p>Publicação do aviso de dispensa</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-jpef">
+                        <div class="fluxo-node-icon">JPEF</div>
+                        <div class="fluxo-node-info">
+                            <h4>Justificativa de Preço e Fornecedor</h4>
+                            <p>Justifica preço e escolha do fornecedor</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-ce">
+                        <div class="fluxo-node-icon">CE</div>
+                        <div class="fluxo-node-info">
+                            <h4>Certidão de Enquadramento</h4>
+                            <p>Certifica enquadramento na dispensa</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-end">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        FIM DO PROCESSO
+                    </div>
+                </div>
+
+                <!-- BRANCH 3: Licitação Normal -->
+                <div class="fluxo-branch">
+                    <span class="branch-condition condition-normal">Licitação Normal</span>
+                    <div class="branch-condition-detail">modalidade_sugerida = licitacao_normal</div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-pp">
+                        <div class="fluxo-node-icon">PP</div>
+                        <div class="fluxo-node-info">
+                            <h4>Pesquisa de Preço</h4>
+                            <p>Levantamento de preços de mercado</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-pgr">
+                        <div class="fluxo-node-icon">PGR</div>
+                        <div class="fluxo-node-info">
+                            <h4>Plano de Gestão de Riscos</h4>
+                            <p>Identificação e mitigação de riscos</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+                    <div class="fluxo-node node-tr">
+                        <div class="fluxo-node-icon">TR</div>
+                        <div class="fluxo-node-info">
+                            <h4>Termo de Referência</h4>
+                            <p>Especificações completas da contratação</p>
+                        </div>
+                    </div>
+                    <div class="fluxo-connector">
+                        <div class="fluxo-connector-line"></div>
+                        <div class="fluxo-connector-arrow"></div>
+                    </div>
+
+                    <!-- Sub-Gateway TR -->
+                    <div class="fluxo-gateway">
+                        <div class="gateway-diamond gateway-tr">
+                            <span class="gateway-diamond-inner">?</span>
+                        </div>
+                        <span class="gateway-label">Tipo de contratação?</span>
+                        <span class="gateway-sublabel">trs.contratacao_direta</span>
+                    </div>
+
+                    <!-- Sub-branches do TR -->
+                    <div class="fluxo-sub-branches">
+                        <!-- Dispensa / Contratação direta -->
+                        <div class="fluxo-branch">
+                            <span class="branch-condition condition-direta">Contratação Direta</span>
+                            <div class="branch-condition-detail">contratacao_direta = true</div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-adl">
+                                <div class="fluxo-node-icon">ADL</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Aviso Dispensa Licitação</h4>
+                                    <p>Publicação da dispensa</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-jf">
+                                <div class="fluxo-node-icon">JF</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Justificativa do Fornecedor</h4>
+                                    <p>Justifica a escolha do fornecedor</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-ed">
+                                <div class="fluxo-node-icon">ED</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Edital</h4>
+                                    <p>Documento oficial do certame</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-mc">
+                                <div class="fluxo-node-icon">MC</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Minuta de Contrato</h4>
+                                    <p>Minuta do contrato administrativo</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-end">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                FIM
+                            </div>
+                        </div>
+
+                        <!-- Licitação -->
+                        <div class="fluxo-branch">
+                            <span class="branch-condition condition-licit">Licitação</span>
+                            <div class="branch-condition-detail">contratacao_direta = false</div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-chk">
+                                <div class="fluxo-node-icon">CHK</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Checklist de Instrução</h4>
+                                    <p>AGU/SEGES - verificação documental</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-ed">
+                                <div class="fluxo-node-icon">ED</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Edital</h4>
+                                    <p>Documento oficial do certame</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-node node-mc">
+                                <div class="fluxo-node-icon">MC</div>
+                                <div class="fluxo-node-info">
+                                    <h4>Minuta de Contrato</h4>
+                                    <p>Minuta do contrato administrativo</p>
+                                </div>
+                            </div>
+                            <div class="fluxo-connector">
+                                <div class="fluxo-connector-line"></div>
+                                <div class="fluxo-connector-arrow"></div>
+                            </div>
+                            <div class="fluxo-end">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                FIM
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Referência de Artefatos -->
+    <div class="content-card" style="margin-top: var(--spacing-xl);">
+        <h3>Referência de Artefatos</h3>
+        <p>Todos os documentos gerados pelo sistema durante o processo licitatório:</p>
+        <table class="artefatos-ref-table">
+            <thead>
+                <tr>
+                    <th>Sigla</th>
+                    <th>Documento</th>
+                    <th>Fluxo</th>
+                    <th>Regra de Ativação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#3182CE;">DFD</span></td>
+                    <td>Documento de Formalização da Demanda</td>
+                    <td>Todos</td>
+                    <td>Sempre obrigatório</td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#E53E3E;">JE</span></td>
+                    <td>Justificativa de Excepcionalidade</td>
+                    <td>Todos (se fora do PAC)</td>
+                    <td><code>projeto.intra_pac = False</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#38A169;">ETP</span></td>
+                    <td>Estudo Técnico Preliminar</td>
+                    <td>Todos</td>
+                    <td>Sempre obrigatório (após DFD)</td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#805AD5;">RDVE</span></td>
+                    <td>Relatório de Demonstração de Vantagem Econômica</td>
+                    <td>Adesão ARP</td>
+                    <td><code>etps.modalidade_sugerida = adesao_ata</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#D69E2E;">JVA</span></td>
+                    <td>Justificativa da Vantagem da Adesão</td>
+                    <td>Adesão ARP</td>
+                    <td><code>etps.modalidade_sugerida = adesao_ata</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#319795;">TAFO</span></td>
+                    <td>Termo de Aceite do Fornecedor e do Órgão Gerenciador</td>
+                    <td>Adesão ARP</td>
+                    <td><code>etps.modalidade_sugerida = adesao_ata</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#DD6B20;">TRS</span></td>
+                    <td>TR Simplificado</td>
+                    <td>Dispensa Valor Baixo</td>
+                    <td><code>etps.modalidade_sugerida = dispensa_valor_baixo</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#B83280;">ADE</span></td>
+                    <td>Aviso de Dispensa Eletrônica</td>
+                    <td>Dispensa Valor Baixo</td>
+                    <td><code>etps.modalidade_sugerida = dispensa_valor_baixo</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#2B6CB0;">JPEF</span></td>
+                    <td>Justificativa de Preço e Escolha do Fornecedor</td>
+                    <td>Dispensa Valor Baixo</td>
+                    <td><code>etps.modalidade_sugerida = dispensa_valor_baixo</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#718096;">CE</span></td>
+                    <td>Certidão de Enquadramento</td>
+                    <td>Dispensa Valor Baixo</td>
+                    <td><code>etps.modalidade_sugerida = dispensa_valor_baixo</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#319795;">PP</span></td>
+                    <td>Pesquisa de Preço</td>
+                    <td>Licitação Normal</td>
+                    <td><code>etps.modalidade_sugerida = licitacao_normal</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#E53E3E;">PGR</span></td>
+                    <td>Plano de Gestão de Riscos</td>
+                    <td>Licitação Normal</td>
+                    <td><code>etps.modalidade_sugerida = licitacao_normal</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#D69E2E;">TR</span></td>
+                    <td>Termo de Referência</td>
+                    <td>Licitação Normal</td>
+                    <td><code>etps.modalidade_sugerida = licitacao_normal</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#B83280;">ADL</span></td>
+                    <td>Aviso de Dispensa de Licitação</td>
+                    <td>Contratação Direta</td>
+                    <td><code>trs.contratacao_direta = true</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#2B6CB0;">JF</span></td>
+                    <td>Justificativa do Fornecedor</td>
+                    <td>Contratação Direta</td>
+                    <td><code>trs.contratacao_direta = true</code></td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#805AD5;">ED</span></td>
+                    <td>Edital</td>
+                    <td>Licitação / Contratação Direta</td>
+                    <td>Final de ambos os fluxos</td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#38A169;">MC</span></td>
+                    <td>Minuta de Contrato</td>
+                    <td>Licitação / Contratação Direta</td>
+                    <td>Final de ambos os fluxos</td>
+                </tr>
+                <tr>
+                    <td><span class="sigla-badge" style="background:#DD6B20;">CHK</span></td>
+                    <td>Checklist de Instrução (AGU/SEGES)</td>
+                    <td>Licitação</td>
+                    <td><code>trs.contratacao_direta = false</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Seção: Artefatos -->
+<div class="manual-section" id="artefatos">
+    <div class="section-header">
+        <div class="section-icon" style="background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+        </div>
+        <div>
+            <h2 class="section-title">Tipos de Artefatos</h2>
+            <p class="section-description">Documentos que podem ser criados no sistema</p>
+        </div>
+    </div>
+
+    <div class="artefatos-grid">
+        <div class="artefato-card" style="border-left-color: #3182CE;">
+            <div class="artefato-header">
+                <div class="artefato-icon" style="background: #3182CE;">DFD</div>
+                <h3>Documento de Formalização da Demanda</h3>
+            </div>
+            <p><strong>Dependências:</strong> Nenhuma (sempre liberado)</p>
+            <p><strong>Função:</strong> Ponto de partida que formaliza a necessidade da contratação, detalhando o
+                objeto, justificativa e requisitos.</p>
+        </div>
+
+        <div class="artefato-card" style="border-left-color: #E53E3E;">
+            <div class="artefato-header">
+                <div class="artefato-icon" style="background: #E53E3E;">PGR</div>
+                <h3>Plano de Gerenciamento de Riscos</h3>
+            </div>
+            <p><strong>Dependências:</strong> Requer DFD</p>
+            <p><strong>Função:</strong> Identifica, avalia e propõe medidas de mitigação para riscos do projeto de
+                contratação.</p>
+        </div>
+
+        <div class="artefato-card" style="border-left-color: #319795;">
+            <div class="artefato-header">
+                <div class="artefato-icon" style="background: #319795;">PP</div>
+                <h3>Pesquisa de Preços</h3>
+            </div>
+            <p><strong>Dependências:</strong> Requer DFD</p>
+            <p><strong>Função:</strong> Realiza cotação de preços utilizando dados do PNCP e Compras.gov, com IA para
+                análise estatística.</p>
+        </div>
+
+        <div class="artefato-card" style="border-left-color: #38A169;">
+            <div class="artefato-header">
+                <div class="artefato-icon" style="background: #38A169;">ETP</div>
+                <h3>Estudo Técnico Preliminar</h3>
+            </div>
+            <p><strong>Dependências:</strong> Requer DFD + PGR + PP</p>
+            <p><strong>Função:</strong> Documento técnico detalhado que fundamenta a escolha da solução de contratação.
+            </p>
+        </div>
+
+        <div class="artefato-card" style="border-left-color: #D69E2E;">
+            <div class="artefato-header">
+                <div class="artefato-icon" style="background: #D69E2E;">TR</div>
+                <h3>Termo de Referência</h3>
+            </div>
+            <p><strong>Dependências:</strong> Requer ETP</p>
+            <p><strong>Função:</strong> Define especificações técnicas, obrigações, prazos e condições da contratação.
+            </p>
+        </div>
+
+        <div class="artefato-card" style="border-left-color: #805AD5;">
+            <div class="artefato-header">
+                <div class="artefato-icon" style="background: #805AD5;">ED</div>
+                <h3>Edital de Licitação</h3>
+            </div>
+            <p><strong>Dependências:</strong> Requer TR</p>
+            <p><strong>Função:</strong> Documento oficial da licitação, com todas as regras, critérios e condições do
+                certame.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Seção: Tipos de Usuários -->
+<div class="manual-section" id="usuarios">
+    <div class="section-header">
+        <div class="section-icon" style="background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </div>
+        <div>
+            <h2 class="section-title">Tipos de Usuários</h2>
+            <p class="section-description">Perfis e permissões no sistema</p>
+        </div>
+    </div>
+
+    <div class="users-grid">
+        <div class="user-card">
+            <div class="user-badge" style="background: #2B6CB0;">Administrador</div>
+            <h3>👨‍💼 Administrador</h3>
+            <ul>
+                <li>Acesso total ao sistema</li>
+                <li>Gerencia usuários e permissões</li>
+                <li>Configura parâmetros globais</li>
+                <li>Acessa todos os projetos</li>
+            </ul>
+        </div>
+
+        <div class="user-card">
+            <div class="user-badge" style="background: #38A169;">Gestor</div>
+            <h3>📊 Gestor de Licitações</h3>
+            <ul>
+                <li>Cria e gerencia projetos</li>
+                <li>Aprova artefatos</li>
+                <li>Exporta documentos finais</li>
+                <li>Acompanha processo completo</li>
+            </ul>
+        </div>
+
+        <div class="user-card">
+            <div class="user-badge" style="background: #D69E2E;">Técnico</div>
+            <h3>⚙️ Técnico Elaborador</h3>
+            <ul>
+                <li>Cria e edita artefatos</li>
+                <li>Utiliza ferramentas de IA</li>
+                <li>Realiza pesquisas de preços</li>
+                <li>Submete para aprovação</li>
+            </ul>
+        </div>
+
+        <div class="user-card">
+            <div class="user-badge" style="background: #718096;">Consultor</div>
+            <h3>👁️ Consultor</h3>
+            <ul>
+                <li>Visualiza projetos e artefatos</li>
+                <li>Exporta relatórios</li>
+                <li>Sem permissão de edição</li>
+                <li>Acesso somente leitura</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Dicas e Boas Práticas -->
+<div class="manual-section">
+    <div class="section-header">
+        <div class="section-icon" style="background: linear-gradient(135deg, #f6ad55 0%, #dd6b20 100%);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+        </div>
+        <div>
+            <h2 class="section-title">Dicas e Boas Práticas</h2>
+            <p class="section-description">Recomendações para melhor uso do sistema</p>
+        </div>
+    </div>
+
+    <div class="tips-grid">
+        <div class="tip-card tip-success">
+            <div class="tip-icon">✅</div>
+            <h4>Use a IA com Sabedoria</h4>
+            <p>A IA é uma ferramenta poderosa, mas sempre revise e adapte o conteúdo gerado à realidade específica do
+                seu projeto.</p>
+        </div>
+
+        <div class="tip-card tip-info">
+            <div class="tip-icon">💡</div>
+            <h4>Mantenha Versões</h4>
+            <p>Crie novas versões antes de fazer alterações significativas. O sistema mantém histórico completo para
+                auditoria.</p>
+        </div>
+
+        <div class="tip-card tip-warning">
+            <div class="tip-icon">⚠️</div>
+            <h4>Siga as Dependências</h4>
+            <p>Respeite a ordem de criação dos artefatos. Cada documento depende de informações dos anteriores.</p>
+        </div>
+
+        <div class="tip-card tip-primary">
+            <div class="tip-icon">🔍</div>
+            <h4>Pesquisa de Preços</h4>
+            <p>Utilize filtros e parâmetros avançados para obter cotações mais precisas e atualizadas.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer de Ajuda -->
+<div class="manual-footer">
+    <div class="footer-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <div>
+            <h3>Precisa de mais ajuda?</h3>
+            <p>Entre em contato com o suporte técnico do TRE-GO ou consulte a documentação técnica completa.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

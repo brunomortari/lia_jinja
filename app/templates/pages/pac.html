@@ -1,0 +1,500 @@
+{% extends "app.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/pac.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Header da pagina -->
+<!-- Header da pagina -->
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <line x1="10" y1="9" x2="8" y2="9"></line>
+            </svg>
+        </div>
+        <div>
+            <h1 class="page-title">Plano Anual de Contratações</h1>
+            <p class="page-subtitle">Selecione os itens e defina as quantidades para iniciar um novo projeto</p>
+        </div>
+    </div>
+</div>
+
+{% if message %}
+<div class="alert alert-success">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <span>{{ message }}</span>
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-error">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<!-- Cards de Estatisticas -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-primary">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ itens|length }}</span>
+            <span class="stat-label">Total</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ itens|selectattr('tipo_contratacao', 'equalto', 'Servicos')|list|length +
+                itens|selectattr('tipo_contratacao', 'equalto', 'Serviços')|list|length }}</span>
+            <span class="stat-label">Servicos</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <span class="stat-value">{{ itens|selectattr('tipo_contratacao', 'equalto', 'Fornecimento')|list|length
+                }}</span>
+            <span class="stat-label">Fornecimentos</span>
+        </div>
+    </div>
+    <!-- Card: Iniciar projeto fora do PAC -->
+    <div style="flex: 1; min-width: 250px; display: flex; align-items: center; padding: 1.5rem; border: 1px solid #374151; border-left: 4px solid #9ca3af; border-radius: 8px; background: rgba(255, 255, 255, 0.02);">
+        <div style="flex: 1;">
+            <h3 style="margin: 0 0 0.5rem 0; color: #e5e7eb; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Iniciar projeto fora do PAC
+            </h3>
+            <p style="margin: 0; color: #9ca3af; font-size: 0.85rem; line-height: 1.4;">
+                Crie uma <strong>Justificativa de Excepcionalidade</strong> para contratar itens não contemplados no PAC
+            </p>
+        </div>
+        <button type="button" id="btn-sem-pac" class="btn btn-primary" style="white-space: nowrap; margin-left: 1rem; flex-shrink: 0; background-color: #3b82f6; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; cursor: pointer; transition: background-color 0.2s;">
+            Iniciar
+        </button>
+    </div>
+</div>
+
+<form action="/projetos/novo" method="POST" id="projeto-form">
+    <!-- Filtros -->
+    <div class="filters-card">
+        <div class="filters-row">
+            <div class="filter-group">
+                <label for="filter-search">Buscar</label>
+                <input type="text" id="filter-search" placeholder="Digite para buscar..." class="filter-input">
+            </div>
+            <div class="filter-group">
+                <label for="filter-tipo">Tipo</label>
+                <select id="filter-tipo" class="filter-select">
+                    <option value="">Todos</option>
+                    <option value="servicos">Servicos</option>
+                    <option value="fornecimento">Fornecimento</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-prioridade">Prioridade</label>
+                <select id="filter-prioridade" class="filter-select">
+                    <option value="">Todas</option>
+                    <option value="1">P1 - Muito Alta</option>
+                    <option value="2">P2 - Alta</option>
+                    <option value="3">P3 - Media</option>
+                    <option value="4">P4 - Baixa</option>
+                    <option value="5">P5 - Muito Baixa</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-unidade">Unidade</label>
+                <select id="filter-unidade" class="filter-select">
+                    <option value="">Todas</option>
+                    {% set unidades = itens|map(attribute='unidade_administrativa')|unique|list %}
+                    {% for unidade in unidades if unidade %}
+                    <option value="{{ unidade }}">{{ unidade }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="filter-results">
+            <span id="filter-count">{{ itens|length }} itens encontrados</span>
+            <button type="button" class="btn btn-ghost btn-sm" id="clear-filters">Limpar filtros</button>
+        </div>
+    </div>
+
+    <!-- Lista de Itens PAC -->
+    <div class="pac-list">
+        {% for item in itens %}
+        <div class="pac-item" data-id="{{ item.id }}"
+            data-tipo="{{ item.tipo_contratacao|lower|replace('ç', 'c')|replace('õ', 'o') if item.tipo_contratacao else '' }}"
+            data-prioridade="{{ item.prioridade or '' }}" data-unidade="{{ item.unidade_administrativa or '' }}"
+            data-descricao="{{ item.descricao|lower if item.descricao else '' }} {{ item.detalhamento|lower if item.detalhamento else '' }}">
+
+            <div class="pac-item-select">
+                <input type="checkbox" name="itens_pac" value="{{ item.id }}" class="pac-checkbox"
+                    id="pac-{{ item.id }}">
+                <label for="pac-{{ item.id }}" class="pac-checkbox-label"></label>
+            </div>
+
+            <div class="pac-item-content">
+                <div class="pac-item-header">
+                    <div class="pac-item-badges">
+                        {% if item.prioridade %}
+                        <span class="badge badge-priority-{{ item.prioridade }}">P{{ item.prioridade }}</span>
+                        {% endif %}
+                        {% if item.tipo_contratacao %}
+                        <span
+                            class="badge badge-{{ 'blue' if 'servico' in item.tipo_contratacao|lower else 'green' }}">{{
+                            item.tipo_contratacao }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="pac-item-value">{{ item.valor_previsto or '-' }}</div>
+                </div>
+
+                <h3 class="pac-item-title">{{ item.descricao or 'Sem descricao' }}</h3>
+
+                {% if item.detalhamento %}
+                <p class="pac-item-detail">{{ item.detalhamento[:200] }}{% if item.detalhamento|length > 200 %}...{%
+                    endif %}</p>
+                {% endif %}
+
+                <div class="pac-item-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        {{ item.unidade_administrativa or '-' }}
+                    </span>
+                    {% if item.numero_contrato %}
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Contrato {{ item.numero_contrato }}/{{ item.ano_contrato }}
+                    </span>
+                    {% endif %}
+                    {% if item.disponibilidade_contratacao %}
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        {{ item.disponibilidade_contratacao }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="pac-item-quantity">
+                <label for="qtd-{{ item.id }}">Quantidade</label>
+                <input type="number" id="qtd-{{ item.id }}" name="quantidade_{{ item.id }}" min="1"
+                    value="{{ item.quantidade|int if item.quantidade else 1 }}" class="quantity-input" disabled>
+                {% if item.unidade and item.unidade != 'Não se aplica' %}
+                <span class="quantity-unit">{{ item.unidade }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <h3>Nenhum item encontrado</h3>
+            <p>Nao ha itens no PAC 2025 para exibir.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Painel de Selecao Flutuante -->
+    <div class="selection-panel" id="selection-panel">
+        <div class="selection-panel-content">
+            <div class="selection-info">
+                <span class="selection-count"><strong id="selected-count">0</strong> itens selecionados</span>
+                <button type="button" class="btn btn-ghost btn-sm" id="clear-selection">Limpar</button>
+            </div>
+            <button type="button" class="btn btn-primary" id="open-modal-btn" style="background-color: #3b82f6; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Criar Projeto
+            </button>
+        </div>
+    </div>
+
+    <!-- Campo oculto para enviar itens vazios -->
+    <input type="hidden" id="itens-pac-input" name="itens_pac_json" value="[]">
+
+    <!-- Modal Criar Projeto -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Criar Novo Projeto</h2>
+                <button type="button" class="modal-close" id="close-modal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="selected-summary" id="selected-summary"></div>
+
+                <div class="form-group">
+                    <label for="titulo">Titulo do Projeto *</label>
+                    <input type="text" id="titulo" name="titulo" placeholder="Ex: Contratacao de servicos de TI"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="prompt_inicial">Descricao adicional</label>
+                    <textarea id="prompt_inicial" name="prompt_inicial" rows="3"
+                        placeholder="Informacoes complementares..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancel-modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" style="background-color: #3b82f6; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 6px; border: none; cursor: pointer; transition: background-color 0.2s;">Criar Projeto</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+<script>
+    // Elements
+    const checkboxes = document.querySelectorAll('.pac-checkbox');
+    const pacItems = document.querySelectorAll('.pac-item');
+    const selectionPanel = document.getElementById('selection-panel');
+    const selectedCount = document.getElementById('selected-count');
+    const clearSelectionBtn = document.getElementById('clear-selection');
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const modal = document.getElementById('modal');
+    const closeModalBtn = document.getElementById('close-modal');
+    const cancelModalBtn = document.getElementById('cancel-modal');
+    const selectedSummary = document.getElementById('selected-summary');
+
+    // Filters
+    const filterSearch = document.getElementById('filter-search');
+    const filterTipo = document.getElementById('filter-tipo');
+    const filterPrioridade = document.getElementById('filter-prioridade');
+    const filterUnidade = document.getElementById('filter-unidade');
+    const filterCount = document.getElementById('filter-count');
+    const clearFiltersBtn = document.getElementById('clear-filters');
+
+    // Update selection
+    function updateSelection() {
+        const checked = document.querySelectorAll('.pac-checkbox:checked');
+        const count = checked.length;
+        selectedCount.textContent = count;
+
+        // Toggle selection panel
+        if (count > 0) {
+            selectionPanel.classList.add('visible');
+        } else {
+            selectionPanel.classList.remove('visible');
+        }
+
+        // Update item states and quantity inputs
+        checkboxes.forEach(cb => {
+            const item = cb.closest('.pac-item');
+            const qtyInput = item.querySelector('.quantity-input');
+
+            if (cb.checked) {
+                item.classList.add('selected');
+                qtyInput.disabled = false;
+            } else {
+                item.classList.remove('selected');
+                qtyInput.disabled = true;
+            }
+        });
+    }
+
+    // Checkbox handlers
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelection);
+    });
+
+    // Clear selection
+    clearSelectionBtn.addEventListener('click', () => {
+        checkboxes.forEach(cb => cb.checked = false);
+        updateSelection();
+    });
+
+    // Apply filters
+    function applyFilters() {
+        const searchTerm = filterSearch.value.toLowerCase();
+        const tipo = filterTipo.value;
+        const prioridade = filterPrioridade.value;
+        const unidade = filterUnidade.value;
+
+        let visibleCount = 0;
+
+        pacItems.forEach(item => {
+            const itemTipo = item.dataset.tipo || '';
+            const itemPrioridade = item.dataset.prioridade || '';
+            const itemUnidade = item.dataset.unidade || '';
+            const itemDescricao = item.dataset.descricao || '';
+
+            let show = true;
+
+            if (searchTerm && !itemDescricao.includes(searchTerm)) {
+                show = false;
+            }
+
+            if (tipo && !itemTipo.includes(tipo)) {
+                show = false;
+            }
+
+            if (prioridade && itemPrioridade !== prioridade) {
+                show = false;
+            }
+
+            if (unidade && itemUnidade !== unidade) {
+                show = false;
+            }
+
+            if (show) {
+                item.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+
+        filterCount.textContent = visibleCount + ' itens encontrados';
+    }
+
+    filterSearch.addEventListener('input', applyFilters);
+    filterTipo.addEventListener('change', applyFilters);
+    filterPrioridade.addEventListener('change', applyFilters);
+    filterUnidade.addEventListener('change', applyFilters);
+
+    clearFiltersBtn.addEventListener('click', () => {
+        filterSearch.value = '';
+        filterTipo.value = '';
+        filterPrioridade.value = '';
+        filterUnidade.value = '';
+        applyFilters();
+    });
+
+    // Botão sem PAC
+    const btnSemPac = document.getElementById('btn-sem-pac');
+    btnSemPac.addEventListener('click', () => {
+        // Limpar seleção
+        checkboxes.forEach(cb => cb.checked = false);
+        updateSelection();
+        // Abrir modal sem itens
+        openModalWithoutItems();
+    });
+
+    function openModalWithoutItems() {
+        selectedSummary.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'selected-summary-item';
+        div.innerHTML = '<span style="color: #6b7280;">📄 Nenhum item PAC</span><strong style="color: #9ca3af;">Justificativa de Excepcionalidade</strong>';
+        selectedSummary.appendChild(div);
+        modal.classList.add('visible');
+        document.getElementById('titulo').focus();
+    }
+
+    // Modal
+    openModalBtn.addEventListener('click', () => {
+        // Build summary
+        const checked = document.querySelectorAll('.pac-checkbox:checked');
+        selectedSummary.innerHTML = '';
+
+        checked.forEach(cb => {
+            const item = cb.closest('.pac-item');
+            const title = item.querySelector('.pac-item-title').textContent.trim();
+            const qty = item.querySelector('.quantity-input').value;
+            const unit = item.querySelector('.quantity-unit')?.textContent || 'un';
+
+            const div = document.createElement('div');
+            div.className = 'selected-summary-item';
+            div.innerHTML = `<span>${title.substring(0, 50)}${title.length > 50 ? '...' : ''}</span><strong>${qty} ${unit}</strong>`;
+            selectedSummary.appendChild(div);
+        });
+
+        modal.classList.add('visible');
+        document.getElementById('titulo').focus();
+    });
+
+    function closeModal() {
+        modal.classList.remove('visible');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelModalBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('visible')) {
+            closeModal();
+        }
+    });
+
+    // Handle form submission - serialize selected items to JSON
+    const form = document.getElementById('projeto-form');
+    form.addEventListener('submit', (e) => {
+        const checked = document.querySelectorAll('.pac-checkbox:checked');
+        const itensPac = [];
+        
+        checked.forEach(cb => {
+            const item = cb.closest('.pac-item');
+            const itemId = cb.value;
+            const qty = item.querySelector('.quantity-input').value;
+            
+            itensPac.push({
+                id: parseInt(itemId),
+                quantidade: parseFloat(qty)
+            });
+        });
+        
+        // Set the hidden input with JSON
+        document.getElementById('itens-pac-input').value = JSON.stringify(itensPac);
+    });
+
+    // Initial
+    updateSelection();
+</script>
+{% endblock %}

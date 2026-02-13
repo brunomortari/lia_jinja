@@ -1,0 +1,373 @@
+{#
+Sistema LIA - Macros para Chat de Artefatos
+============================================
+Macros reutilizáveis para páginas de geração de artefatos com IA
+Usado por: DFD, ETP, TR, Edital, PGR, etc.
+#}
+
+{# ========== LAYOUT CONTAINER ========== #}
+{% macro chat_layout_start(phase='preparation') %}
+<div class="artifact-chat-layout phase-{{ phase }}" id="artifactChatLayout">
+    {% endmacro %}
+
+    {% macro chat_layout_end() %}
+</div>
+{% endmacro %}
+
+
+{# ========== SEÇÃO DE CHAT ========== #}
+{% macro chat_section_start(projeto, artifact_label, artifact_version, subtitle='Assistente para elaboração de
+artefato') %}
+<section class="chat-section" id="chatSection">
+    <div class="chat-header">
+        <div class="chat-header-info">
+            <h1 class="chat-header-title">
+                Projeto {{ projeto.id }}: {{ projeto.titulo }}
+                <span class="chat-header-badge">{{ artifact_label }} v{{ artifact_version }}</span>
+            </h1>
+            <p class="chat-header-subtitle">{{ subtitle }}</p>
+        </div>
+    </div>
+    {% endmacro %}
+
+    {% macro chat_section_end() %}
+</section>
+{% endmacro %}
+
+
+{# ========== TELA DE BOAS-VINDAS ========== #}
+{% macro chat_welcome(icon='🤖', title='LIA - Assistente', description='') %}
+<div class="chat-welcome" id="chatWelcome">
+    <div class="chat-welcome-icon">{{ icon }}</div>
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+</div>
+{% endmacro %}
+
+
+{# ========== ÁREA DE MENSAGENS ========== #}
+{% macro chat_messages_area() %}
+<div class="chat-messages" id="chatMessages"></div>
+{% endmacro %}
+
+
+{# ========== BARRA DE AUTORIZAÇÃO ========== #}
+{% macro chat_auth_bar(artifact_label='Artefato') %}
+<div class="generate-auth-bar" id="generateAuthBar">
+    <div class="generate-auth-text">
+        <div class="generate-auth-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+        </div>
+        <div class="generate-auth-label">
+            <strong>Informações coletadas com sucesso</strong>
+            <span>Autorize a geração do {{ artifact_label }} quando estiver pronto</span>
+        </div>
+    </div>
+    <button class="btn-authorize" id="btnAuthorize" onclick="authorizeGeneration()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        Gerar {{ artifact_label }}
+    </button>
+</div>
+{% endmacro %}
+
+
+{# ========== ÁREA DE INPUT ========== #}
+{% macro chat_input_area(placeholder='Descreva sua necessidade...') %}
+<div class="chat-input-area" id="chatInputArea">
+    <div class="chat-input-wrapper-stacked">
+        <!-- 1. Text Area (Top) -->
+        <textarea class="chat-input-expanded" id="chatInput" placeholder="{{ placeholder }}" rows="2"></textarea>
+
+        <!-- 2. Toolbar (Bottom) -->
+        <div class="chat-input-toolbar-bottom">
+            <!-- Left Actions: Attach, Model, Skills, (Deep Research injected via JS) -->
+            <div class="toolbar-actions-left" id="chatToolbarLeft">
+
+                <!-- 1. Attachment (Paperclip) -->
+                <button class="btn-action-icon" id="btnAttach" title="Anexar arquivo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                        </path>
+                    </svg>
+                </button>
+                <input type="file" id="fileInput" style="display: none;" multiple accept="image/*,.pdf,.txt">
+
+                <!-- 2. Model Selector (Modern Icon) -->
+                <div class="model-selector-wrapper" id="modelSelectorWrapper">
+                    <button class="btn-action-icon" id="modelSelectorBtn" type="button" title="Selecionar modelo de IA">
+                        <!-- Multi-colored icon via CSS or SVG classes -->
+                        <svg class="icon-model-modern" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#grad1)">
+                            </path>
+                        </svg>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="model-dropdown" id="modelDropdown">
+                        <div class="model-dropdown-header">
+                            <h4>Selecione o Modelo de IA</h4>
+                            <p>Escolha o modelo para gerar os artefatos</p>
+                        </div>
+                        <div class="model-dropdown-body" id="modelDropdownBody">
+                            <div class="model-loading">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Skills (New) -->
+                <div class="skills-selector-wrapper" id="skillsSelectorWrapper" style="position: relative;">
+                    <button class="btn-action-icon" id="btnSkills" type="button" title="Habilidades (Skills)"
+                        onclick="toggleSkillsDropdown(event)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </button>
+                    <!-- Skills Popover -->
+                    <div class="skills-dropdown" id="skillsDropdown">
+                        <div class="skills-dropdown-header">
+                            <h4>Habilidades Ativas</h4>
+                            <p>Selecione as skills para esta sessão</p>
+                        </div>
+                        <div class="skills-dropdown-body" id="skillsListContainer">
+                            <!-- Populated by JS -->
+                            <div class="model-loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Actions: Force Generate + Send -->
+            <div class="toolbar-actions-right" style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn-force-generate" id="btnForceGenerate" title="Gerar artefato agora (força geração mesmo sem dados completos)" style="display: none;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12,2 15,9 22,9 17,14 19,22 12,17 5,22 7,14 2,9 9,9"></polygon>
+                    </svg>
+                </button>
+                <button class="btn-send-round" id="btnSend" title="Enviar mensagem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+
+{# ========== PAINEL DE CONTEXTO ========== #}
+{% macro context_panel_start(artifact_label='Artefato') %}
+<aside class="context-panel" id="contextPanel">
+    <div class="context-header">
+        <div class="context-header-title">
+            <div class="context-header-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+            </div>
+            <div class="context-header-text">
+                <h3>Contexto do Projeto</h3>
+                <p>Dados para elaboração do {{ artifact_label }}</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="context-body">
+
+        {# SEÇÃO: BASE DE CONHECIMENTO (ARQUIVOS) #}
+        <div class="context-card collapsed context-knowledge-base" id="cardKnowledgeBase">
+            <div class="context-card-header" onclick="toggleContextCard('cardKnowledgeBase')">
+                <div class="context-card-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Base de Conhecimento
+                    <span class="context-badge" id="knowledgeBaseCount">0</span>
+                </div>
+                <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+            <div class="context-card-body" id="knowledgeBaseList">
+                <div class="empty-state-small">Nenhum arquivo anexado</div>
+            </div>
+        </div>
+        {% endmacro %}
+
+        {% macro context_panel_end() %}
+    </div>
+</aside>
+{% endmacro %}
+
+
+{# ========== CONTEXT CARD ========== #}
+{% macro context_card(id, title, icon='folder', collapsed=true, items=[], badge=none) %}
+<div class="context-card {% if collapsed %}collapsed{% endif %}" id="{{ id }}">
+    <div class="context-card-header" onclick="toggleContextCard('{{ id }}')">
+        <div class="context-card-title">
+            {% if icon == 'folder' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            {% elif icon == 'calendar' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            {% elif icon == 'dollar' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            {% elif icon == 'clock' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {% elif icon == 'file' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            {% elif icon == 'search' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            {% elif icon == 'alert' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            {% endif %}
+            {{ title }}
+            {% if badge is not none %}
+            <span class="context-badge">{{ badge }}</span>
+            {% endif %}
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        {% for item in items %}
+        <div class="context-item">
+            <div class="context-label">{{ item.label }}</div>
+            <div class="context-value {% if item.highlight %}highlight{% endif %}">{{ item.value }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
+
+{# ========== SEÇÃO WORKSPACE ========== #}
+{% macro workspace_section(artifact_label='Artefato') %}
+<section class="workspace-section" id="workspaceSection">
+    <div class="workspace-header">
+        <div class="workspace-header-left">
+            <div class="workspace-spinner" id="workspaceSpinner"></div>
+            <h2 class="workspace-title">
+                <span id="workspaceTitle">Gerando {{ artifact_label }}...</span>
+                <span class="workspace-badge" id="workspaceBadge">Em progresso</span>
+            </h2>
+        </div>
+        <span class="workspace-progress" id="workspaceProgress">Iniciando...</span>
+    </div>
+
+    <div class="workspace-body">
+        <div class="artifact-fields-container" id="artifactFieldsContainer">
+            <!-- Fields will be rendered here -->
+        </div>
+    </div>
+
+    <div class="workspace-actions" id="workspaceActions">
+        <button class="btn-workspace btn-workspace-outline" onclick="voltarProjeto()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"></path>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Voltar
+        </button>
+        <button class="btn-workspace btn-workspace-secondary" onclick="saveArtifact('rascunho')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Salvar Rascunho
+        </button>
+        <button class="btn-workspace btn-workspace-primary" onclick="saveArtifact('aprovado')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Aprovar {{ artifact_label }}
+        </button>
+    </div>
+</section>
+{% endmacro %}
+
+
+{# ========== CAMPOS OBRIGATÓRIOS (SEÇÃO) ========== #}
+{% macro required_fields_section(title, description='', fields=[]) %}
+<div class="required-fields-section" style="margin-bottom: 12px;">
+    <h4 class="required-fields-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="vertical-align: middle; margin-right: 6px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        {{ title }}
+    </h4>
+    {% if description %}
+    <p style="font-size: 0.7rem; color: var(--text-muted-chat); margin: 0 0 12px 0;">
+        {{ description }}
+    </p>
+    {% endif %}
+
+    {% for field in fields %}
+    <div class="required-field-group">
+        <label class="required-field-label">{{ field.label }}</label>
+        {% if field.type == 'date' %}
+        <input type="date" class="required-field-input" id="{{ field.id }}">
+        {% else %}
+        <input type="text" class="required-field-input" id="{{ field.id }}"
+            placeholder="{{ field.placeholder|default('') }}">
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}

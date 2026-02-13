@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema LIA{% endblock %} - Licitações com IA</title>
+
+
+        <!-- Script para aplicar tema escuro instantaneamente -->
+        <script>
+            try {
+                var theme = localStorage.getItem('theme');
+                if (theme) {
+                    document.documentElement.setAttribute('data-theme', theme);
+                }
+            } catch(e) {}
+        </script>
+        <!-- CSS Core (carregamento direto, sem @import) -->
+        <link rel="stylesheet" href="{{ url_for('static', path='css/core/variables.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/core/base.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/core/animations.css') }}">
+
+        <!-- CSS Componentes -->
+        <link rel="stylesheet" href="{{ url_for('static', path='css/components/buttons.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/components/cards.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/components/forms.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/components/badges.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/components/tabs.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/components/loading.css') }}">
+
+        <!-- CSS Layout -->
+        <link rel="stylesheet" href="{{ url_for('static', path='css/layout/sidebar.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/theme.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+
+    <!-- CSS Extra (para páginas específicas) -->
+    {% block extra_css %}{% endblock %}
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+    {% block body %}{% endblock %}
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', path='js/theme.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

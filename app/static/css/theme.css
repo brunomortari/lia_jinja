@@ -1,0 +1,413 @@
+/**
+ * Sistema LIA - Temas
+ * ===================
+ * 4 temas disponíveis:
+ * - light: Tema claro (padrão)
+ * - dark: Tema escuro azulado
+ * - dark-gray: Tema cinza escuro (estilo ChatGPT/Gemini)
+ * - nativa: Tema verde oliva/floresta
+ */
+
+/* ========== TEMA CLARO (PADRÃO) ========== */
+
+body,
+body[data-theme="light"] {
+    /* Fundos */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --bg-sidebar: #e2e8f0;
+    --bg-elevated: #ffffff;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --bg-hover: #f1f5f9;
+
+    /* Texto */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --text-inverse: #ffffff;
+
+    /* Bordas */
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --border-focus: #5f748d;
+
+    /* Input */
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --input-focus-border: #5f748d;
+
+    /* Acentos */
+    --accent: #334155;
+    --accent-light: #5f748d;
+    --accent-dark: #1e293b;
+    --accent-soft: rgba(51, 65, 85, 0.1);
+    --accent-glow: rgba(51, 65, 85, 0.2);
+
+    /* Gradiente */
+    --gradient-primary: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 40px rgba(51, 65, 85, 0.1);
+
+    /* Chat específico */
+    --chat-bg: #f8fafc;
+    --chat-surface: #f8fafc;
+    --chat-elevated: #f8fafc;
+    --chat-border: rgba(0, 0, 0, 0.08);
+    --chat-border-subtle: rgba(0, 0, 0, 0.04);
+    --text-bright: #0f172a;
+    --text-primary-chat: #1e293b;
+    --text-secondary-chat: #64748b;
+    --text-muted-chat: #94a3b8;
+    --chat-accent: #334155;
+    --chat-accent-light: #5f748d;
+    --chat-accent-dark: #1e293b;
+    --chat-accent-soft: rgba(51, 65, 85, 0.1);
+    --chat-accent-glow: rgba(51, 65, 85, 0.25);
+}
+
+/* ========== TEMA ESCURO AZULADO ========== */
+
+body[data-theme="dark"] {
+    /* Fundos - Tons de azul escuro */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --bg-sidebar: #1e293b;
+    --bg-elevated: #1e293b;
+    --bg-card: #1e293b;
+    --bg-input: #1e293b;
+    --bg-hover: #334155;
+
+    /* Texto */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-inverse: #0f172a;
+
+    /* Bordas */
+    --border: #334155;
+    --border-light: #475569;
+    --border-focus: #60a5fa;
+
+    /* Input */
+    --input-bg: #1e293b;
+    --input-border: #334155;
+    --input-focus-border: #60a5fa;
+
+    /* Acentos - Azul claro */
+    --accent: #3b82f6;
+    --accent-light: #60a5fa;
+    --accent-dark: #2563eb;
+    --accent-soft: rgba(59, 130, 246, 0.15);
+    --accent-glow: rgba(59, 130, 246, 0.3);
+
+    /* Gradiente */
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.2);
+
+    /* Chat específico */
+    --chat-bg: #0f172a;
+    --chat-surface: #0f172a;
+    --chat-elevated: #0f172a;
+    --chat-border: rgba(255, 255, 255, 0.08);
+    --chat-border-subtle: rgba(255, 255, 255, 0.04);
+    --text-bright: #ffffff;
+    --text-primary-chat: rgba(255, 255, 255, 0.92);
+    --text-secondary-chat: rgba(255, 255, 255, 0.6);
+    --text-muted-chat: rgba(255, 255, 255, 0.38);
+    --chat-accent: #3b82f6;
+    --chat-accent-light: #60a5fa;
+    --chat-accent-dark: #1e293b;
+    --chat-accent-soft: rgba(59, 130, 246, 0.15);
+    --chat-accent-glow: rgba(59, 130, 246, 0.25);
+}
+
+/* ========== TEMA CINZA ESCURO (ChatGPT/Gemini Style) ========== */
+
+body[data-theme="dark-gray"] {
+    /* Fundos - Cinza neutro escuro */
+    --bg-primary: #171717;
+    --bg-secondary: #212121;
+    --bg-tertiary: #2d2d2d;
+    --bg-sidebar: #1a1a1a;
+    --bg-elevated: #262626;
+    --bg-card: #212121;
+    --bg-input: #2d2d2d;
+    --bg-hover: #333333;
+
+    /* Texto */
+    --text-primary: #ececec;
+    --text-secondary: #a1a1a1;
+    --text-muted: #6b6b6b;
+    --text-inverse: #171717;
+
+    /* Bordas */
+    --border: #3d3d3d;
+    --border-light: #484848;
+    --border-focus: #a1a1a1;
+
+    /* Input */
+    --input-bg: #2d2d2d;
+    --input-border: #3d3d3d;
+    --input-focus-border: #a1a1a1;
+
+    /* Acentos - Branco/Cinza claro */
+    --accent: #525252;
+    --accent-light: #a1a1a1;
+    --accent-dark: #333333;
+    --accent-soft: rgba(161, 161, 161, 0.1);
+    --accent-glow: rgba(161, 161, 161, 0.2);
+
+    /* Gradiente */
+    --gradient-primary: linear-gradient(135deg, #404040 0%, #262626 100%);
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6);
+    --shadow-glow: 0 0 40px rgba(100, 100, 100, 0.1);
+
+    /* Chat específico */
+    --chat-bg: #171717;
+    --chat-surface: #171717;
+    --chat-elevated: #171717;
+    --chat-border: rgba(255, 255, 255, 0.06);
+    --chat-border-subtle: rgba(255, 255, 255, 0.03);
+    --text-bright: #ffffff;
+    --text-primary-chat: rgba(255, 255, 255, 0.9);
+    --text-secondary-chat: rgba(255, 255, 255, 0.55);
+    --text-muted-chat: rgba(255, 255, 255, 0.35);
+    --chat-accent: #525252;
+    --chat-accent-light: #8b8b8b;
+    --chat-accent-dark: #333333;
+    --chat-accent-soft: rgba(139, 139, 139, 0.1);
+    --chat-accent-glow: rgba(139, 139, 139, 0.15);
+}
+
+/* ========== TEMA NATIVA (Verde Oliva/Floresta) ========== */
+
+body[data-theme="nativa"] {
+    /* Fundos - Tons de floresta */
+    --bg-primary: #1a1f16;
+    --bg-secondary: #232b1e;
+    --bg-tertiary: #2e3926;
+    --bg-sidebar: #1e2419;
+    --bg-elevated: #283220;
+    --bg-card: #232b1e;
+    --bg-input: #2e3926;
+    --bg-hover: #3a4730;
+
+    /* Texto */
+    --text-primary: #e8f0e3;
+    --text-secondary: #a3b899;
+    --text-muted: #6b7c62;
+    --text-inverse: #1a1f16;
+
+    /* Bordas */
+    --border: #3a4730;
+    --border-light: #4a5a3e;
+    --border-focus: #7c9a5e;
+
+    /* Input */
+    --input-bg: #2e3926;
+    --input-border: #3a4730;
+    --input-focus-border: #7c9a5e;
+
+    /* Acentos - Verde oliva */
+    --accent: #5c7a3d;
+    --accent-light: #7c9a5e;
+    --accent-dark: #3d5228;
+    --accent-soft: rgba(92, 122, 61, 0.2);
+    --accent-glow: rgba(92, 122, 61, 0.3);
+
+    /* Gradiente */
+    --gradient-primary: linear-gradient(135deg, #5c7a3d 0%, #3d5228 100%);
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(92, 122, 61, 0.2);
+
+    /* Chat específico */
+    --chat-bg: #1a1f16;
+    --chat-surface: #1a1f16;
+    --chat-elevated: #1a1f16;
+    --chat-border: rgba(168, 192, 147, 0.1);
+    --chat-border-subtle: rgba(168, 192, 147, 0.05);
+    --text-bright: #f0f7eb;
+    --text-primary-chat: rgba(232, 240, 227, 0.92);
+    --text-secondary-chat: rgba(163, 184, 153, 0.8);
+    --text-muted-chat: rgba(107, 124, 98, 0.7);
+    --chat-accent: #5c7a3d;
+    --chat-accent-light: #7c9a5e;
+    --chat-accent-dark: #2e3926;
+    --chat-accent-soft: rgba(92, 122, 61, 0.2);
+    --chat-accent-glow: rgba(92, 122, 61, 0.25);
+}
+
+/* ========== CORES DE ESTADO (Todas os temas) ========== */
+
+body,
+body[data-theme="light"],
+body[data-theme="dark"],
+body[data-theme="dark-gray"],
+body[data-theme="nativa"] {
+    --color-success: #10b981;
+    --color-success-light: #34d399;
+    --color-success-dark: #059669;
+    --color-warning: #f59e0b;
+    --color-warning-light: #fbbf24;
+    --color-warning-dark: #d97706;
+    --color-error: #ef4444;
+    --color-error-light: #f87171;
+    --color-error-dark: #dc2626;
+    --color-info: #3b82f6;
+    --color-info-light: #60a5fa;
+    --color-info-dark: #2563eb;
+
+    /* Chat states */
+    --chat-success: #10b981;
+    --chat-warning: #f59e0b;
+    --chat-error: #ef4444;
+    --chat-info: #3b82f6;
+}
+
+/* ========== TRANSICOES DE TEMA ========== */
+/* Transições aplicadas APENAS durante troca de tema (via JS) para evitar flash na navegação */
+
+body.theme-transitioning,
+body.theme-transitioning .sidebar,
+body.theme-transitioning .app-header,
+body.theme-transitioning .card,
+body.theme-transitioning .main-content,
+body.theme-transitioning .chat-section,
+body.theme-transitioning .context-panel,
+body.theme-transitioning .workspace-section,
+body.theme-transitioning input,
+body.theme-transitioning textarea,
+body.theme-transitioning select,
+body.theme-transitioning button,
+body.theme-transitioning .btn,
+body.theme-transitioning .field-card,
+body.theme-transitioning .context-card {
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* ========== AJUSTES ESPECIFICOS PARA TEMAS ESCUROS ========== */
+
+/* Cards no modo escuro precisam de bordas mais visíveis */
+body[data-theme="dark"] .card,
+body[data-theme="dark-gray"] .card,
+body[data-theme="nativa"] .card {
+    border: 1px solid var(--border);
+}
+
+/* Inputs nos modos escuros */
+body[data-theme="dark"] input,
+body[data-theme="dark"] textarea,
+body[data-theme="dark"] select,
+body[data-theme="dark-gray"] input,
+body[data-theme="dark-gray"] textarea,
+body[data-theme="dark-gray"] select,
+body[data-theme="nativa"] input,
+body[data-theme="nativa"] textarea,
+body[data-theme="nativa"] select {
+    /* background: var(--input-bg); */
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+body[data-theme="dark"] input:focus,
+body[data-theme="dark"] textarea:focus,
+body[data-theme="dark"] select:focus,
+body[data-theme="dark-gray"] input:focus,
+body[data-theme="dark-gray"] textarea:focus,
+body[data-theme="dark-gray"] select:focus,
+body[data-theme="nativa"] input:focus,
+body[data-theme="nativa"] textarea:focus,
+body[data-theme="nativa"] select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Sidebar ativa em temas escuros */
+body[data-theme="dark"] .nav-item.active,
+body[data-theme="dark-gray"] .nav-item.active,
+body[data-theme="nativa"] .nav-item.active {
+    background: var(--accent-soft);
+    color: var(--accent-light);
+}
+
+/* Botões nos modos escuros */
+body[data-theme="dark"] .btn-primary,
+body[data-theme="dark-gray"] .btn-primary,
+body[data-theme="nativa"] .btn-primary {
+    background: var(--gradient-primary);
+    color: var(--text-inverse);
+}
+
+body[data-theme="dark"] .btn-secondary,
+body[data-theme="dark-gray"] .btn-secondary,
+body[data-theme="nativa"] .btn-secondary {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+/* Scrollbar para temas escuros */
+body[data-theme="dark"],
+body[data-theme="dark-gray"],
+body[data-theme="nativa"] {
+    scrollbar-color: var(--border) var(--bg-primary);
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-thumb,
+body[data-theme="dark-gray"] ::-webkit-scrollbar-thumb,
+body[data-theme="nativa"] ::-webkit-scrollbar-thumb {
+    background: var(--border);
+}
+
+body[data-theme="dark"] ::-webkit-scrollbar-track,
+body[data-theme="dark-gray"] ::-webkit-scrollbar-track,
+body[data-theme="nativa"] ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+/* ========== HOVER STATES ========== */
+
+body[data-theme="dark"] .card:hover,
+body[data-theme="dark-gray"] .card:hover,
+body[data-theme="nativa"] .card:hover {
+    border-color: var(--border-light);
+}
+
+/* Context header em temas escuros */
+body[data-theme="dark"] .context-header,
+body[data-theme="dark-gray"] .context-header,
+body[data-theme="nativa"] .context-header {
+    background: var(--accent-dark);
+}
+
+body[data-theme="dark"] .context-header .context-header-text h3,
+body[data-theme="dark-gray"] .context-header .context-header-text h3,
+body[data-theme="nativa"] .context-header .context-header-text h3 {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+body[data-theme="dark"] .context-header .context-header-text p,
+body[data-theme="dark-gray"] .context-header .context-header-text p,
+body[data-theme="nativa"] .context-header .context-header-text p {
+    color: rgba(255, 255, 255, 0.6);
+}

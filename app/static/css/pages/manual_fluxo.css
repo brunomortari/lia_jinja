@@ -1,0 +1,489 @@
+/**
+ * Sistema LIA - Fluxo do Processo Licitatório (Visual)
+ * =====================================================
+ */
+
+/* Container principal do fluxo */
+.fluxo-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    overflow-x: auto;
+    position: relative;
+}
+
+/* Legenda */
+.fluxo-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-primary, var(--color-gray-50));
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legenda-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legenda-diamond {
+    width: 12px;
+    height: 12px;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+}
+
+/* Fluxo visual - layout vertical */
+.fluxo-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 900px;
+    padding: var(--spacing-lg) 0;
+}
+
+/* Nó do fluxo (artefato) */
+.fluxo-node {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    border: 2px solid;
+    background: var(--bg-secondary);
+    min-width: 280px;
+    max-width: 360px;
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: default;
+}
+
+.fluxo-node:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.fluxo-node-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.fluxo-node-info h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 2px 0;
+}
+
+.fluxo-node-info p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Gateway (losango de decisão) */
+.fluxo-gateway {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.gateway-diamond {
+    width: 48px;
+    height: 48px;
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid;
+    border-radius: 6px;
+    position: relative;
+}
+
+.gateway-diamond-inner {
+    transform: rotate(-45deg);
+    font-size: 1rem;
+}
+
+.gateway-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    max-width: 200px;
+}
+
+.gateway-sublabel {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 280px;
+    font-style: italic;
+}
+
+/* Conector vertical (seta para baixo) */
+.fluxo-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.fluxo-connector-line {
+    width: 2px;
+    height: 24px;
+    background: var(--color-gray-400);
+}
+
+.fluxo-connector-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--color-gray-400);
+}
+
+/* Ramificação (branches) */
+.fluxo-branches {
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
+.fluxo-branches::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 2px;
+    background: var(--color-gray-400);
+}
+
+.fluxo-branches.branches-2::before {
+    width: 50%;
+}
+
+.fluxo-branches.branches-3::before {
+    width: 70%;
+}
+
+.fluxo-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 360px;
+    position: relative;
+}
+
+.fluxo-branch::before {
+    content: '';
+    width: 2px;
+    height: 16px;
+    background: var(--color-gray-400);
+}
+
+/* Branch label (condição) */
+.branch-condition {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.branch-condition-detail {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+    background: var(--color-gray-100);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    max-width: 280px;
+}
+
+/* Fim do processo */
+.fluxo-end {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.fluxo-end svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Início do processo */
+.fluxo-start {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #334155, #1e293b);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Cores por tipo de artefato */
+.node-dfd { border-color: #3182CE; }
+.node-dfd .fluxo-node-icon { background: #3182CE; }
+
+.node-je { border-color: #E53E3E; }
+.node-je .fluxo-node-icon { background: #E53E3E; }
+
+.node-etp { border-color: #38A169; }
+.node-etp .fluxo-node-icon { background: #38A169; }
+
+.node-rdve { border-color: #805AD5; }
+.node-rdve .fluxo-node-icon { background: #805AD5; }
+
+.node-jva { border-color: #D69E2E; }
+.node-jva .fluxo-node-icon { background: #D69E2E; }
+
+.node-tafo { border-color: #319795; }
+.node-tafo .fluxo-node-icon { background: #319795; }
+
+.node-trs { border-color: #DD6B20; }
+.node-trs .fluxo-node-icon { background: #DD6B20; }
+
+.node-ade { border-color: #B83280; }
+.node-ade .fluxo-node-icon { background: #B83280; }
+
+.node-jpef { border-color: #2B6CB0; }
+.node-jpef .fluxo-node-icon { background: #2B6CB0; }
+
+.node-ce { border-color: #718096; }
+.node-ce .fluxo-node-icon { background: #718096; }
+
+.node-pp { border-color: #319795; }
+.node-pp .fluxo-node-icon { background: #319795; }
+
+.node-pgr { border-color: #E53E3E; }
+.node-pgr .fluxo-node-icon { background: #E53E3E; }
+
+.node-tr { border-color: #D69E2E; }
+.node-tr .fluxo-node-icon { background: #D69E2E; }
+
+.node-adl { border-color: #B83280; }
+.node-adl .fluxo-node-icon { background: #B83280; }
+
+.node-jf { border-color: #2B6CB0; }
+.node-jf .fluxo-node-icon { background: #2B6CB0; }
+
+.node-ed { border-color: #805AD5; }
+.node-ed .fluxo-node-icon { background: #805AD5; }
+
+.node-mc { border-color: #38A169; }
+.node-mc .fluxo-node-icon { background: #38A169; }
+
+.node-chk { border-color: #DD6B20; }
+.node-chk .fluxo-node-icon { background: #DD6B20; }
+
+/* Gateway colors */
+.gateway-pac { border-color: #3182CE; background: rgba(49, 130, 206, 0.1); }
+.gateway-etp { border-color: #38A169; background: rgba(56, 161, 105, 0.1); }
+.gateway-tr { border-color: #D69E2E; background: rgba(214, 158, 46, 0.1); }
+
+/* Branch condition colors */
+.condition-yes {
+    background: rgba(56, 161, 105, 0.15);
+    color: #276749;
+    border: 1px solid rgba(56, 161, 105, 0.3);
+}
+
+.condition-no {
+    background: rgba(229, 62, 62, 0.12);
+    color: #9B2C2C;
+    border: 1px solid rgba(229, 62, 62, 0.3);
+}
+
+.condition-arp {
+    background: rgba(128, 90, 213, 0.12);
+    color: #553C9A;
+    border: 1px solid rgba(128, 90, 213, 0.3);
+}
+
+.condition-baixo {
+    background: rgba(221, 107, 32, 0.12);
+    color: #9C4221;
+    border: 1px solid rgba(221, 107, 32, 0.3);
+}
+
+.condition-normal {
+    background: rgba(49, 130, 206, 0.12);
+    color: #2A4365;
+    border: 1px solid rgba(49, 130, 206, 0.3);
+}
+
+.condition-direta {
+    background: rgba(214, 158, 46, 0.12);
+    color: #744210;
+    border: 1px solid rgba(214, 158, 46, 0.3);
+}
+
+.condition-licit {
+    background: rgba(56, 161, 105, 0.12);
+    color: #276749;
+    border: 1px solid rgba(56, 161, 105, 0.3);
+}
+
+/* Tabela de artefatos */
+.artefatos-ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-lg);
+    font-size: 0.875rem;
+}
+
+.artefatos-ref-table th {
+    background: var(--color-gray-100);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border);
+}
+
+.artefatos-ref-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.artefatos-ref-table tr:hover td {
+    background: var(--color-gray-50);
+}
+
+.artefatos-ref-table .sigla-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+
+/* Tooltip do fluxo */
+.fluxo-node[data-tooltip] {
+    position: relative;
+}
+
+.fluxo-node[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-gray-800);
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    z-index: var(--z-tooltip);
+    pointer-events: none;
+}
+
+/* Sub-ramificação interna */
+.fluxo-sub-branches {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    position: relative;
+    width: 100%;
+}
+
+.fluxo-sub-branches::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: var(--color-gray-400);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .fluxo-branches {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xl);
+    }
+
+    .fluxo-branches::before {
+        display: none;
+    }
+
+    .fluxo-branch::before {
+        display: none;
+    }
+
+    .fluxo-branch {
+        max-width: 100%;
+    }
+
+    .fluxo-visual {
+        min-width: unset;
+    }
+
+    .fluxo-sub-branches {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .fluxo-sub-branches::before {
+        display: none;
+    }
+}

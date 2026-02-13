@@ -1,0 +1,261 @@
+{% extends "app.html" %}
+{% from "components/macros.html" import project_status_badge %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+        </div>
+        <div>
+            <h1 class="page-title">Projetos em Andamento</h1>
+            <p class="page-subtitle">Gerencie seus projetos de contratação</p>
+        </div>
+    </div>
+    <a href="/pac" class="btn btn-primary">
+        + Novo Projeto
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Titulo</th>
+                    <th>Responsavel</th>
+                    <th>Status</th>
+                    <th>Etapa Atual</th>
+                    <th>Criado em</th>
+                    <th>Acoes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if projetos|length == 0 %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">
+                        Nenhum projeto encontrado. Clique em "+ Novo Projeto" para comecar.
+                    </td>
+                </tr>
+                {% else %}
+                {% for projeto in projetos %}
+                <tr>
+                    <td style="min-width: 250px;">
+                        <strong>Proj {{ projeto.id }}: {{ projeto.titulo|capitalize }}</strong>
+                        {% if projeto.protocolo_sei %}
+                        <div
+                            style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                            <span
+                                style="display: inline-block; width: 6px; height: 6px; background-color: var(--color-success); border-radius: 50%;"></span>
+                            SEI: <span style="font-family: var(--font-mono); font-weight: 500;">{{
+                                projeto.protocolo_sei.numero }}</span>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div
+                                style="width: 24px; height: 24px; background: var(--color-primary-light); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold;">
+                                {{ projeto.usuario.nome[0]|upper if projeto.usuario and projeto.usuario.nome else '?' }}
+                            </div>
+                            <span style="white-space: nowrap;">{{ projeto.usuario.nome.split()[0] if projeto.usuario and
+                                projeto.usuario.nome else 'Desconhecido' }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {{ project_status_badge(projeto.status) }}
+                    </td>
+                    <td>
+                        {% if projeto.tem_edital %}
+                        <span class="stage-badge stage-edital">Edital</span>
+                        {% elif projeto.tem_tr %}
+                        <span class="stage-badge stage-tr">TR</span>
+                        {% elif projeto.tem_etp %}
+                        <span class="stage-badge stage-etp">ETP</span>
+                        {% elif projeto.tem_pp %}
+                        <span class="stage-badge stage-pp">Pesq. Preços</span>
+                        {% elif projeto.tem_pgr %}
+                        <span class="stage-badge stage-riscos">PGR</span>
+                        {% elif projeto.tem_dfd %}
+                        <span class="stage-badge stage-dfd">DFD</span>
+                        {% else %}
+                        <span class="stage-badge stage-start">Planejamento</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ projeto.data_criacao.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="/projetos/{{ projeto.id }}" class="btn-icon" title="Gerar Artefatos">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                                    height="18">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </a>
+
+                            <button onclick="alert('Funcionalidade de Arquivar em desenvolvimento')" class="btn-icon"
+                                title="Arquivar Projeto">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                                    height="18">
+                                    <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                                    <rect x="1" y="3" width="22" height="5"></rect>
+                                    <line x1="10" y1="12" x2="14" y2="12"></line>
+                                </svg>
+                            </button>
+
+                            {% if projeto.protocolo_sei %}
+                            <a href="{{ projeto.protocolo_sei.link }}" target="_blank" class="btn-icon"
+                                title="Visualizar no SEI" style="color: var(--color-success);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                                    height="18">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                            {% else %}
+                            <a href="/projetos/{{ projeto.id }}/sei/criar" class="btn-icon" title="Criar Processo SEI"
+                                style="color: var(--color-primary);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                                    height="18">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        animation: slideDown 0.5s ease-out;
+    }
+
+    .page-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .page-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(51, 65, 85, 0.1);
+        color: #334155;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .page-icon:hover {
+        transform: scale(1.05) rotate(5deg);
+    }
+
+    .page-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .page-subtitle {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        color: #64748b;
+        margin: 4px 0 0 0;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Stage Badges - Cores Unificadas com Artefatos (Preenchimento Sólido/Badges) */
+    .stage-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        color: white;
+        /* Texto branco para todas */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .stage-dfd {
+        background-color: #3182CE;
+    }
+
+    /* DFD Blue */
+    .stage-riscos {
+        background-color: #E53E3E;
+    }
+
+    /* PGR Red */
+    .stage-pp {
+        background-color: #319795;
+    }
+
+    /* PP Teal */
+    .stage-etp {
+        background-color: #38A169;
+    }
+
+    /* ETP Green */
+    .stage-tr {
+        background-color: #D69E2E;
+    }
+
+    /* TR Yellow/Orange */
+    .stage-edital {
+        background-color: #805AD5;
+    }
+
+    /* Edital Purple */
+
+    .stage-start {
+        background-color: #718096;
+        /* Cinza Neutro */
+        color: white;
+    }
+</style>
+{% endblock %}

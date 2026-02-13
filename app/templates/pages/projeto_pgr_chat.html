@@ -1,0 +1,1395 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}PGR - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+<style>
+    /* PGR Color Theme Override - Vermelho #E53E3E */
+    :root {
+        --pgr-accent: #E53E3E;
+        --pgr-accent-light: #FC8181;
+        --pgr-accent-dark: #C53030;
+        --pgr-accent-soft: rgba(229, 62, 62, 0.15);
+        --pgr-accent-glow: rgba(229, 62, 62, 0.25);
+    }
+
+    /* Override accent colors for PGR */
+    .artifact-chat-page .chat-section-header .artifact-badge {
+        background: var(--pgr-accent-soft);
+        color: var(--pgr-accent);
+    }
+
+    .artifact-chat-page .context-panel-header {
+        border-bottom-color: var(--pgr-accent-soft);
+    }
+
+    .artifact-chat-page .context-panel-header .artifact-tag {
+        background: var(--pgr-accent-soft);
+        color: var(--pgr-accent);
+    }
+
+    .artifact-chat-page .chat-input-area:focus-within {
+        border-color: var(--pgr-accent);
+        box-shadow: 0 0 0 3px var(--pgr-accent-soft);
+    }
+
+    .artifact-chat-page .btn-primary,
+    .artifact-chat-page .send-btn:not(:disabled) {
+        background: var(--pgr-accent);
+    }
+
+    .artifact-chat-page .btn-primary:hover,
+    .artifact-chat-page .send-btn:not(:disabled):hover {
+        background: var(--pgr-accent-dark);
+    }
+
+    .artifact-chat-page .auth-bar {
+        background: linear-gradient(135deg, var(--pgr-accent) 0%, var(--pgr-accent-dark) 100%);
+    }
+
+    .artifact-chat-page .workspace-header {
+        border-bottom-color: var(--pgr-accent-soft);
+    }
+
+    .artifact-chat-page .workspace-field-card .regenerate-btn:hover {
+        color: var(--pgr-accent);
+    }
+
+    /* Risk Matrix Styles */
+    .risk-matrix-container {
+        margin: 16px 0;
+        padding: 16px;
+        background: var(--chat-surface);
+        border-radius: 12px;
+        border: 1px solid var(--chat-border);
+    }
+
+    .risk-matrix {
+        display: grid;
+        grid-template-columns: 40px repeat(5, 1fr);
+        grid-template-rows: repeat(5, 40px) 40px;
+        gap: 2px;
+        font-size: 0.7rem;
+    }
+
+    .matrix-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .matrix-cell.header {
+        background: transparent;
+        color: var(--text-secondary-chat);
+        font-size: 0.65rem;
+    }
+
+    .matrix-cell.low {
+        background: #10b98130;
+        color: #10b981;
+    }
+
+    .matrix-cell.medium {
+        background: #f59e0b30;
+        color: #f59e0b;
+    }
+
+    .matrix-cell.high {
+        background: #f97316;
+        color: white;
+    }
+
+    .matrix-cell.extreme {
+        background: #ef4444;
+        color: white;
+    }
+
+    .matrix-cell.has-risk {
+        box-shadow: 0 0 0 2px var(--pgr-accent);
+        animation: pulse-risk 2s infinite;
+    }
+
+    @keyframes pulse-risk {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 2px var(--pgr-accent);
+        }
+
+        50% {
+            box-shadow: 0 0 0 4px var(--pgr-accent-soft);
+        }
+    }
+
+    /* Risk Cards */
+    .risk-phase-section {
+        margin-bottom: 24px;
+    }
+
+    .risk-phase-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--chat-elevated);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        cursor: pointer;
+    }
+
+    .risk-phase-header:hover {
+        background: var(--chat-surface);
+    }
+
+    .risk-phase-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--text-primary-chat);
+    }
+
+    .risk-phase-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .risk-phase-badge.planejamento {
+        background: #3b82f620;
+        color: #3b82f6;
+    }
+
+    .risk-phase-badge.selecao {
+        background: #8b5cf620;
+        color: #8b5cf6;
+    }
+
+    .risk-phase-badge.gestao {
+        background: #10b98120;
+        color: #10b981;
+    }
+
+    .risk-card {
+        background: var(--chat-surface);
+        border: 1px solid var(--chat-border);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: all 0.2s;
+    }
+
+    .risk-card:hover {
+        border-color: var(--pgr-accent-soft);
+    }
+
+    .risk-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .risk-level-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .risk-level-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .risk-level-dot.baixo {
+        background: #10b981;
+    }
+
+    .risk-level-dot.medio {
+        background: #f59e0b;
+    }
+
+    .risk-level-dot.alto {
+        background: #f97316;
+    }
+
+    .risk-level-dot.extremo {
+        background: #ef4444;
+    }
+
+    .risk-score {
+        font-size: 0.75rem;
+        color: var(--text-secondary-chat);
+    }
+
+    .risk-evento {
+        font-weight: 600;
+        color: var(--text-primary-chat);
+        margin-bottom: 8px;
+    }
+
+    .risk-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+
+    .risk-detail {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .risk-detail-label {
+        color: var(--text-muted-chat);
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+
+    .risk-detail-value {
+        color: var(--text-secondary-chat);
+    }
+
+    /* Context Cards for DFD/Cotacao */
+    .context-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .context-status-badge.aprovado {
+        background: #10b98120;
+        color: #10b981;
+    }
+
+    .context-status-badge.pendente {
+        background: #f59e0b20;
+        color: #f59e0b;
+    }
+
+    .context-alert {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #f59e0b15;
+        border: 1px solid #f59e0b30;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 0.8rem;
+        color: #f59e0b;
+    }
+
+    .context-alert svg {
+        flex-shrink: 0;
+    }
+
+    /* Risk Card Actions */
+    .risk-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .risk-edit-btn,
+    .risk-delete-btn {
+        padding: 4px;
+        background: transparent;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: var(--text-muted-chat);
+        transition: all 0.2s;
+    }
+
+    .risk-edit-btn:hover {
+        background: var(--pgr-accent-soft);
+        color: var(--pgr-accent);
+    }
+
+    .risk-delete-btn:hover {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    /* Regenerate Phase Button */
+    .btn-regenerate-phase {
+        padding: 6px 10px;
+        background: var(--pgr-accent-soft);
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--pgr-accent);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-regenerate-phase:hover {
+        background: var(--pgr-accent);
+        color: white;
+    }
+
+    .risk-phase-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .risk-phase-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+    }
+
+    /* Risk Edit Modal */
+    .risk-edit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .risk-edit-content {
+        background: var(--chat-bg);
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .risk-edit-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--chat-border);
+        background: var(--chat-surface);
+        border-radius: 16px 16px 0 0;
+    }
+
+    .risk-edit-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--text-primary-chat);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .risk-edit-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-muted-chat);
+        padding: 4px;
+        line-height: 1;
+    }
+
+    .risk-edit-close:hover {
+        color: var(--pgr-accent);
+    }
+
+    .risk-edit-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .risk-edit-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .risk-edit-field label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary-chat);
+    }
+
+    .risk-edit-field input,
+    .risk-edit-field textarea,
+    .risk-edit-field select {
+        padding: 10px 12px;
+        border: 1px solid var(--chat-border);
+        border-radius: 8px;
+        background: var(--chat-surface);
+        color: var(--text-primary-chat);
+        font-size: 0.9rem;
+        font-family: inherit;
+    }
+
+    .risk-edit-field input:focus,
+    .risk-edit-field textarea:focus,
+    .risk-edit-field select:focus {
+        outline: none;
+        border-color: var(--pgr-accent);
+        box-shadow: 0 0 0 3px var(--pgr-accent-soft);
+    }
+
+    .risk-edit-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .risk-edit-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 16px 20px;
+        border-top: 1px solid var(--chat-border);
+        background: var(--chat-surface);
+        border-radius: 0 0 16px 16px;
+    }
+
+    .btn-cancel {
+        padding: 10px 20px;
+        background: var(--chat-elevated);
+        border: 1px solid var(--chat-border);
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--text-primary-chat);
+        font-weight: 500;
+    }
+
+    .btn-cancel:hover {
+        background: var(--chat-surface);
+    }
+
+    .btn-save-risk {
+        padding: 10px 20px;
+        background: var(--pgr-accent);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        font-weight: 500;
+    }
+
+    .btn-save-risk:hover {
+        background: var(--pgr-accent-dark);
+    }
+
+    /* Phase Regenerate Inline Chat */
+    .phase-inline-chat {
+        background: var(--chat-elevated);
+        border-radius: 8px;
+        padding: 12px;
+        margin: 12px 0;
+    }
+
+    .phase-inline-chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+        color: var(--text-secondary-chat);
+    }
+
+    .phase-inline-chat-input-row {
+        display: flex;
+        gap: 8px;
+    }
+
+    .phase-inline-chat-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid var(--chat-border);
+        border-radius: 8px;
+        background: var(--chat-surface);
+        color: var(--text-primary-chat);
+        font-size: 0.9rem;
+    }
+
+    .phase-inline-chat-input:focus {
+        outline: none;
+        border-color: var(--pgr-accent);
+    }
+
+    .phase-inline-chat-send {
+        padding: 10px 16px;
+        background: var(--pgr-accent);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .phase-inline-chat-send:hover {
+        background: var(--pgr-accent-dark);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SECAO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='PGR',
+artifact_version=proxima_versao,
+subtitle='Assistente para elaboracao do Plano de Gerenciamento de Riscos'
+) }}
+
+{# Welcome Screen - Rendered via JavaScript for centered display #}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='PGR') }}
+{{ chat_input_area(placeholder='Quais areas mais te preocupam nesta contratacao?') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='PGR') }}
+
+{# Alerta se nao houver DFD aprovado #}
+{% if not dfd_context %}
+<div class="context-alert">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+    <span>Nenhum DFD aprovado. Aprove um DFD para melhor analise de riscos.</span>
+</div>
+{% endif %}
+
+
+
+{# Campos opcionais do PGR #}
+<div class="context-card collapsed" id="cardDadosPgr">
+    <div class="context-card-header" onclick="toggleContextCard('cardDadosPgr')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Dados para Analise
+            <span class="context-badge" style="font-size: 0.6rem;">Preencha aqui ou via chat</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="required-fields-section"
+            style="margin-bottom: 0; margin-top: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Areas de Preocupacao</label>
+                <input type="text" class="required-field-input" id="inputAreasPreocupacao"
+                    placeholder="Ex: prazo, fornecedores, tecnologia...">
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Prazo Desejado</label>
+                <input type="text" class="required-field-input" id="inputPrazoDesejado"
+                    placeholder="Ex: 60 dias, urgente, sem urgencia...">
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Equipe Responsavel (opcional)</label>
+                <input type="text" class="required-field-input" id="inputEquipeResponsavel"
+                    placeholder="Nome do responsavel pelo monitoramento...">
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: Projeto #}
+{{ context_card(
+id='cardProjeto',
+title='Projeto',
+icon='folder',
+collapsed=true,
+items=[
+{'label': 'Titulo', 'value': projeto.titulo},
+{'label': 'Requisitante', 'value': usuario.nome},
+{'label': 'Setor', 'value': usuario.setor or 'Nao informado'}
+]
+) }}
+
+{# Card: DFD Aprovado #}
+{% if dfd_context %}
+<div class="context-card" id="cardDfd">
+    <div class="context-card-header" onclick="toggleContextCard('cardDfd')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            DFD Aprovado
+            <span class="context-status-badge aprovado">Aprovado</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="context-item">
+            <div class="context-label">Objeto</div>
+            <div class="context-value">{{ (dfd_context.descricao_objeto or 'N/A')[:100] }}{% if
+                (dfd_context.descricao_objeto or '')|length > 100 %}...{% endif %}</div>
+        </div>
+        <div class="context-item">
+            <div class="context-label">Versao</div>
+            <div class="context-value">v{{ dfd_context.versao or 1 }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Card: Cotacoes Aprovadas #}
+{% if cotacoes_context and cotacoes_context|length > 0 %}
+<div class="context-card" id="cardCotacoes">
+    <div class="context-card-header" onclick="toggleContextCard('cardCotacoes')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Cotacoes Aprovadas
+            <span class="context-badge">{{ cotacoes_context|length }}</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        {% for cot in cotacoes_context[:2] %}
+        <div class="context-item">
+            <div class="context-label">Cotacao v{{ cot.versao or loop.index }}</div>
+            <div class="context-value">R$ {{ "%.2f"|format(cot.valor_total or 0)|replace(".", ",") }}</div>
+        </div>
+        {% endfor %}
+        {% if cotacoes_context|length > 2 %}
+        <div class="context-item">
+            <div class="context-value" style="color: var(--text-muted-chat); font-size: 0.8rem;">
+                + {{ cotacoes_context|length - 2 }} mais cotacoes...
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{# Card: Resumo Financeiro #}
+{{ context_card(
+id='cardResumo',
+title='Resumo Financeiro',
+icon='dollar',
+collapsed=true,
+items=[
+{'label': 'Total de Itens', 'value': (total_itens|round|int if total_itens else itens_pac|length) ~ ' unidades'},
+{'label': 'Valor Estimado', 'value': 'R$ ' ~ ("%.2f"|format(valor_estimado_total)|replace(".", ",") if
+valor_estimado_total else "0,00"), 'highlight': true}
+]
+) }}
+
+{{ context_panel_end() }}
+
+{# ========== SECAO WORKSPACE (GERACAO) ========== #}
+{{ workspace_section(artifact_label='PGR') }}
+
+{{ chat_layout_end() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+<script>
+    console.log('[PGR Chat] Inicializando interface...');
+
+    // ========== PGR-SPECIFIC CONFIGURATION ==========
+    const PGR_CONFIG = {
+        projetoId: {{ projeto.id|default (0) }},
+    apiBase: '/api/ia-native/pgr',
+        artifactType: 'pgr',
+            artifactLabel: 'PGR',
+                generateMarker: '[GERAR_PGR]',
+                    setorRequisitante: {{ (usuario.setor or "Unidade Requisitante")| tojson }},
+    responsavelRequisitante: {{ (usuario.nome or "")| tojson }},
+    valorEstimado: {{ valor_estimado_total |default (0) }},
+    // Context data
+    dfdAprovado: {{ 'true' if dfd_context else 'false' }},
+    cotacaoAprovada: {{ 'true' if cotacoes_context and cotacoes_context | length > 0 else 'false' }},
+    // Edit mode
+    faseInicial: {{ (fase_inicial or "preparation")| tojson }},
+    editarId: {{ (pgr_editar.id if pgr_editar else None)| tojson }},
+    editarVersao: {{ (pgr_editar.versao if pgr_editar else None)| tojson }},
+    editarStatus: {{ (pgr_editar.status if pgr_editar else "")| tojson }},
+    // Existing data for editing
+    editarDados: {% if pgr_editar %} {
+        id: {{ pgr_editar.id }},
+        identificacao_objeto: {{ pgr_editar.identificacao_objeto | tojson |default ('""') }},
+        valor_estimado_total: {{ pgr_editar.valor_estimado_total |default (0) }},
+        metodologia_adotada: {{ pgr_editar.metodologia_adotada | tojson |default ('"Matriz 5x5"') }},
+        resumo_analise_planejamento: {{ pgr_editar.resumo_analise_planejamento | tojson |default ('""') }},
+        resumo_analise_selecao: {{ pgr_editar.resumo_analise_selecao | tojson |default ('""') }},
+        resumo_analise_gestao: {{ pgr_editar.resumo_analise_gestao | tojson |default ('""') }},
+        itens_risco: {{ pgr_itens_risco_json |default ('[]') | safe }}
+    } {% else %} null{% endif %},
+    // Endpoints
+    saveEndpoint: '/api/ia/artefato/salvar',
+        updateEndpoint: '/api/riscos/' + '{id}',
+            // Custom payload builders
+            buildSavePayload: function(finalData, status) {
+                // Helper para limpar valor monetario (R$ 1.000,00 -> 1000.00)
+                const cleanValor = (val) => {
+                    if (typeof val === 'number') return val;
+                    if (!val) return 0;
+                    // Remove tudo que nao for digito ou virgula, depois troca virgula por ponto
+                    return parseFloat(val.toString().replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+                };
+
+                return {
+                    projeto_id: this.projetoId,
+                    tipo_artefato: 'riscos',
+                    pgr_data: {
+                        identificacao_objeto: finalData.identificacao_objeto || '',
+                        valor_estimado_total: cleanValor(finalData.valor_estimado_total) || this.valorEstimado,
+                        metodologia_adotada: finalData.metodologia_adotada || 'Matriz 5x5 (Probabilidade vs Impacto)',
+                        resumo_analise_planejamento: finalData.resumo_analise_planejamento || '',
+                        resumo_analise_selecao: finalData.resumo_analise_selecao || '',
+                        resumo_analise_gestao: finalData.resumo_analise_gestao || '',
+                        itens_risco: finalData.itens_risco || []
+                    },
+                    campos_sistema: {
+                        setor_requisitante: this.setorRequisitante,
+                        responsavel_requisitante: this.responsavelRequisitante,
+                        valor_estimado: this.valorEstimado
+                    },
+                    campos_usuario: {},
+                    status: status
+                };
+            },
+    buildUpdatePayload: function(finalData, status) {
+        // Helper para limpar valor monetario
+        const cleanValor = (val) => {
+            if (typeof val === 'number') return val;
+            if (!val) return 0;
+            // Remove tudo que nao for digito ou virgula, depois troca virgula por ponto
+            return parseFloat(val.toString().replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        };
+
+        return {
+            identificacao_objeto: finalData.identificacao_objeto || '',
+            valor_estimado_total: cleanValor(finalData.valor_estimado_total) || this.valorEstimado,
+            metodologia_adotada: finalData.metodologia_adotada || 'Matriz 5x5 (Probabilidade vs Impacto)',
+            resumo_analise_planejamento: finalData.resumo_analise_planejamento || '',
+            resumo_analise_selecao: finalData.resumo_analise_selecao || '',
+            resumo_analise_gestao: finalData.resumo_analise_gestao || '',
+            itens_risco: finalData.itens_risco || [],
+            status: status
+        };
+    },
+    // Custom form data collector
+    getFormData: function() {
+        return {
+            areas_preocupacao: document.getElementById('inputAreasPreocupacao')?.value || null,
+            prazo_desejado: document.getElementById('inputPrazoDesejado')?.value || null,
+            equipe_responsavel: document.getElementById('inputEquipeResponsavel')?.value || null
+        };
+    },
+    fallbackMessage: 'Ola! Sou a **LIA-RISK**, sua assistente para elaboracao do Plano de Gerenciamento de Riscos conforme a Lei 14.133/2021.\n\nVou te ajudar a identificar e planejar a gestao de riscos desta contratacao.\n\n**Para comecar: quais areas mais te preocupam nesta contratacao?**\n(Ex: prazo de entrega, disponibilidade de fornecedores, complexidade tecnica, orcamento)'
+    };
+
+    // ========== PGR FIELDS DEFINITION ==========
+    const PGR_FIELDS = [
+        // ID field (hidden, for edit mode)
+        { key: 'id', label: 'ID', rows: 0, icon: '', type: 'hidden' },
+
+        // Summary fields
+        { key: 'identificacao_objeto', label: 'Identificacao do Objeto', rows: 2, icon: '📦', type: 'ia' },
+        { key: 'metodologia_adotada', label: 'Metodologia Adotada', rows: 1, icon: '📊', type: 'auto', value: 'Matriz 5x5 (Probabilidade vs Impacto)' },
+        { key: 'valor_estimado_total', label: 'Valor Estimado', rows: 1, icon: '💰', type: 'auto', value: {{ ("R$ " ~ "%.2f" | format(valor_estimado_total |default(0)) | replace(".", ",")) | tojson }}},
+
+    // Phase summaries (editable + regenerable)
+    { key: 'resumo_analise_planejamento', label: 'Resumo - Fase Planejamento', rows: 3, icon: '📋', type: 'ia', phase: 'Planejamento' },
+    { key: 'resumo_analise_selecao', label: 'Resumo - Fase Selecao', rows: 3, icon: '🔍', type: 'ia', phase: 'Selecao_Fornecedor' },
+    { key: 'resumo_analise_gestao', label: 'Resumo - Fase Gestao', rows: 3, icon: '⚙️', type: 'ia', phase: 'Gestao_Contratual' },
+
+    // Risk items (special handling - rendered as cards)
+    { key: 'itens_risco', label: 'Riscos Identificados', rows: 0, icon: '⚠️', type: 'riscos' }
+    ];
+
+    // ========== CUSTOM RISK RENDERER ==========
+    function renderRiskMatrix(risks) {
+        // Create 5x5 matrix with risk counts
+        const matrix = {};
+        for (let p = 1; p <= 5; p++) {
+            for (let i = 1; i <= 5; i++) {
+                matrix[`${p}-${i}`] = [];
+            }
+        }
+
+        // Populate matrix
+        if (risks && Array.isArray(risks)) {
+            risks.forEach(risk => {
+                const key = `${risk.probabilidade}-${risk.impacto}`;
+                if (matrix[key]) {
+                    matrix[key].push(risk);
+                }
+            });
+        }
+
+        // Get level class
+        function getLevelClass(p, i) {
+            const score = p * i;
+            if (score <= 5) return 'low';
+            if (score <= 10) return 'medium';
+            if (score <= 20) return 'high';
+            return 'extreme';
+        }
+
+        // Build HTML
+        let html = '<div class="risk-matrix-container"><div class="risk-matrix">';
+
+        // Header row (impact labels)
+        html += '<div class="matrix-cell header"></div>';
+        for (let i = 1; i <= 5; i++) {
+            html += `<div class="matrix-cell header">I${i}</div>`;
+        }
+
+        // Data rows (probability)
+        for (let p = 5; p >= 1; p--) {
+            html += `<div class="matrix-cell header">P${p}</div>`;
+            for (let i = 1; i <= 5; i++) {
+                const key = `${p}-${i}`;
+                const count = matrix[key].length;
+                const levelClass = getLevelClass(p, i);
+                const hasRisk = count > 0 ? 'has-risk' : '';
+                html += `<div class="matrix-cell ${levelClass} ${hasRisk}" title="P${p} x I${i}: ${count} risco(s)">${count || ''}</div>`;
+            }
+        }
+
+        html += '</div></div>';
+        return html;
+    }
+
+    function renderRiskCards(risks) {
+        // Kept for backward compatibility - calls editable version
+        return renderRiskCardsEditable(risks);
+    }
+
+    function renderRiskCardsEditable(risks) {
+        if (!risks || !Array.isArray(risks) || risks.length === 0) {
+            return '<p style="color: var(--text-muted-chat); text-align: center; padding: 20px;">Nenhum risco identificado ainda.</p>';
+        }
+
+        // Group risks by phase
+        const phases = {
+            'Planejamento': { label: 'Planejamento', class: 'planejamento', risks: [] },
+            'Selecao_Fornecedor': { label: 'Selecao de Fornecedor', class: 'selecao', risks: [] },
+            'Gestao_Contratual': { label: 'Gestao Contratual', class: 'gestao', risks: [] }
+        };
+
+        risks.forEach((risk, globalIdx) => {
+            const phase = risk.fase_licitacao || 'Planejamento';
+            if (phases[phase]) {
+                phases[phase].risks.push({ ...risk, _globalIndex: globalIdx });
+            }
+        });
+
+        let html = '';
+
+        Object.keys(phases).forEach(phaseKey => {
+            const phase = phases[phaseKey];
+
+            html += `
+            <div class="risk-phase-section">
+                <div class="risk-phase-header">
+                    <div class="risk-phase-title" onclick="toggleRiskPhase('${phaseKey}')" style="cursor: pointer; flex: 1;">
+                        <span class="risk-phase-badge ${phase.class}">${phase.label}</span>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary-chat);">${phase.risks.length} risco(s)</span>
+                        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-left: auto;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <button class="btn-regenerate-phase" onclick="showRegeneratePhaseModal('${phaseKey}', '${phase.label}')" title="Regenerar riscos desta fase">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="risk-phase-body" id="phase-${phaseKey}">
+            `;
+
+            if (phase.risks.length === 0) {
+                html += `<p style="color: var(--text-muted-chat); text-align: center; padding: 16px; font-size: 0.85rem;">Nenhum risco nesta fase. Clique em regenerar para adicionar.</p>`;
+            }
+
+            phase.risks.forEach((risk, idx) => {
+                const score = (risk.probabilidade || 1) * (risk.impacto || 1);
+                let level = 'baixo';
+                if (score > 5 && score <= 10) level = 'medio';
+                else if (score > 10 && score <= 20) level = 'alto';
+                else if (score > 20) level = 'extremo';
+
+                html += `
+                <div class="risk-card" data-risk-index="${risk._globalIndex}">
+                    <div class="risk-card-header">
+                        <div class="risk-level-indicator">
+                            <div class="risk-level-dot ${level}"></div>
+                            <span class="risk-score">P${risk.probabilidade || '?'} x I${risk.impacto || '?'} = ${score}</span>
+                        </div>
+                        <div class="risk-card-actions">
+                            <span style="font-size: 0.7rem; padding: 2px 6px; background: var(--chat-elevated); border-radius: 4px;">${risk.categoria || 'Geral'}</span>
+                            <button class="risk-edit-btn" onclick="editRiskItem(${risk._globalIndex})" title="Editar risco">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="risk-delete-btn" onclick="deleteRiskItem(${risk._globalIndex})" title="Remover risco">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="risk-evento">${risk.evento || 'Evento nao especificado'}</div>
+                    <div class="risk-details">
+                        <div class="risk-detail">
+                            <span class="risk-detail-label">Causa</span>
+                            <span class="risk-detail-value">${(risk.causa || '-').substring(0, 80)}${(risk.causa || '').length > 80 ? '...' : ''}</span>
+                        </div>
+                        <div class="risk-detail">
+                            <span class="risk-detail-label">Consequencia</span>
+                            <span class="risk-detail-value">${(risk.consequencia || '-').substring(0, 80)}${(risk.consequencia || '').length > 80 ? '...' : ''}</span>
+                        </div>
+                        <div class="risk-detail">
+                            <span class="risk-detail-label">Tratamento</span>
+                            <span class="risk-detail-value">${risk.tipo_tratamento || '-'}</span>
+                        </div>
+                        <div class="risk-detail">
+                            <span class="risk-detail-label">Responsavel</span>
+                            <span class="risk-detail-value">${risk.alocacao_responsavel || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+
+            html += '</div></div>';
+        });
+
+        return html;
+    }
+
+    function toggleRiskPhase(phaseKey) {
+        const body = document.getElementById(`phase-${phaseKey}`);
+        if (body) {
+            body.style.display = body.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    // Override workspace render for PGR
+    window.customWorkspaceRender = function (data, fields) {
+        let html = '';
+
+        // Render standard fields first (using same structure as artifact_chat.js)
+        fields.forEach(field => {
+            if (field.type === 'riscos') return; // Skip risk items, handle separately
+            if (field.type === 'hidden') return; // Skip hidden fields like ID
+
+            const value = field.type === 'auto' ? field.value : (data[field.key] || '');
+            const isEditable = field.type === 'ia' || field.type === 'user';
+            const isAuto = field.type === 'auto';
+
+            // Use same structure as generic artifact_chat.js for compatibility with showRegenerateModal
+            html += `
+            <div class="field-card visible done ${isAuto ? 'locked' : ''}" id="field-${field.key}" data-field="${field.key}">
+                <div class="field-header">
+                    <div class="field-title">
+                        <span class="field-icon">${field.icon}</span>
+                        ${field.label}
+                    </div>
+                    <span class="field-status done" id="status-${field.key}">${isAuto ? 'Automatico' : '✓ Gerado'}</span>
+                </div>
+                <div class="field-body">
+                    <textarea
+                        class="field-textarea"
+                        id="input-${field.key}"
+                        rows="${field.rows || 3}"
+                        ${isAuto ? 'readonly disabled' : ''}
+                        placeholder="${isAuto ? 'Campo automatico' : 'Digite ou peca para a IA regenerar...'}"
+                    >${value}</textarea>
+                    ${isEditable ? `
+                    <button class="btn-regenerate-field" onclick="showRegenerateModal('${field.key}', '${field.label}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        Regenerar com IA
+                    </button>
+                    ` : ''}
+                </div>
+            </div>
+            `;
+        });
+
+        // Render risk matrix
+        const riscos = data.itens_risco || [];
+        html += `
+        <div class="field-card visible done" id="field-risk_matrix" data-field="risk_matrix">
+            <div class="field-header">
+                <div class="field-title">
+                    <span class="field-icon">📊</span>
+                    Matriz de Riscos (${riscos.length} identificados)
+                </div>
+                <span class="field-status done">✓ Calculada</span>
+            </div>
+            <div class="field-body" style="padding: 0;">
+                ${renderRiskMatrix(riscos)}
+            </div>
+        </div>
+        `;
+
+        // Render risk cards by phase with edit and regenerate capabilities
+        html += `
+        <div class="field-card visible done" id="field-itens_risco" data-field="itens_risco">
+            <div class="field-header">
+                <div class="field-title">
+                    <span class="field-icon">⚠️</span>
+                    Riscos por Fase
+                </div>
+                <span class="field-status done">${riscos.length} riscos</span>
+            </div>
+            <div class="field-body" style="padding: 0;">
+                ${renderRiskCardsEditable(riscos)}
+            </div>
+        </div>
+        `;
+
+        return html;
+    };
+
+    // ========== RISK EDITING FUNCTIONS ==========
+
+    // Edit a specific risk item
+    function editRiskItem(index) {
+        const risk = window.artifactData.itens_risco?.[index];
+        if (!risk) {
+            console.error('Risco nao encontrado:', index);
+            return;
+        }
+
+        const modal = document.createElement('div');
+        modal.className = 'risk-edit-modal';
+        modal.id = 'riskEditModal';
+        modal.innerHTML = `
+            <div class="risk-edit-content">
+                <div class="risk-edit-header">
+                    <h3>⚠️ Editar Risco</h3>
+                    <button class="risk-edit-close" onclick="closeRiskEditModal()">&times;</button>
+                </div>
+                <div class="risk-edit-body">
+                    <div class="risk-edit-field">
+                        <label>Evento de Risco</label>
+                        <textarea id="edit-evento" rows="2">${risk.evento || ''}</textarea>
+                    </div>
+                    <div class="risk-edit-row">
+                        <div class="risk-edit-field">
+                            <label>Fase</label>
+                            <select id="edit-fase">
+                                <option value="Planejamento" ${risk.fase_licitacao === 'Planejamento' ? 'selected' : ''}>Planejamento</option>
+                                <option value="Selecao_Fornecedor" ${risk.fase_licitacao === 'Selecao_Fornecedor' ? 'selected' : ''}>Selecao de Fornecedor</option>
+                                <option value="Gestao_Contratual" ${risk.fase_licitacao === 'Gestao_Contratual' ? 'selected' : ''}>Gestao Contratual</option>
+                            </select>
+                        </div>
+                        <div class="risk-edit-field">
+                            <label>Categoria</label>
+                            <select id="edit-categoria">
+                                <option value="Tecnico" ${risk.categoria === 'Tecnico' ? 'selected' : ''}>Tecnico</option>
+                                <option value="Administrativo" ${risk.categoria === 'Administrativo' ? 'selected' : ''}>Administrativo</option>
+                                <option value="Juridico" ${risk.categoria === 'Juridico' ? 'selected' : ''}>Juridico</option>
+                                <option value="Economico" ${risk.categoria === 'Economico' ? 'selected' : ''}>Economico</option>
+                                <option value="Reputacional" ${risk.categoria === 'Reputacional' ? 'selected' : ''}>Reputacional</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="risk-edit-field">
+                        <label>Causa</label>
+                        <textarea id="edit-causa" rows="2">${risk.causa || ''}</textarea>
+                    </div>
+                    <div class="risk-edit-field">
+                        <label>Consequencia</label>
+                        <textarea id="edit-consequencia" rows="2">${risk.consequencia || ''}</textarea>
+                    </div>
+                    <div class="risk-edit-row">
+                        <div class="risk-edit-field">
+                            <label>Probabilidade (1-5)</label>
+                            <select id="edit-probabilidade">
+                                ${[1, 2, 3, 4, 5].map(n => `<option value="${n}" ${risk.probabilidade == n ? 'selected' : ''}>${n} - ${['Rara', 'Baixa', 'Media', 'Alta', 'Muito Alta'][n - 1]}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="risk-edit-field">
+                            <label>Impacto (1-5)</label>
+                            <select id="edit-impacto">
+                                ${[1, 2, 3, 4, 5].map(n => `<option value="${n}" ${risk.impacto == n ? 'selected' : ''}>${n} - ${['Insignificante', 'Pequeno', 'Moderado', 'Grande', 'Catastrofico'][n - 1]}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="risk-edit-field">
+                        <label>Tipo de Tratamento</label>
+                        <select id="edit-tratamento">
+                            <option value="Mitigar" ${risk.tipo_tratamento === 'Mitigar' ? 'selected' : ''}>Mitigar</option>
+                            <option value="Transferir" ${risk.tipo_tratamento === 'Transferir' ? 'selected' : ''}>Transferir</option>
+                            <option value="Aceitar" ${risk.tipo_tratamento === 'Aceitar' ? 'selected' : ''}>Aceitar</option>
+                            <option value="Evitar" ${risk.tipo_tratamento === 'Evitar' ? 'selected' : ''}>Evitar</option>
+                        </select>
+                    </div>
+                    <div class="risk-edit-field">
+                        <label>Resposta Planejada</label>
+                        <textarea id="edit-resposta" rows="2">${risk.resposta_planejada || ''}</textarea>
+                    </div>
+                    <div class="risk-edit-field">
+                        <label>Responsavel</label>
+                        <input type="text" id="edit-responsavel" value="${risk.alocacao_responsavel || ''}">
+                    </div>
+                </div>
+                <div class="risk-edit-footer">
+                    <button class="btn-cancel" onclick="closeRiskEditModal()">Cancelar</button>
+                    <button class="btn-save-risk" onclick="saveRiskEdit(${index})">Salvar Alteracoes</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeRiskEditModal();
+        });
+    }
+
+    function closeRiskEditModal() {
+        const modal = document.getElementById('riskEditModal');
+        if (modal) modal.remove();
+    }
+
+    function saveRiskEdit(index) {
+        if (!window.artifactData.itens_risco?.[index]) return;
+
+        // Update risk data
+        window.artifactData.itens_risco[index] = {
+            ...window.artifactData.itens_risco[index],
+            evento: document.getElementById('edit-evento').value,
+            fase_licitacao: document.getElementById('edit-fase').value,
+            categoria: document.getElementById('edit-categoria').value,
+            causa: document.getElementById('edit-causa').value,
+            consequencia: document.getElementById('edit-consequencia').value,
+            probabilidade: parseInt(document.getElementById('edit-probabilidade').value),
+            impacto: parseInt(document.getElementById('edit-impacto').value),
+            tipo_tratamento: document.getElementById('edit-tratamento').value,
+            resposta_planejada: document.getElementById('edit-resposta').value,
+            alocacao_responsavel: document.getElementById('edit-responsavel').value,
+        };
+
+        // Re-render workspace
+        const fields = window.ARTIFACT_FIELDS;
+        artifactFieldsContainer.innerHTML = window.customWorkspaceRender(window.artifactData, fields);
+
+        closeRiskEditModal();
+        addMessage('assistant', '✓ Risco atualizado com sucesso.');
+    }
+
+    function deleteRiskItem(index) {
+        if (!confirm('Tem certeza que deseja remover este risco?')) return;
+
+        if (window.artifactData.itens_risco) {
+            window.artifactData.itens_risco.splice(index, 1);
+
+            // Re-render workspace
+            const fields = window.ARTIFACT_FIELDS;
+            artifactFieldsContainer.innerHTML = window.customWorkspaceRender(window.artifactData, fields);
+
+            addMessage('assistant', '✓ Risco removido.');
+        }
+    }
+
+    // ========== PHASE REGENERATION ==========
+
+    function showRegeneratePhaseModal(phaseKey, phaseLabel) {
+        const phaseBody = document.getElementById(`phase-${phaseKey}`);
+        if (!phaseBody) return;
+
+        // Check if inline chat already exists
+        let existingChat = phaseBody.querySelector('.phase-inline-chat');
+        if (existingChat) {
+            existingChat.remove();
+            return;
+        }
+
+        // Create inline chat
+        const inlineChat = document.createElement('div');
+        inlineChat.className = 'phase-inline-chat';
+        inlineChat.innerHTML = `
+            <div class="phase-inline-chat-header">
+                <span>💬 Instrucoes para regenerar riscos de "${phaseLabel}"</span>
+                <button class="risk-edit-close" onclick="this.closest('.phase-inline-chat').remove()" style="font-size: 1.2rem;">&times;</button>
+            </div>
+            <div class="phase-inline-chat-input-row">
+                <input
+                    type="text"
+                    class="phase-inline-chat-input"
+                    id="phase-input-${phaseKey}"
+                    placeholder="Ex: Foque em riscos de fornecedor, adicione riscos de prazo..."
+                    onkeydown="if(event.key==='Enter') regeneratePhase('${phaseKey}', '${phaseLabel}')"
+                >
+                <button class="phase-inline-chat-send" onclick="regeneratePhase('${phaseKey}', '${phaseLabel}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    Regenerar
+                </button>
+            </div>
+            <div class="inline-chat-hint">
+                💡 Dica: Descreva o que quer mudar ou pressione Enter para regenerar automaticamente
+            </div>
+        `;
+
+        phaseBody.insertBefore(inlineChat, phaseBody.firstChild);
+        document.getElementById(`phase-input-${phaseKey}`)?.focus();
+    }
+
+    async function regeneratePhase(phaseKey, phaseLabel) {
+        const input = document.getElementById(`phase-input-${phaseKey}`);
+        const instructions = input?.value?.trim() || '';
+
+        // Get current risks for this phase
+        const currentPhaseRisks = (window.artifactData.itens_risco || [])
+            .filter(r => r.fase_licitacao === phaseKey);
+
+        addMessage('assistant', `🔄 Regenerando riscos de **${phaseLabel}**...${instructions ? ` (${instructions})` : ''}`);
+
+        // Remove inline chat
+        const phaseBody = document.getElementById(`phase-${phaseKey}`);
+        const inlineChat = phaseBody?.querySelector('.phase-inline-chat');
+        if (inlineChat) {
+            inlineChat.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px;">
+                    <div class="spinner" style="width: 16px; height: 16px;"></div>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary-chat);">Regenerando com IA...</span>
+                </div>
+            `;
+        }
+
+        try {
+            const config = window.ARTIFACT_CONFIG;
+            const response = await fetch(`${config.apiBase}/chat/${config.projetoId}/regenerar-campo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    campo: phaseKey,
+                    tipo: 'categoria',
+                    history: chatHistory,
+                    prompt_adicional: instructions,
+                    valor_atual: JSON.stringify(currentPhaseRisks)
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.value) {
+                // Parse new risks
+                let newRisks;
+                try {
+                    newRisks = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
+                } catch (e) {
+                    console.error('Erro ao parsear riscos:', e);
+                    addMessage('assistant', '❌ Erro ao processar resposta da IA.');
+                    return;
+                }
+
+                if (Array.isArray(newRisks)) {
+                    // Remove old risks from this phase
+                    window.artifactData.itens_risco = (window.artifactData.itens_risco || [])
+                        .filter(r => r.fase_licitacao !== phaseKey);
+
+                    // Add new risks with phase set
+                    newRisks.forEach(r => {
+                        r.fase_licitacao = phaseKey;
+                        window.artifactData.itens_risco.push(r);
+                    });
+
+                    // Re-render workspace
+                    const fields = window.ARTIFACT_FIELDS;
+                    artifactFieldsContainer.innerHTML = window.customWorkspaceRender(window.artifactData, fields);
+
+                    addMessage('assistant', `✓ ${newRisks.length} risco(s) regenerados para **${phaseLabel}**.`);
+                }
+            } else {
+                addMessage('assistant', '❌ Erro ao regenerar: ' + (result.error || 'Resposta invalida'));
+            }
+        } catch (error) {
+            console.error('Erro ao regenerar fase:', error);
+            addMessage('assistant', '❌ Erro de conexao ao regenerar riscos.');
+        }
+
+        // Clean up inline chat
+        if (inlineChat) inlineChat.remove();
+    }
+
+    // Export risk functions globally
+    window.editRiskItem = editRiskItem;
+    window.closeRiskEditModal = closeRiskEditModal;
+    window.saveRiskEdit = saveRiskEdit;
+    window.deleteRiskItem = deleteRiskItem;
+    window.showRegeneratePhaseModal = showRegeneratePhaseModal;
+    window.regeneratePhase = regeneratePhase;
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(PGR_CONFIG, PGR_FIELDS);
+    });
+</script>
+{% endblock %}

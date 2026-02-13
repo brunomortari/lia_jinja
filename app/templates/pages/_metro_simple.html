@@ -1,0 +1,120 @@
+<!-- Simplified Professional Flow - Compact Design -->
+        <div class="metro-svg-wrapper" style="position: relative; height: 350px; overflow-x: auto; background: #F7FAFC; border-radius: 8px; padding: 1.5rem;">
+            <svg width="1200" height="300" viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg" class="metro-svg">
+                <defs>
+                    <linearGradient id="trunkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#2C5282;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#2B6CB0;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+
+                <!-- Background subtle grid -->
+                <rect width="100%" height="100%" fill="#F7FAFC" opacity="0.5"/>
+
+                <!-- ==================== TRUNK LINE ==================== -->
+                <!-- JEP to DFD (conditional, dashed) -->
+                {% if projeto_sem_pac %}
+                <line x1="30" y1="150" x2="120" y2="150" 
+                      stroke="#C53030" stroke-width="3" stroke-linecap="round" 
+                      stroke-dasharray="6,4" opacity="0.8"/>
+                {% endif %}
+                
+                <!-- DFD to ETP -->
+                <line x1="120" y1="150" x2="240" y2="150" 
+                      stroke="url(#trunkGradient)" stroke-width="4" stroke-linecap="round"/>
+                
+                <!-- ETP to TR -->
+                <line x1="240" y1="150" x2="360" y2="150" 
+                      stroke="url(#trunkGradient)" stroke-width="4" stroke-linecap="round"/>
+
+                <!-- ==================== STATIONS ==================== -->
+                
+                <!-- JEP (conditional) -->
+                {% if projeto_sem_pac %}
+                <g class="station {{ flow_state.get('jep', 'locked') }}" transform="translate(30, 150)">
+                    <circle r="10" fill="white" stroke="#C53030" stroke-width="2.5"/>
+                    {% if flow_state.get('jep') == 'completed' %}
+                    <circle r="6" fill="#C53030"/>
+                    <text y="2" text-anchor="middle" class="text-white" style="font-size: 8px;">✓</text>
+                    {% endif %}
+                    <text y="28" text-anchor="middle" class="font-bold" style="font-size: 11px; fill: #C53030;">JEP</text>
+                    <text y="40" text-anchor="middle" style="font-size: 9px; fill: #718096;">Just. Excep.</text>
+                </g>
+                {% endif %}
+                
+                <!-- DFD -->
+                <g class="station {{ flow_state.get('dfd', 'locked') }}" transform="translate(120, 150)">
+                    <circle r="10" fill="white" stroke="#2B6CB0" stroke-width="2.5"/>
+                    {% if flow_state.get('dfd') == 'completed' %}
+                    <circle r="6" fill="#2B6CB0"/>
+                    <text y="2" text-anchor="middle" class="text-white" style="font-size: 8px;">✓</text>
+                    {% endif %}
+                    <text y="28" text-anchor="middle" class="font-bold" style="font-size: 11px; fill: #2C5282;">DFD</text>
+                    <text y="40" text-anchor="middle" style="font-size: 9px; fill: #718096;">Doc. Form.</text>
+                </g>
+
+                <!-- ETP -->
+                <g class="station {{ flow_state.get('etp', 'locked') }}" transform="translate(240, 150)">
+                    <circle r="10" fill="white" stroke="#2B6CB0" stroke-width="2.5"/>
+                    {% if flow_state.get('etp') == 'completed' %}
+                    <circle r="6" fill="#2B6CB0"/>
+                    <text y="2" text-anchor="middle" class="text-white" style="font-size: 8px;">✓</text>
+                    {% endif %}
+                    <text y="28" text-anchor="middle" class="font-bold" style="font-size: 11px; fill: #2C5282;">ETP</text>
+                    <text y="40" text-anchor="middle" style="font-size: 9px; fill: #718096;">Est. Técnico</text>
+                    
+                    <!-- Pesquisa de Atas (dotted connection) -->
+                    <line x1="0" y1="-10" x2="0" y2="-50" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="2,2"/>
+                    <circle cy="-50" r="7" fill="white" stroke="#A0AEC0" stroke-width="2" stroke-dasharray="2,2"/>
+                    <text y="-62" text-anchor="middle" style="font-size: 9px; fill: #718096;">Pesq. Atas</text>
+                </g>
+
+                <!-- Portaria Designação (dotted connection to DFD/ETP area) -->
+                <g transform="translate(180, 150)">
+                    <line x1="0" y1="-10" x2="0" y2="-50" stroke="#A0AEC0" stroke-width="1.5" stroke-dasharray="2,2"/>
+                    <circle cy="-50" r="7" fill="white" stroke="#A0AEC0" stroke-width="2" stroke-dasharray="2,2"/>
+                    <text y="-62" text-anchor="middle" style="font-size: 9px; fill: #718096;">Port. Desig.</text>
+                </g>
+
+                <!-- TR - Decision Point -->
+                <g class="station decision-point {{ flow_state.get('tr', 'locked') }}" transform="translate(360, 150)">
+                    <circle r="12" fill="white" stroke="#2B6CB0" stroke-width="3"/>
+                    <circle r="16" fill="none" stroke="#4A5568" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+                    {% if flow_state.get('tr') == 'completed' %}
+                    <circle r="7" fill="#2B6CB0"/>
+                    <text y="2" text-anchor="middle" class="text-white" style="font-size: 8px;">✓</text>
+                    {% endif %}
+                    <text y="30" text-anchor="middle" class="font-bold" style="font-size: 11px; fill: #2C5282;">TR</text>
+                    <text y="42" text-anchor="middle" style="font-size: 9px; fill: #718096;">T. Referência</text>
+                    <text y="-22" text-anchor="middle" class="font-semibold" style="font-size: 9px; fill: #4A5568;">⟳ Bifurcação</text>
+                </g>
+
+                <!-- Branch indicator (only show when TR completed) -->
+                {% if flow_state.get('tr') == 'completed' %}
+                <text x="480" y="150" text-anchor="start" style="font-size: 10px; fill: #718096; font-style: italic;">
+                    → Fluxos alternativos disponíveis (clique para expandir)
+                </text>
+                {% endif %}
+
+            </svg>
+
+            <!-- Compact Legend -->
+            <div class="flex gap-4 mt-4 text-xs text-gray-600 justify-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-0.5 bg-blue-700"></div>
+                    <span>Tronco Comum</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-0.5 border-t-2 border-gray-400 border-dashed"></div>
+                    <span>Opcional/Condicional</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full border-2 border-green-600 bg-green-600"></div>
+                    <span>Concluído</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full border-2 border-gray-400 bg-white"></div>
+                    <span>Pendente</span>
+                </div>
+            </div>
+        </div>

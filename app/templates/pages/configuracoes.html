@@ -1,0 +1,239 @@
+{% extends "app.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/configuracoes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/configuracoes_skills.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </svg>
+        </div>
+        <div>
+            <h1 class="page-title">Configurações</h1>
+            <p class="page-subtitle">Gerencie as preferências do sistema</p>
+        </div>
+    </div>
+</div>
+
+
+<div class="config-container">
+    <!-- Abas verticais -->
+    <nav class="config-tabs">
+        <ul>
+            <li><button class="config-tab-btn active" data-tab="modelos">Modelos de IA</button></li>
+            <li><button class="config-tab-btn" data-tab="usuarios">Usuários</button></li>
+            <li><button class="config-tab-btn" data-tab="habilidades">Habilidades</button></li>
+            <li><button class="config-tab-btn" data-tab="temas">Temas</button></li>
+        </ul>
+    </nav>
+
+    <!-- Conteúdo das abas -->
+    <div class="config-content">
+        <!-- Modelos de IA -->
+        <section class="config-section config-modelos active" data-tab="modelos">
+            <h2>Modelos de IA</h2>
+            <ul>
+                {% for modelo in modelos_ia %}
+                <li>
+                    <span class="modelo-nome">{{ modelo.nome }}</span>
+                    <button type="button" class="btn btn-light btn-sm btn-verificar"
+                        onclick="verificarStatusModelo(this, '{{ modelo.nome }}')" title="Verificar status">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4.93 4.93a10 10 0 1 1 0 14.14" />
+                            <path d="M8 2v4" />
+                            <path d="M2 8h4" />
+                        </svg>
+                    </button>
+                    <span class="modelo-status">Clique para verificar</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <small>Clique na seta para verificar o status do modelo em tempo real.</small>
+        </section>
+
+        <!-- Usuários (futuro) -->
+        <section class="config-section config-usuarios" data-tab="usuarios" style="display: none;">
+            <h2>Usuários e Permissões</h2>
+
+            <div class="admin-access-card"
+                style="background: var(--bg-tertiary); padding: var(--spacing-lg); border-radius: var(--radius-lg); border: 1px solid var(--border); display: flex; gap: var(--spacing-lg); align-items: flex-start;">
+                <div class="admin-icon"
+                    style="background: var(--bg-secondary); padding: var(--spacing-md); border-radius: var(--radius-md); font-size: 2rem;">
+                    🛡️
+                </div>
+                <div class="admin-info">
+                    <h3 style="margin-top: 0; font-size: 1.1rem; color: var(--text-primary);">Painel Administrativo</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">
+                        Para gerenciamento avançado de usuários, permissões, grupos e visualização direta dos dados do
+                        banco (SQLAdmin), acesse o painel dedicado.
+                    </p>
+                    <a href="/admin" target="_blank" class="btn btn-primary"
+                        style="background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
+                        <span>Acessar Painel Admin</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Habilidades (Skills) -->
+        <!-- Habilidades (Skills) -->
+        <section class="config-section config-habilidades" data-tab="habilidades" style="display: none;">
+
+            <!-- VIEW: LISTA (Padrão) -->
+            <div id="skills-list-view">
+                <div class="skills-section-header">
+                    <div>
+                        <h2>Habilidades (Skills)</h2>
+                        <p>Personalize o comportamento da IA com instrucoes customizadas</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="abrirCriarSkill()">
+                        + Nova Habilidade
+                    </button>
+                </div>
+
+                <div class="skills-info-banner">
+                    <div class="info-icon">💡</div>
+                    <div>
+                        <strong>O que sao Habilidades?</strong>
+                        <p>Skills sao instrucoes que modificam como a IA gera seus documentos.
+                            Por exemplo: ser mais rigoroso com citacoes legais, incluir criterios ambientais,
+                            ou usar linguagem simplificada. Associe skills aos seus projetos para personalizar a
+                            geracao.</p>
+                    </div>
+                </div>
+
+                <div class="skills-group">
+                    <h3 class="skills-group-title">Skills do Sistema</h3>
+                    <div id="systemSkillsList" class="skills-list"></div>
+                </div>
+
+                <div class="skills-group">
+                    <h3 class="skills-group-title">Minhas Skills</h3>
+                    <div id="userSkillsList" class="skills-list"></div>
+                    <div id="noUserSkills" class="skills-empty" style="display: none;">
+                        <div class="empty-icon">📭</div>
+                        <p>Voce ainda nao criou nenhuma habilidade personalizada.</p>
+                        <button class="btn btn-secondary" onclick="abrirCriarSkill()">Criar Primeira Skill</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: CRIAÇÃO / EDIÇÃO (Escondido inicialmente) -->
+            <div id="skills-create-view" style="display: none;">
+                <!-- O conteúdo do Wizard/Edit será injetado aqui via JS -->
+            </div>
+
+        </section>
+
+        <!-- (Modais antigos removidos) -->
+
+        <!-- Temas -->
+        <section class="config-section config-temas" data-tab="temas" style="display: none;">
+            <h2>Temas</h2>
+            <div class="temas-container">
+                <button type="button" class="btn btn-secondary" onclick="Theme.set('light')">
+                    ☀️ Claro
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="Theme.set('dark')">
+                    🌙 Escuro
+                </button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    async function verificarStatusModelo(btn, modeloNome) {
+        const statusSpan = btn.parentElement.querySelector('.modelo-status');
+        const originalContent = statusSpan.textContent;
+
+        // Mostrar loading com animação
+        statusSpan.innerHTML = '<span class="ping-loading">⏳ Pingando...</span>';
+        statusSpan.style.color = 'var(--text-secondary)';
+        statusSpan.style.background = 'var(--bg-hover)';
+
+        // Desabilitar botão durante o ping
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.classList.add('spinning');
+
+        try {
+            const response = await fetch(`/api/ping-modelo/${encodeURIComponent(modeloNome)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            // Formatar status baseado na resposta
+            switch (data.status) {
+                case 'online':
+                    statusSpan.textContent = `🟢 Online (${data.tempo_ms}ms)`;
+                    statusSpan.style.color = '#fff';
+                    statusSpan.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    break;
+                case 'rate_limited':
+                    statusSpan.textContent = `🟡 Rate Limited`;
+                    statusSpan.style.color = '#000';
+                    statusSpan.style.background = 'linear-gradient(135deg, #fbbf24, #d97706)';
+                    break;
+                case 'offline':
+                    statusSpan.textContent = `🔴 Offline`;
+                    statusSpan.style.color = '#fff';
+                    statusSpan.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                    break;
+                default:
+                    statusSpan.textContent = `⚠️ ${data.mensagem || 'Erro'}`;
+                    statusSpan.style.color = '#000';
+                    statusSpan.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            }
+
+        } catch (error) {
+            console.error('Erro ao verificar status:', error);
+            statusSpan.textContent = '⚠️ Erro de conexão';
+            statusSpan.style.color = '#fff';
+            statusSpan.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+        } finally {
+            // Reabilitar botão
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.classList.remove('spinning');
+        }
+    }
+
+    // Navegação entre abas/seções verticais
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabBtns = document.querySelectorAll('.config-tab-btn');
+        const sections = document.querySelectorAll('.config-section');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                sections.forEach(sec => sec.style.display = 'none');
+
+                this.classList.add('active');
+                const tab = this.getAttribute('data-tab');
+                document.querySelector('.config-section[data-tab="' + tab + '"]').style.display = 'block';
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/configuracoes_skills.js') }}"></script>
+{% endblock %}

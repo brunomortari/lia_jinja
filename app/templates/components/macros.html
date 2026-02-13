@@ -1,0 +1,185 @@
+{% macro status_badge(status) %}
+{% if status == 'publicado' %}
+<span class="badge badge-info" style="background-color: #3182CE; color: white;">
+    PUBLICADO
+</span>
+{% elif status == 'aprovado' or status == 'concluido' %}
+<span class="badge badge-success">
+    APROVADO
+</span>
+{% else %}
+<span class="badge badge-warning">
+    RASCUNHO
+</span>
+{% endif %}
+{% endmacro %}
+
+{% macro project_status_badge(status) %}
+{% set status_colors = {'rascunho': '#EDF2F7', 'em_andamento': '#BEE3F8', 'concluido': '#C6F6D5'} %}
+{% set text_colors = {'rascunho': '#2D3748', 'em_andamento': '#2C5282', 'concluido': '#22543D'} %}
+{% set labels = {'rascunho': 'Rascunho', 'em_andamento': 'Em Andamento', 'concluido': 'Concluído'} %}
+
+<span
+    style="background: {{ status_colors.get(status, '#EDF2F7') }}; color: {{ text_colors.get(status, '#2D3748') }}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.875rem;">
+    {{ labels.get(status, status) }}
+</span>
+{% endmacro %}
+
+{% macro artefato_icon_svg() %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+    <polyline points="14 2 14 8 20 8"></polyline>
+</svg>
+{% endmacro %}
+
+{% macro versao_actions(projeto_id, tipo, artefato, type_locked=False, has_approved=False) %}
+{# 
+  Regras de negócio para ações de artefato:
+  - Rascunho: pode editar, deletar, ver PDF, aprovar (se não existe outro aprovado)
+  - Aprovado: pode editar, deletar, ver PDF, publicar no SEI
+  - Publicado: NÃO pode editar, NÃO pode deletar, pode ver PDF
+#}
+{% set is_published = artefato.protocolo_sei %}
+{% set is_approved = artefato.status == 'aprovado' or artefato.status == 'concluido' %}
+
+<div class="versao-actions">
+    {# Editar: só se NÃO publicado #}
+    {% if not is_published and tipo != 'pesquisa_precos' %}
+    <a href="/projetos/{{ projeto_id }}/{{ tipo }}/{{ artefato.id }}/editar" class="btn-icon btn-icon-edit"
+        title="Editar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+    </a>
+    {% endif %}
+
+    {# PDF: sempre disponível #}
+    <button class="btn-icon btn-icon-pdf" onclick="baixarPDF('{{ tipo }}', {{ artefato.id }})" title="Baixar PDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <polyline points="9 15 12 18 15 15"></polyline>
+        </svg>
+    </button>
+
+    {# Publicado: mostrar link SEI #}
+    {% if is_published %}
+    <a href="{{ artefato.protocolo_sei.link }}" target="_blank" class="btn-icon btn-icon-sei-published"
+        title="Ver no SEI: {{ artefato.protocolo_sei.numero }}" style="color: #2F855A; border-color: #2F855A;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+    </a>
+    {# Aprovado mas não publicado: mostrar botão publicar #}
+    {% elif is_approved %}
+    <a href="/projetos/{{ projeto_id }}/{{ tipo }}/{{ artefato.id }}/publicar-sei" class="btn-icon btn-icon-sei"
+        title="Publicar no SEI">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+    </a>
+    {% endif %}
+
+    {# Deletar: só se NÃO publicado #}
+    {% if not is_published %}
+    <button class="btn-icon btn-icon-delete" onclick="deletarArtefato('{{ tipo }}', {{ artefato.id }})" title="Excluir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+    </button>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro artefato_section(projeto_id, tipo, titulo, artefatos, liberado=True, faltando=[]) %}
+{#
+  Regras de negócio:
+  - Publicado no SEI: bloqueia novas versões
+  - Versão aprovada existe: bloqueia novas versões  
+#}
+{% set published_versions = artefatos | selectattr("protocolo_sei") | list %}
+{% set approved_versions = artefatos | selectattr("status", "equalto", "aprovado") | list %}
+{% set is_type_locked = (published_versions | length > 0) or (approved_versions | length > 0) %}
+{% set has_published = published_versions | length > 0 %}
+{% set has_approved = approved_versions | length > 0 %}
+
+<div class="artefato-card {% if not liberado %}artefato-bloqueado{% endif %}">
+    <div class="artefato-header">
+        <div
+            class="artefato-icon {% if liberado %}artefato-icon-liberado artefato-icon-{{ tipo }}{% else %}artefato-icon-bloqueado{% endif %}">
+            {{ artefato_icon_svg() }}
+        </div>
+        <div class="artefato-info">
+            <h3>{{ titulo }}</h3>
+            <div class="artefato-meta">
+                {% if liberado %}
+                <span class="badge badge-success">LIBERADO</span>
+                <span class="text-muted">
+                    {{ artefatos|length if artefatos else 0 }} versão(ões) criada(s)
+                </span>
+                {% else %}
+                <span class="badge badge-secondary">BLOQUEADO</span>
+                <span class="text-muted">Requer: {{ faltando|join(', ') }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="artefato-actions">
+        {% if liberado and not is_type_locked %}
+        <a href="/projetos/{{ projeto_id }}/{{ tipo }}" class="btn btn-sm btn-success">
+            <i class="fas fa-plus mr-1"></i> Nova Versão
+        </a>
+        {% elif has_published %}
+        <span class="text-muted" style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Publicado no SEI
+        </span>
+        {% elif has_approved %}
+        <span class="text-info" style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            Versão aprovada
+        </span>
+        {% elif not liberado %}
+        <button class="btn btn-sm btn-secondary" disabled title="Requer: {{ faltando|join(', ') }}">
+            <i class="fas fa-lock mr-1"></i> Bloqueado
+        </button>
+        {% endif %}
+    </div>
+
+    {% if artefatos and artefatos|length > 0 %}
+    <div class="dfd-versoes-list">
+        <h4>Versões do {{ titulo.split(' - ')[0] }}</h4>
+        <ul>
+            {% for artefato in artefatos|sort(attribute='versao', reverse=True) %}
+            <li>
+                <span class="versao-numero">v{{ artefato.versao }}</span>
+                {{ status_badge(artefato.status) }}
+                <span class="versao-data">
+                    {{ artefato.data_criacao.strftime('%d/%m/%Y %H:%M') if artefato.data_criacao else 'N/A' }}
+                    {% if artefato.protocolo_sei %}
+                    <span class="text-success ml-2 font-weight-bold" style="font-size: 0.8em; margin-left: 8px;">
+                        ● SEI: {{ artefato.protocolo_sei.numero }}
+                    </span>
+                    {% endif %}
+                </span>
+                {{ versao_actions(projeto_id, tipo, artefato, is_type_locked, has_approved) }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}

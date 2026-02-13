@@ -1,0 +1,286 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}Checklist de Instrução - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+<style>
+    /* CHK theme: purple */
+    .chat-header { border-top-color: #9F7AEA !important; }
+    .artifact-badge { background: linear-gradient(135deg, #9F7AEA, #805AD5) !important; }
+    .workspace-header { border-top-color: #9F7AEA !important; }
+    .btn-generate { background: linear-gradient(135deg, #9F7AEA, #805AD5) !important; }
+    .btn-generate:hover { background: linear-gradient(135deg, #805AD5, #6B46C1) !important; }
+    
+    /* Checklist status indicators */
+    .chk-status-conforme { color: #38A169; font-weight: 600; }
+    .chk-status-nao-conforme { color: #E53E3E; font-weight: 600; }
+    .chk-status-ressalvas { color: #D69E2E; font-weight: 600; }
+    
+    .chk-item-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .chk-item-row:last-child { border-bottom: none; }
+    .chk-item-status {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+    .chk-item-status.sim { background: #C6F6D5; color: #22543D; }
+    .chk-item-status.nao { background: #FED7D7; color: #742A2A; }
+    .chk-item-status.nao_se_aplica { background: #E2E8F0; color: #4A5568; }
+</style>
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SEÇÃO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='Checklist de Instrução',
+artifact_version=proxima_versao,
+subtitle='Assistente para elaboração do Checklist de Instrução conforme modelos AGU/SEGES'
+) }}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='Checklist de Instrução') }}
+{{ chat_input_area(placeholder='Informe sobre documentos adicionais do processo ou peça para gerar...') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='Checklist de Instrução') }}
+
+{# Card: Documentos Detectados #}
+<div class="context-card" id="cardDocumentos">
+    <div class="context-card-header" onclick="toggleContextCard('cardDocumentos')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+            Documentos no Processo
+            <span class="context-badge" style="font-size: 0.6rem;">Detectados automaticamente</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="chk-item-row">
+                <div class="chk-item-status {{ 'sim' if dfd_existe else 'nao' }}">
+                    {{ '✓' if dfd_existe else '✗' }}
+                </div>
+                <span style="font-size: 0.85rem;">DFD - Documento de Formalização da Demanda</span>
+            </div>
+            <div class="chk-item-row">
+                <div class="chk-item-status {{ 'sim' if etp_existe else 'nao' }}">
+                    {{ '✓' if etp_existe else '✗' }}
+                </div>
+                <span style="font-size: 0.85rem;">ETP - Estudo Técnico Preliminar</span>
+            </div>
+            <div class="chk-item-row">
+                <div class="chk-item-status {{ 'sim' if tr_existe else 'nao' }}">
+                    {{ '✓' if tr_existe else '✗' }}
+                </div>
+                <span style="font-size: 0.85rem;">TR - Termo de Referência</span>
+            </div>
+            <div class="chk-item-row">
+                <div class="chk-item-status {{ 'sim' if pgr_existe else 'nao' }}">
+                    {{ '✓' if pgr_existe else '✗' }}
+                </div>
+                <span style="font-size: 0.85rem;">PGR - Matriz de Riscos</span>
+            </div>
+            <div class="chk-item-row">
+                <div class="chk-item-status {{ 'sim' if pp_existe else 'nao' }}">
+                    {{ '✓' if pp_existe else '✗' }}
+                </div>
+                <span style="font-size: 0.85rem;">PP - Pesquisa de Preços</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: Projeto #}
+{{ context_card(
+id='cardProjeto',
+title='Projeto',
+icon='folder',
+collapsed=true,
+items=[
+{'label': 'Título', 'value': projeto.titulo},
+{'label': 'Requisitante', 'value': usuario.nome},
+{'label': 'Setor', 'value': usuario.setor or 'Não informado'}
+]
+) }}
+
+{# Card: Marco Legal #}
+<div class="context-card collapsed" id="cardLegais">
+    <div class="context-card-header" onclick="toggleContextCard('cardLegais')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Marco Legal
+            <span class="context-badge" style="font-size: 0.6rem;">Lei 14.133/2021</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <p style="font-size: 0.85rem; line-height: 1.4; color: #666;">
+            O <strong>Checklist de Instrução</strong> verifica a conformidade documental do processo licitatório conforme modelos da AGU (Advocacia-Geral da União) e SEGES (Secretaria de Gestão).
+        </p>
+        <p style="font-size: 0.85rem; line-height: 1.4; color: #666; margin-top: 0.5rem;">
+            Deve conter referência a todos os documentos exigidos pela <strong>Lei 14.133/2021</strong> com indicação de folhas/páginas no processo.
+        </p>
+    </div>
+</div>
+
+{{ context_panel_end() }}
+
+{# ========== SEÇÃO WORKSPACE (GERAÇÃO) ========== #}
+{{ workspace_section(artifact_label='Checklist de Instrução') }}
+
+{{ chat_layout_end() }}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+
+<script>
+    // ========== CHK CONFIG ==========
+    const CHK_CONFIG = {
+        projetoId: {{ projeto.id }},
+        apiBase: '/api/ia-native/checklist_conformidade',
+        artifactType: 'checklist_conformidade',
+        artifactLabel: 'Checklist de Instrução',
+        generateMarker: '[GERAR_CHK]',
+
+        // Dados pré-preenchidos
+        projetoTitulo: {{ projeto.titulo | tojson }},
+        setorRequisitante: {{ (usuario.setor or "Unidade Requisitante") | tojson }},
+        responsavelRequisitante: {{ (usuario.nome or "") | tojson }},
+
+        // Mode
+        faseInicial: 'preparation',
+        editarId: null,
+
+        // Endpoints
+        saveEndpoint: '/api/ia/artefato/salvar',
+
+        // Custom payload builders
+        buildSavePayload: function(finalData, status) {
+            return {
+                projeto_id: this.projetoId,
+                tipo_artefato: 'checklist_conformidade',
+                artefato_data: {
+                    dfd_presente: finalData.dfd_presente || 'nao',
+                    dfd_folhas: finalData.dfd_folhas || '',
+                    etp_presente: finalData.etp_presente || 'nao',
+                    etp_folhas: finalData.etp_folhas || '',
+                    tr_presente: finalData.tr_presente || 'nao',
+                    tr_folhas: finalData.tr_folhas || '',
+                    matriz_riscos_presente: finalData.matriz_riscos_presente || 'nao',
+                    matriz_riscos_folhas: finalData.matriz_riscos_folhas || '',
+                    disponibilidade_orcamentaria_presente: finalData.disponibilidade_orcamentaria_presente || 'nao',
+                    disponibilidade_orcamentaria_folhas: finalData.disponibilidade_orcamentaria_folhas || '',
+                    parecer_juridico_presente: finalData.parecer_juridico_presente || 'nao',
+                    parecer_juridico_folhas: finalData.parecer_juridico_folhas || '',
+                    validado_por: finalData.validado_por || '',
+                    observacoes_gerais: finalData.observacoes_gerais || '',
+                    status_conformidade: finalData.status_conformidade || 'nao_conforme',
+                    itens_verificacao: finalData.itens_verificacao || []
+                },
+                status: status
+            };
+        },
+
+        buildUpdatePayload: function(finalData, status) {
+            return {
+                dfd_presente: finalData.dfd_presente || 'nao',
+                dfd_folhas: finalData.dfd_folhas || '',
+                etp_presente: finalData.etp_presente || 'nao',
+                etp_folhas: finalData.etp_folhas || '',
+                tr_presente: finalData.tr_presente || 'nao',
+                tr_folhas: finalData.tr_folhas || '',
+                matriz_riscos_presente: finalData.matriz_riscos_presente || 'nao',
+                matriz_riscos_folhas: finalData.matriz_riscos_folhas || '',
+                disponibilidade_orcamentaria_presente: finalData.disponibilidade_orcamentaria_presente || 'nao',
+                disponibilidade_orcamentaria_folhas: finalData.disponibilidade_orcamentaria_folhas || '',
+                parecer_juridico_presente: finalData.parecer_juridico_presente || 'nao',
+                parecer_juridico_folhas: finalData.parecer_juridico_folhas || '',
+                validado_por: finalData.validado_por || '',
+                observacoes_gerais: finalData.observacoes_gerais || '',
+                status_conformidade: finalData.status_conformidade || 'nao_conforme',
+                itens_verificacao: finalData.itens_verificacao || [],
+                status: status
+            };
+        },
+
+        fallbackMessage: '📋 **Bem-vindo ao Assistente do Checklist de Instrução!**\n\nSou a **LIA**, sua assistente do TRE-GO para elaboração do Checklist de Instrução conforme modelos **AGU/SEGES**.\n\n**📄 O que vamos fazer?**\nVerificar a conformidade documental do processo licitatório, garantindo que todos os documentos exigidos pela Lei 14.133/2021 estejam presentes.\n\n**💬 Vamos começar!**\nJá detectei os artefatos aprovados no sistema. Há algum documento adicional no processo que eu deva considerar?\n\nOu se preferir, posso **gerar o checklist automaticamente** com base nos artefatos já aprovados.'
+    };
+
+    // ========== CHK FIELDS DEFINITION ==========
+    const CHK_FIELDS = [
+        // Automatic fields (system)
+        { key: 'numero_chk', label: 'Número do Checklist', rows: 1, icon: '🔢', type: 'auto', value: {{ ("CHK-" ~ projeto.id | string ~ "-" ~ proxima_versao | string) | tojson }} },
+        { key: 'setor_requisitante', label: 'Setor Requisitante', rows: 1, icon: '🏢', type: 'auto', value: {{ (usuario.setor or "Unidade Requisitante") | tojson }} },
+
+        // AI-generated fields (editable + regenerable)
+        { key: 'dfd_presente', label: 'DFD Presente', rows: 1, icon: '📄', type: 'ia' },
+        { key: 'dfd_folhas', label: 'DFD - Referência Folhas', rows: 1, icon: '📑', type: 'ia' },
+        { key: 'etp_presente', label: 'ETP Presente', rows: 1, icon: '📄', type: 'ia' },
+        { key: 'etp_folhas', label: 'ETP - Referência Folhas', rows: 1, icon: '📑', type: 'ia' },
+        { key: 'tr_presente', label: 'TR Presente', rows: 1, icon: '📄', type: 'ia' },
+        { key: 'tr_folhas', label: 'TR - Referência Folhas', rows: 1, icon: '📑', type: 'ia' },
+        { key: 'matriz_riscos_presente', label: 'Matriz de Riscos Presente', rows: 1, icon: '📄', type: 'ia' },
+        { key: 'matriz_riscos_folhas', label: 'Matriz de Riscos - Referência Folhas', rows: 1, icon: '📑', type: 'ia' },
+        { key: 'disponibilidade_orcamentaria_presente', label: 'Disponibilidade Orçamentária', rows: 1, icon: '💰', type: 'ia' },
+        { key: 'disponibilidade_orcamentaria_folhas', label: 'Disp. Orçamentária - Referência', rows: 1, icon: '📑', type: 'ia' },
+        { key: 'parecer_juridico_presente', label: 'Parecer Jurídico', rows: 1, icon: '⚖️', type: 'ia' },
+        { key: 'parecer_juridico_folhas', label: 'Parecer Jurídico - Referência', rows: 1, icon: '📑', type: 'ia' },
+        { key: 'observacoes_gerais', label: 'Observações Gerais', rows: 3, icon: '📝', type: 'ia' },
+        { key: 'status_conformidade', label: 'Status de Conformidade', rows: 1, icon: '✅', type: 'ia' },
+
+        // User fields
+        { key: 'validado_por', label: 'Validado Por', rows: 1, icon: '👔', type: 'user' }
+    ];
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(CHK_CONFIG, CHK_FIELDS);
+    });
+</script>
+{% endblock %}

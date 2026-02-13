@@ -1,0 +1,221 @@
+/**
+ * Sistema LIA - Componente: Badges
+ * =================================
+ */
+
+/* ========== BADGE BASE ========== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 0.25rem 0.75rem;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: 1;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+/* ========== VARIANTES DE COR ========== */
+
+.badge-primary {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--color-accent);
+}
+
+.badge-secondary {
+    background: var(--color-gray-200);
+    color: var(--color-gray-700);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-success);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-warning-dark);
+}
+
+.badge-error,
+.badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-error);
+}
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-info);
+}
+
+/* ========== VARIANTES SÓLIDAS ========== */
+
+.badge-solid-primary {
+    background: var(--color-accent);
+    color: white;
+}
+
+.badge-solid-success {
+    background: var(--color-success);
+    color: white;
+}
+
+.badge-solid-warning {
+    background: var(--color-warning);
+    color: var(--color-dark);
+}
+
+.badge-solid-error {
+    background: var(--color-error);
+    color: white;
+}
+
+/* ========== BADGES DE STATUS (Sistema LIA) ========== */
+
+.badge-status {
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-md);
+}
+
+.badge-status-pendente,
+.badge-pendente {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-status-em-andamento,
+.badge-em-andamento {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+.badge-status-concluido,
+.badge-concluido {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.badge-status-erro,
+.badge-erro {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.badge-status-rascunho,
+.badge-rascunho {
+    background: var(--color-gray-200);
+    color: var(--color-gray-700);
+}
+
+/* ========== TAMANHOS ========== */
+
+.badge-sm {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.65rem;
+}
+
+.badge-lg {
+    padding: 0.35rem 1rem;
+    font-size: var(--font-size-sm);
+}
+
+/* ========== BADGE COM PONTO ========== */
+
+.badge-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.badge-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+}
+
+/* ========== BADGE REMOVÍVEL ========== */
+
+.badge-removable {
+    padding-right: 0.35rem;
+}
+
+.badge-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: var(--spacing-xs);
+    border: none;
+    background: transparent;
+    color: currentColor;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: var(--radius-full);
+}
+
+.badge-remove:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* ========== BADGE CONTADOR ========== */
+
+.badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--color-error);
+    color: white;
+    border-radius: var(--radius-full);
+}
+
+.badge-count-sm {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+}
+
+/* ========== BADGE TIPO ARTEFATO (Sistema LIA) ========== */
+
+.badge-artefato {
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+
+.badge-dfd {
+    background: #EDE9FE;
+    color: #5B21B6;
+}
+
+.badge-etp {
+    background: #E0F2FE;
+    color: #0369A1;
+}
+
+.badge-tr {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.badge-mp {
+    background: #FCE7F3;
+    color: #9D174D;
+}
+
+.badge-edital {
+    background: #ECFDF5;
+    color: #065F46;
+}

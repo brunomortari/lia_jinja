@@ -1,0 +1,308 @@
+<div class="artefato-card-horizontal">
+    <div class="artefato-card-left" style="border-left-color: {{ item.cor }};">
+        <div class="artefato-badge" style="background: {{ item.cor }};">
+            {{ item.tipo_label }}
+            {% if item.versao %}v{{ item.versao }}{% endif %}
+        </div>
+        <div class="artefato-projeto">
+            <h3 class="projeto-titulo">{{ item.projeto.titulo }}</h3>
+            {% if item.projeto.descricao %}
+            <p class="projeto-descricao">{{ item.projeto.descricao|truncate(100) }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="artefato-card-center">
+        <div class="artefato-info-group">
+            <span class="info-label">Tipo</span>
+            <span class="info-value">{{ item.tipo_completo }}</span>
+        </div>
+
+        {% if item.tipo == 'pesquisa-precos' %}
+        <div class="artefato-info-group">
+            <span class="info-label">Cotações</span>
+            <span class="info-value">{{ item.quantidade or 0 }}</span>
+        </div>
+        <div class="artefato-info-group">
+            <span class="info-label">Valor Total</span>
+            <span class="info-value valor">R$ {{ '{:,.2f}'.format(item.valor_total or 0).replace(',', 'X').replace('.',
+                ',').replace('X', '.') }}</span>
+        </div>
+        {% else %}
+        <div class="artefato-info-group">
+            <span class="info-label">Status</span>
+            <span class="status-badge status-{{ item.status }}">
+                {{ item.status|upper }}
+            </span>
+        </div>
+        <div class="artefato-info-group">
+            <span class="info-label">Criado por</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <div
+                    style="width: 20px; height: 20px; background: var(--color-primary-light); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold;">
+                    {{ item.projeto.usuario.nome[0]|upper if item.projeto.usuario and item.projeto.usuario.nome else '?'
+                    }}
+                </div>
+                <span class="info-value">{{ item.projeto.usuario.nome.split()[0] if item.projeto.usuario else 'Sistema'
+                    }}</span>
+                {% if item.gerado_por_ia %}
+                <span class="ia-badge" title="Gerado por IA" style="padding: 2px 4px; font-size: 0.6rem; gap: 2px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    IA
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="artefato-info-group">
+            <span class="info-label">Atualização</span>
+            <span class="info-value data">
+                {% if item.data_atualizacao %}
+                {{ item.data_atualizacao.strftime('%d/%m/%Y %H:%M') }}
+                {% else %}
+                -
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="artefato-card-right">
+        {% if item.tipo == 'pesquisa-precos' %}
+        <a href="/projetos/{{ item.projeto.id }}/cotacao-page" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Ver Cotações
+        </a>
+        {% elif item.tipo == 'dfd' %}
+        <!-- DFD: Redireciona para interface de chat em modo edição (fase 3) -->
+        <a href="/projetos/{{ item.projeto.id }}/dfd/chat?edit={{ item.id }}" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Editar
+        </a>
+        {% else %}
+        <a href="/projetos/{{ item.projeto.id }}/{{ item.tipo }}/{{ item.id }}/editar" class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Editar
+        </a>
+        {% endif %}
+        <a href="/projetos/{{ item.projeto.id }}" class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Projeto
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Card Horizontal */
+    .artefato-card-horizontal {
+        display: flex;
+        align-items: center;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md) var(--spacing-lg);
+        transition: all 0.2s ease;
+    }
+
+    .artefato-card-horizontal:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--color-primary);
+        transform: translateY(-2px);
+    }
+
+    .artefato-card-left {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        flex: 1;
+        min-width: 0;
+        padding-left: var(--spacing-md);
+        border-left: 4px solid;
+    }
+
+    .artefato-badge {
+        padding: 4px 10px;
+        border-radius: var(--radius-sm);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .artefato-projeto {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .projeto-titulo {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .projeto-descricao {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .artefato-card-center {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xl);
+        padding: 0 var(--spacing-xl);
+    }
+
+    .artefato-info-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .info-label {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-tertiary);
+    }
+
+    .info-value {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .info-value.valor {
+        font-family: var(--font-mono);
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .info-value.data {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: var(--radius-sm);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-rascunho {
+        background: #E2E8F0;
+        color: #4A5568;
+    }
+
+    .status-aprovado {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+
+    .status-pendente {
+        background: #FEFCBF;
+        color: #975A16;
+    }
+
+    .status-rejeitado {
+        background: #FED7D7;
+        color: #C53030;
+    }
+
+    .status-realizada {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+
+    /* IA Badge */
+    .ia-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        background: #EBF8FF;
+        color: #2B6CB0;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .artefato-card-right {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding-left: var(--spacing-lg);
+        border-left: 1px solid var(--border);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .artefato-card-horizontal {
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--spacing-md);
+        }
+
+        .artefato-card-left {
+            border-left: none;
+            border-top: 4px solid;
+            padding-left: 0;
+            padding-top: var(--spacing-md);
+        }
+
+        .artefato-card-center {
+            flex-wrap: wrap;
+            padding: var(--spacing-md) 0;
+            gap: var(--spacing-md);
+        }
+
+        .artefato-card-right {
+            border-left: none;
+            border-top: 1px solid var(--border);
+            padding-left: 0;
+            padding-top: var(--spacing-md);
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .artefato-card-center {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .artefato-card-right {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .artefato-card-right .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>

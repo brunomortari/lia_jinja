@@ -1,0 +1,333 @@
+/**
+ * Sistema LIA - Página: Projeto Dashboard
+ * ========================================
+ */
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    animation: slideDown 0.5s ease-out;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(51, 65, 85, 0.1);
+    color: #334155;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.page-icon:hover {
+    transform: scale(1.05) rotate(5deg);
+}
+
+.page-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2;
+}
+
+.page-title {
+    font-family: var(--font-serif, 'Playfair Display', serif);
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-subtitle {
+    font-family: var(--font-sans, 'DM Sans', sans-serif);
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 4px 0 0 0;
+}
+
+/* Fluxo Visual */
+.fluxo-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+.fluxo-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.fluxo-item.completo {
+    background: #C6F6D5;
+    color: #22543D;
+}
+
+.fluxo-item.ativo {
+    background: #EBF8FF;
+    color: #2B6CB0;
+    border: 1px solid #BEE3F8;
+}
+
+.fluxo-item.bloqueado {
+    background: #F7FAFC;
+    color: #A0AEC0;
+    border: 1px solid #EDF2F7;
+}
+
+.fluxo-numero {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+.fluxo-seta {
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+
+/* Artefatos List */
+.artefatos-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.artefato-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    transition: all 0.2s ease;
+}
+
+.artefato-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.artefato-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.artefato-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: white;
+}
+
+/* Cores Especificas dos Artefatos */
+.artefato-icon-dfd {
+    background-color: #3182CE !important;
+}
+
+.artefato-icon-riscos {
+    background-color: #E53E3E !important;
+}
+
+.artefato-icon-pesquisa_precos {
+    background-color: #319795 !important;
+}
+
+.artefato-icon-etp {
+    background-color: #38A169 !important;
+}
+
+.artefato-icon-tr {
+    background-color: #D69E2E !important;
+}
+
+.artefato-icon-edital {
+    background-color: #805AD5 !important;
+}
+
+.artefato-icon-liberado svg {
+    stroke: white;
+}
+
+.artefato-icon-bloqueado {
+    background: #EDF2F7;
+}
+
+.artefato-icon-bloqueado svg {
+    stroke: #A0AEC0;
+}
+
+.artefato-info h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.artefato-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+
+.artefato-actions {
+    padding-top: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dfd-versoes-list {
+    margin-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
+    padding-top: var(--spacing-md);
+}
+
+.dfd-versoes-list h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.dfd-versoes-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dfd-versoes-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.9rem;
+}
+
+.dfd-versoes-list li:last-child {
+    border-bottom: none;
+}
+
+.versao-numero {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 40px;
+}
+
+.versao-data {
+    color: var(--text-secondary);
+    flex: 1;
+    font-size: 0.85rem;
+}
+
+.versao-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: var(--bg-tertiary);
+    color: var(--color-primary);
+}
+
+.btn-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-icon-edit {
+    color: #38A169;
+    border-color: #C6F6D5;
+    background-color: #F0FFF4;
+}
+
+.btn-icon-edit:hover {
+    background-color: #38A169;
+    color: white;
+}
+
+.btn-icon-pdf {
+    color: #805AD5;
+    border-color: #E9D8FD;
+    background-color: #FAF5FF;
+}
+
+.btn-icon-pdf:hover {
+    background-color: #805AD5;
+    color: white;
+}
+
+.btn-icon-sei,
+.btn-icon-sei-published {
+    color: #3182CE;
+    border-color: #BEE3F8;
+    background-color: #EBF8FF;
+}
+
+.btn-icon-sei:hover {
+    background-color: #3182CE;
+    color: white;
+}
+
+.btn-icon-delete {
+    color: #E53E3E;
+    border-color: #FED7D7;
+    background-color: #FFF5F5;
+}
+
+.btn-icon-delete:hover {
+    background-color: #E53E3E;
+    color: white;
+    border-color: #E53E3E;
+}

@@ -1,0 +1,504 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}ETP - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SEÇÃO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='ETP',
+artifact_version=proxima_versao,
+subtitle='Assistente para elaboração do Estudo Técnico Preliminar (Lei 14.133/2021)'
+) }}
+
+{# Welcome Screen - Rendered via JavaScript for centered display #}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='ETP') }}
+{{ chat_input_area(placeholder='Descreva requisitos técnicos específicos ou inicie a geração...') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='ETP') }}
+
+
+
+{# Campos opcionais do ETP #}
+<div class="context-card collapsed" id="cardDadosEtp">
+    <div class="context-card-header" onclick="toggleContextCard('cardDadosEtp')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Dados Adicionais
+            <span class="context-badge" style="font-size: 0.6rem;">Preencha aqui ou via chat</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="required-fields-section"
+            style="margin-bottom: 0; margin-top: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Requisitos Adicionais</label>
+                <input type="text" class="required-field-input" id="inputRequisitos" placeholder="Normas ISO, ABNT...">
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Certificações Exigidas</label>
+                <input type="text" class="required-field-input" id="inputCertificacoes"
+                    placeholder="Ex: ISO 9001, CMMI...">
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: Adesão de Ata de Registro #}
+<div class="context-card collapsed" id="cardAdesaoAta">
+    <div class="context-card-header" onclick="toggleContextCard('cardAdesaoAta')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Adesão a Ata de Registro
+            <span class="context-badge" style="font-size: 0.6rem; background: #f59e0b;">Opcional</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div style="margin-bottom: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="checkboxAdesaoAta" onchange="toggleAdesaoAta(this.checked)">
+                <span style="font-size: 0.9rem; font-weight: 500;">Deseja aderir a uma Ata de Registro de Preços?</span>
+            </label>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 8px 0 0 26px;">
+                Pesquisar por atas já registradas (Lei 14.133/2021, Art. 37)
+            </p>
+        </div>
+
+        {# Adesão UI - Hidden by default #}
+        <div id="adesaoAtaUI" style="display: none; padding-top: 12px; border-top: 1px solid var(--border);">
+            <div class="required-field-group">
+                <label class="required-field-label">Descrição do Item</label>
+                <input type="text" class="required-field-input" id="inputDescricaoAta" 
+                    placeholder="Ex: Toner para impressora laser..." onchange="buscarAtas()">
+            </div>
+
+            <div id="atasLoading" style="display: none; padding: 12px; text-align: center; color: var(--text-secondary);">
+                <svg style="width: 20px; height: 20px; animation: spin 1s linear infinite; margin-right: 8px; display: inline-block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <path d="M12 2v6m0 4v6"></path>
+                </svg>
+                Buscando atas...
+            </div>
+
+            <div id="atasResultados" style="display: none;">
+                <div style="font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary);">Atas Encontradas:</div>
+                <div id="atasLista" style="max-height: 200px; overflow-y: auto;"></div>
+            </div>
+
+            <div id="ataSelecionada" style="display: none; padding: 12px; background: var(--bg-secondary); border-radius: 4px; border: 1px solid #10b981; margin-top: 12px;">
+                <div style="font-weight: 600; margin-bottom: 8px; color: #10b981;">✓ Ata Selecionada</div>
+                <div id="ataSelecionadaDetalhes"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{# Card: Artefatos Aprovados (DFD + PGR) #}
+<div class="context-card collapsed" id="cardArtefatos">
+    <div class="context-card-header" onclick="toggleContextCard('cardArtefatos')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Artefatos Aprovados
+            <span class="context-badge">2</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        {# DFD Sub-Section #}
+        <div class="context-item icon-item"
+            style="border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px;">
+            <div class="icon-wrapper" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                📄
+            </div>
+            <div class="item-details">
+                <div class="context-label">DFD - Documento de Formalização</div>
+                <div class="context-value">Versão {{ dfd_context.versao }} (Aprovado)</div>
+            </div>
+        </div>
+
+        {# PGR Sub-Section #}
+        {% if pgr_context %}
+        <div class="context-item icon-item">
+            <div class="icon-wrapper" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                🛡️
+            </div>
+            <div class="item-details">
+                <div class="context-label">PGR - Gerenciamento de Riscos</div>
+                <div class="context-value">Versão {{ pgr_context.versao | default('1') }} (Disponível)</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Card: Cotação #}
+{% if cotacao_context %}
+{{ context_card(
+id='cardCotacao',
+title='Pesquisa de Preços',
+icon='dollar',
+collapsed=true,
+items=[
+{'label': 'Valor Total', 'value': 'R$ ' ~ ("%.2f"|format(cotacao_context.valor_total_cotacao)|replace(".",
+",") if
+cotacao_context.valor_total_cotacao else "0,00"), 'highlight': true},
+{'label': 'Fornecedores', 'value': cotacao_context.quantidade_fornecedores|default(0) ~ ' cotados'}
+]
+) }}
+{% endif %}
+
+{# Card: Itens do PAC + Financeiro #}
+<div class="context-card collapsed" id="cardPac">
+    <div class="context-card-header" onclick="toggleContextCard('cardPac')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Itens do PAC & Financeiro
+            <span class="context-badge">{{ itens_pac|length }}</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        {# Financial Summary moved inside #}
+        <div class="context-section-title"
+            style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px;">
+            Resumo Financeiro</div>
+        <div class="context-item"
+            style="background: var(--bg-secondary); padding: 8px; border-radius: 4px; border: 1px solid var(--border);">
+            <div class="context-label">Valor Estimado Total</div>
+            <div class="context-value" style="font-weight: 600; color: var(--success);">R$ {{
+                "%.2f"|format(valor_estimado_total)|replace(".", ",") if valor_estimado_total else "0,00" }}
+            </div>
+        </div>
+
+        <div class="context-section-title"
+            style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin: 12px 0 8px 0;">
+            Itens Planejados</div>
+        {% for item in itens_pac[:3] %}
+        <div class="context-item">
+            <div class="context-label">Item #{{ item.id }}</div>
+            <div class="context-value">{{ (item.descricao or item.objeto or 'Sem descrição')[:60] }}...
+            </div>
+        </div>
+        {% endfor %}
+        {% if itens_pac|length > 3 %}
+        <div class="context-item">
+            <div class="context-value" style="color: var(--text-muted-chat); font-size: 0.8rem;">
+                + {{ itens_pac|length - 3 }} mais itens...
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{{ context_panel_end() }}
+
+{# ========== SEÇÃO WORKSPACE (GERAÇÃO) ========== #}
+{{ workspace_section(artifact_label='ETP') }}
+
+{{ chat_layout_end() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+<script>
+    console.log('[ETP Chat] Inicializando interface...');
+
+    // ========== ETP-SPECIFIC CONFIGURATION ==========
+    // ========== ETP-SPECIFIC CONFIGURATION ==========
+    const ETP_CONFIG = {
+        projetoId: {{ projeto.id|default (0) }},
+    apiBase: '/api/ia-native/etp',
+        artifactType: 'etp',
+            artifactLabel: 'ETP',
+                generateMarker: '[GERAR_ETP]',
+                    setorRequisitante: {{ (usuario.setor or "Unidade Requisitante")| tojson }},
+    responsavelRequisitante: {{ (usuario.nome or "")| tojson }},
+    valorEstimado: {{ valor_estimado_total |default (0) }},
+    // Edit mode
+    faseInicial: {{ (fase_inicial or "preparation")| tojson }},
+    editarId: {{ (etp_editar.id if etp_editar else None)| tojson }},
+    editarVersao: {{ (etp_editar.versao if etp_editar else None)| tojson }},
+    editarStatus: {{ (etp_editar.status if etp_editar else "")| tojson }},
+    // Existing data for editing
+    editarDados: {% if etp_editar %} {
+        descricao_necessidade: {{ etp_editar.descricao_necessidade | tojson |default ('""') }},
+        area_requisitante: {{ etp_editar.area_requisitante | tojson |default ('""') }},
+        requisitos_contratacao: {{ etp_editar.requisitos_contratacao | tojson |default ('""') }},
+        estimativa_quantidades: {{ etp_editar.estimativa_quantidades | tojson |default ('""') }},
+        levantamento_mercado: {{ etp_editar.levantamento_mercado | tojson |default ('""') }},
+        estimativa_valor: {{ etp_editar.estimativa_valor | tojson |default ('""') }},
+        descricao_solucao: {{ etp_editar.descricao_solucao | tojson |default ('""') }},
+        justificativa_parcelamento: {{ etp_editar.justificativa_parcelamento | tojson |default ('""') }},
+        contratacoes_correlatas: {{ etp_editar.contratacoes_correlatas | tojson |default ('""') }},
+        alinhamento_pca: {{ etp_editar.alinhamento_pca | tojson |default ('""') }},
+        resultados_pretendidos: {{ etp_editar.resultados_pretendidos | tojson |default ('""') }},
+        providencias_previas: {{ etp_editar.providencias_previas | tojson |default ('""') }},
+        impactos_ambientais: {{ etp_editar.impactos_ambientais | tojson |default ('""') }},
+        analise_riscos: {{ etp_editar.analise_riscos | tojson |default ('""') }},
+        viabilidade_contratacao: {{ etp_editar.viabilidade_contratacao | tojson |default ('""') }}
+    } {% else %} null{% endif %},
+    // Endpoints
+    saveEndpoint: '/api/ia/artefato/salvar',
+        updateEndpoint: '/api/etp/' + '{id}',
+            // Custom payload builders
+            buildSavePayload: function(finalData, status) {
+                return {
+                    projeto_id: this.projetoId,
+                    tipo_artefato: 'etp',
+                    etp_data: {
+                        descricao_necessidade: finalData.descricao_necessidade || '',
+                        area_requisitante: finalData.area_requisitante || this.setorRequisitante,
+                        requisitos_contratacao: finalData.requisitos_contratacao || '',
+                        estimativa_quantidades: finalData.estimativa_quantidades || '',
+                        levantamento_mercado: finalData.levantamento_mercado || '',
+                        estimativa_valor: finalData.estimativa_valor || '',
+                        descricao_solucao: finalData.descricao_solucao || '',
+                        justificativa_parcelamento: finalData.justificativa_parcelamento || '',
+                        contratacoes_correlatas: finalData.contratacoes_correlatas || '',
+                        alinhamento_pca: finalData.alinhamento_pca || '',
+                        resultados_pretendidos: finalData.resultados_pretendidos || '',
+                        providencias_previas: finalData.providencias_previas || '',
+                        impactos_ambientais: finalData.impactos_ambientais || '',
+                        analise_riscos: finalData.analise_riscos || '',
+                        viabilidade_contratacao: finalData.viabilidade_contratacao || ''
+                    },
+                    status: status
+                };
+            },
+    buildUpdatePayload: function(finalData, status) {
+        return {
+            descricao_necessidade: finalData.descricao_necessidade || '',
+            area_requisitante: finalData.area_requisitante || '',
+            requisitos_contratacao: finalData.requisitos_contratacao || '',
+            estimativa_quantidades: finalData.estimativa_quantidades || '',
+            levantamento_mercado: finalData.levantamento_mercado || '',
+            estimativa_valor: finalData.estimativa_valor || '',
+            descricao_solucao: finalData.descricao_solucao || '',
+            justificativa_parcelamento: finalData.justificativa_parcelamento || '',
+            contratacoes_correlatas: finalData.contratacoes_correlatas || '',
+            alinhamento_pca: finalData.alinhamento_pca || '',
+            resultados_pretendidos: finalData.resultados_pretendidos || '',
+            providencias_previas: finalData.providencias_previas || '',
+            impactos_ambientais: finalData.impactos_ambientais || '',
+            analise_riscos: finalData.analise_riscos || '',
+            viabilidade_contratacao: finalData.viabilidade_contratacao || '',
+            status: status
+        };
+    },
+    fallbackMessage: 'Sou a **LIA** e vou apoiar na criação do **ETP**. \n\nBase: DFD Aprovado. \nHá requisitos extras (normas, certificações)?'
+    };
+
+    // ========== ETP FIELDS DEFINITION (15 campos obrigatórios) ==========
+    const ETP_FIELDS = [
+        // Automatic fields (system)
+        { key: 'numero_etp', label: 'Número do ETP', rows: 1, icon: '🔢', type: 'auto', value: {{ ("ETP-" ~projeto.id |default(0) | string ~ "-" ~proxima_versao |default(1) | string) | tojson }}},
+    { key: 'area_requisitante', label: 'Área Requisitante (ETP-02)', rows: 1, icon: '🏢', type: 'auto', value: {{ (usuario.setor or "Unidade Requisitante")| tojson }} },
+    { key: 'valor_estimado_pac', label: 'Valor Estimado (PAC)', rows: 1, icon: '💰', type: 'auto', value: {{ ("R$ " ~ "%.2f" | format(valor_estimado_total |default(0)) | replace(".", ","))| tojson }} },
+
+    // AI-generated fields (editable + regenerable) - 15 campos do ETP
+    { key: 'descricao_necessidade', label: 'Descrição da Necessidade (ETP-01)', rows: 4, icon: '📋', type: 'ia' },
+    { key: 'requisitos_contratacao', label: 'Requisitos da Contratação (ETP-03)', rows: 3, icon: '✅', type: 'ia' },
+    { key: 'estimativa_quantidades', label: 'Estimativa de Quantidades (ETP-04)', rows: 3, icon: '📊', type: 'ia' },
+    { key: 'levantamento_mercado', label: 'Levantamento de Mercado (ETP-05)', rows: 4, icon: '🔍', type: 'ia' },
+    { key: 'estimativa_valor', label: 'Estimativa do Valor (ETP-06)', rows: 2, icon: '💵', type: 'ia' },
+    { key: 'descricao_solucao', label: 'Descrição da Solução (ETP-07)', rows: 4, icon: '💡', type: 'ia' },
+    { key: 'justificativa_parcelamento', label: 'Parcelamento do Objeto (ETP-08)', rows: 3, icon: '📦', type: 'ia' },
+    { key: 'contratacoes_correlatas', label: 'Contratações Correlatas (ETP-09)', rows: 2, icon: '🔗', type: 'ia' },
+    { key: 'alinhamento_pca', label: 'Alinhamento ao PCA (ETP-10)', rows: 2, icon: '🎯', type: 'ia' },
+    { key: 'resultados_pretendidos', label: 'Resultados Pretendidos (ETP-11)', rows: 3, icon: '🏆', type: 'ia' },
+    { key: 'providencias_previas', label: 'Providências Prévias (ETP-12)', rows: 2, icon: '⚙️', type: 'ia' },
+    { key: 'impactos_ambientais', label: 'Impactos Ambientais (ETP-13)', rows: 3, icon: '🌱', type: 'ia' },
+    { key: 'analise_riscos', label: 'Análise de Riscos (ETP-14)', rows: 3, icon: '⚠️', type: 'ia' },
+    { key: 'viabilidade_contratacao', label: 'Viabilidade da Contratação (ETP-15)', rows: 3, icon: '✓', type: 'ia' }
+    ];
+
+    // ========== INITIALIZATION ==========
+    
+    // Adesão de Ata - Functions
+    function toggleAdesaoAta(checked) {
+        const adesaoUI = document.getElementById('adesaoAtaUI');
+        if (checked) {
+            adesaoUI.style.display = 'block';
+            // Store flag in ETP model
+            fetch(`/api/etp/{{ projeto.id }}/adesao-ata/habilitar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ habilitar: true })
+            }).catch(err => console.error('Erro ao habilitar adesão:', err));
+        } else {
+            adesaoUI.style.display = 'none';
+            fetch(`/api/etp/{{ projeto.id }}/adesao-ata/habilitar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ habilitar: false })
+            }).catch(err => console.error('Erro ao desabilitar adesão:', err));
+        }
+    }
+
+    function buscarAtas() {
+        const descricao = document.getElementById('inputDescricaoAta').value;
+        if (!descricao.trim()) {
+            alert('Digite uma descrição do item para buscar atas');
+            return;
+        }
+
+        document.getElementById('atasLoading').style.display = 'block';
+        document.getElementById('atasResultados').style.display = 'none';
+
+        fetch(`/api/etp/{{ projeto.id }}/atas-disponiveis?descricao=${encodeURIComponent(descricao)}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('atasLoading').style.display = 'none';
+            
+            if (data.atas && data.atas.length > 0) {
+                mostrarAtas(data.atas);
+            } else {
+                alert('Nenhuma ata encontrada para essa descrição');
+            }
+        })
+        .catch(err => {
+            document.getElementById('atasLoading').style.display = 'none';
+            console.error('Erro ao buscar atas:', err);
+            alert('Erro ao buscar atas. Verificar console.');
+        });
+    }
+
+    function mostrarAtas(atas) {
+        const lista = document.getElementById('atasLista');
+        lista.innerHTML = '';
+        
+        atas.forEach(ata => {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 8px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 4px; cursor: pointer; transition: background 0.2s;';
+            item.innerHTML = `
+                <div style="font-weight: 500; font-size: 0.9rem;">${ata.numero}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">${ata.descricao}</div>
+                <div style="font-size: 0.75rem; color: #10b981; margin-top: 4px;">R$ ${parseFloat(ata.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+            `;
+            item.onmouseover = () => item.style.background = 'var(--bg-secondary)';
+            item.onmouseout = () => item.style.background = 'transparent';
+            item.onclick = () => selecionarAta(ata);
+            lista.appendChild(item);
+        });
+
+        document.getElementById('atasResultados').style.display = 'block';
+    }
+
+    function selecionarAta(ata) {
+        fetch(`/api/etp/{{ projeto.id }}/selecionar-ata`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                ata_id: ata.id,
+                ata_dados: ata
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                mostrarAtaSelecionada(ata);
+                // Auto-activate deep research
+                console.log('Ata selecionada - Deep Research será ativado automaticamente');
+            }
+        })
+        .catch(err => console.error('Erro ao selecionar ata:', err));
+    }
+
+    function mostrarAtaSelecionada(ata) {
+        const ataSelecionadaUI = document.getElementById('ataSelecionada');
+        const detalhes = document.getElementById('ataSelecionadaDetalhes');
+        
+        detalhes.innerHTML = `
+            <div style="font-size: 0.85rem;"><strong>Nº:</strong> ${ata.numero}</div>
+            <div style="font-size: 0.85rem;"><strong>Descrição:</strong> ${ata.descricao}</div>
+            <div style="font-size: 0.85rem;"><strong>Valor:</strong> R$ ${parseFloat(ata.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+            <div style="font-size: 0.85rem;"><strong>Fornecedor:</strong> ${ata.fornecedor || 'N/A'}</div>
+            <button onclick="desmarcarAta()" style="margin-top: 8px; padding: 4px 8px; font-size: 0.8rem; background: #ef4444; color: white; border: none; border-radius: 3px; cursor: pointer;">Desmarcar</button>
+        `;
+        
+        ataSelecionadaUI.style.display = 'block';
+        document.getElementById('atasResultados').style.display = 'none';
+        document.getElementById('inputDescricaoAta').disabled = true;
+    }
+
+    function desmarcarAta() {
+        document.getElementById('ataSelecionada').style.display = 'none';
+        document.getElementById('atasResultados').style.display = 'none';
+        document.getElementById('inputDescricaoAta').value = '';
+        document.getElementById('inputDescricaoAta').disabled = false;
+        
+        fetch(`/api/etp/{{ projeto.id }}/selecionar-ata`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        }).catch(err => console.error('Erro ao desmarcar ata:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(ETP_CONFIG, ETP_FIELDS);
+    });
+</script>
+{% endblock %}

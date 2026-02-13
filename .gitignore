@@ -1,0 +1,33 @@
+# Python / Bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.pytest_cache
+.claude/
+.github/
+
+
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+
+# Variáveis de Ambiente (SEGURANÇA: Nunca comite isso)
+.env
+
+# Banco de Dados Local (SQLite)
+*.db
+*.sqlite3
+
+# IDEs e Editores
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1009 @@
+/**
+ * Sistema LIA - Página: Login
+ * ============================
+ * Design novo - paleta pastel/calma
+ */
+
+/* ========== RESET & BASE ========== */
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* ========== WRAPPER ========== */
+
+.login-wrapper {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+}
+
+/* ========== PAINEL VISUAL (ESQUERDO) ========== */
+
+.visual-panel {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem;
+    overflow: hidden;
+}
+
+/* Formas orgânicas de fundo */
+.organic-shape {
+    position: absolute;
+    border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+    opacity: 0.1;
+    animation: morphShape 25s ease-in-out infinite;
+    filter: blur(40px);
+}
+
+.organic-shape:nth-child(1) {
+    width: 700px;
+    height: 700px;
+    background: var(--color-accent);
+    top: -30%;
+    left: -30%;
+    animation-delay: 0s;
+}
+
+.organic-shape:nth-child(2) {
+    width: 500px;
+    height: 500px;
+    background: var(--color-soft);
+    bottom: -20%;
+    right: -20%;
+    animation-delay: -5s;
+    border-radius: 40% 60% 55% 45% / 55% 45% 55% 45%;
+}
+
+@keyframes morphShape {
+
+    0%,
+    100% {
+        border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        border-radius: 40% 60% 60% 40% / 60% 40% 50% 50%;
+        transform: rotate(180deg) scale(1.1);
+    }
+}
+
+/* ========== ANIMAÇÃO SVG DO DOCUMENTO ========== */
+
+.scene-container {
+    width: 100%;
+    max-width: 600px;
+    height: 450px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lia-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+/* Documento - Sistema de Camadas */
+.doc-paper {
+    fill: #ffffff;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+    transform-origin: center;
+    animation: paperFloat 6s ease-in-out infinite;
+}
+
+.doc-layer {
+    transform-origin: center;
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.doc-layer-1 {
+    animation: docCycle1 24s ease-in-out infinite;
+}
+
+.doc-layer-2 {
+    animation: docCycle2 24s ease-in-out infinite;
+}
+
+.doc-layer-3 {
+    animation: docCycle3 24s ease-in-out infinite;
+}
+
+@keyframes docCycle1 {
+
+    0%,
+    30% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        z-index: 3;
+        filter: brightness(1) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+    }
+
+    32% {
+        opacity: 0.7;
+        transform: translateY(-15px) translateX(10px) rotate(2deg) scale(0.95);
+    }
+
+    35%,
+    95% {
+        opacity: 0;
+        transform: translateY(-50px) translateX(30px) rotate(5deg) scale(0.8);
+        z-index: 1;
+        filter: brightness(0.7) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    }
+
+    97% {
+        opacity: 0.5;
+        transform: translateY(20px) translateX(-10px) rotate(-3deg) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        z-index: 3;
+        filter: brightness(1) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+    }
+}
+
+@keyframes docCycle2 {
+
+    0%,
+    28% {
+        opacity: 0;
+        transform: translateY(20px) translateX(-20px) rotate(-4deg) scale(0.85);
+        z-index: 1;
+        filter: brightness(0.7) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    }
+
+    30% {
+        opacity: 0.5;
+        transform: translateY(10px) translateX(-10px) rotate(-2deg) scale(0.92);
+    }
+
+    33%,
+    63% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        z-index: 3;
+        filter: brightness(1) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+    }
+
+    65% {
+        opacity: 0.7;
+        transform: translateY(-15px) translateX(10px) rotate(2deg) scale(0.95);
+    }
+
+    68%,
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) translateX(25px) rotate(4deg) scale(0.8);
+        z-index: 1;
+        filter: brightness(0.7) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    }
+}
+
+@keyframes docCycle3 {
+
+    0%,
+    61% {
+        opacity: 0;
+        transform: translateY(20px) translateX(20px) rotate(4deg) scale(0.85);
+        z-index: 1;
+        filter: brightness(0.7) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    }
+
+    63% {
+        opacity: 0.5;
+        transform: translateY(10px) translateX(10px) rotate(2deg) scale(0.92);
+    }
+
+    66%,
+    96% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        z-index: 3;
+        filter: brightness(1) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+    }
+
+    98% {
+        opacity: 0.7;
+        transform: translateY(-15px) translateX(-10px) rotate(-2deg) scale(0.95);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px) translateX(-20px) rotate(-4deg) scale(0.85);
+        z-index: 1;
+        filter: brightness(0.7) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+    }
+}
+
+.doc-paper-back {
+    fill: var(--color-light);
+    transform-origin: center;
+    opacity: 0.5;
+    animation: paperFloatBack 6s ease-in-out infinite;
+    animation-delay: 0.2s;
+}
+
+@keyframes paperFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(0.5deg);
+    }
+}
+
+@keyframes paperFloatBack {
+
+    0%,
+    100% {
+        transform: translateY(5px) rotate(-2deg) scale(0.95);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(-1.5deg) scale(0.95);
+    }
+}
+
+/* Linhas de Texto */
+.text-line {
+    fill: none;
+    stroke: var(--color-medium-dark);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0.4;
+}
+
+.word-block {
+    fill: var(--color-medium-dark);
+    opacity: 0;
+    animation: fadeInWord 0.5s ease-out forwards;
+}
+
+@keyframes fadeInWord {
+    to {
+        opacity: 0.6;
+    }
+}
+
+.writing-anim {
+    animation: writeLine 4s ease-in-out infinite;
+}
+
+@keyframes writeLine {
+    0% {
+        stroke-dashoffset: 100;
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    45% {
+        stroke-dashoffset: 0;
+    }
+
+    85% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 0;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 0;
+    }
+}
+
+/* Delays sequenciais */
+.delay-1 {
+    animation-delay: 0.3s;
+}
+
+.delay-2 {
+    animation-delay: 0.6s;
+}
+
+.delay-3 {
+    animation-delay: 0.9s;
+}
+
+.delay-4 {
+    animation-delay: 1.2s;
+}
+
+.delay-5 {
+    animation-delay: 1.5s;
+}
+
+.delay-6 {
+    animation-delay: 1.8s;
+}
+
+.delay-7 {
+    animation-delay: 2.1s;
+}
+
+.delay-8 {
+    animation-delay: 2.4s;
+}
+
+.delay-9 {
+    animation-delay: 2.7s;
+}
+
+.delay-10 {
+    animation-delay: 3.0s;
+}
+
+/* Cursor IA */
+.ai-cursor {
+    fill: var(--color-accent);
+    filter: drop-shadow(0 0 10px var(--color-accent));
+    animation: cursorWrite 4s ease-in-out infinite;
+}
+
+@keyframes cursorWrite {
+
+    0%,
+    10%,
+    95%,
+    100% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    20% {
+        transform: translate(160px, 40px);
+    }
+
+    30% {
+        transform: translate(160px, 60px);
+    }
+
+    40% {
+        transform: translate(160px, 90px);
+    }
+
+    50% {
+        transform: translate(160px, 110px);
+    }
+
+    60% {
+        transform: translate(160px, 130px);
+    }
+
+    70% {
+        transform: translate(160px, 150px);
+    }
+
+    85% {
+        opacity: 1;
+    }
+}
+
+/* Partículas de IA */
+.ai-particle {
+    fill: var(--color-accent);
+    opacity: 0;
+    animation: particleFloat 3s ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+
+    0%,
+    100% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0);
+    }
+
+    20% {
+        opacity: 0.8;
+        transform: translate(0, -10px) scale(1);
+    }
+
+    80% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(0, -30px) scale(0.5);
+    }
+}
+
+/* Ícones de licitação */
+.icon-element {
+    opacity: 0;
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.95);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+/* Nós de conexão (rede neural) */
+.neural-node {
+    fill: var(--color-accent);
+    opacity: 0.4;
+    animation: pulseNode 3s infinite alternate;
+}
+
+.connection-line {
+    stroke: var(--color-soft);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 5;
+    opacity: 0.3;
+    animation: dashMove 20s linear infinite;
+}
+
+@keyframes dashMove {
+    to {
+        stroke-dashoffset: -100;
+    }
+}
+
+@keyframes pulseNode {
+    from {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    to {
+        transform: scale(1.3);
+        opacity: 0.7;
+    }
+}
+
+/* Badges de status */
+.status-badge {
+    opacity: 0;
+    animation: badgeFadeIn 1s ease-out forwards;
+}
+
+@keyframes badgeFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Indicadores de documento ativo */
+.doc-indicator {
+    fill: var(--color-soft);
+    opacity: 0.3;
+    transition: all 0.4s ease;
+}
+
+.doc-indicator-1 {
+    animation: indicatorActive1 15s ease-in-out infinite;
+}
+
+.doc-indicator-2 {
+    animation: indicatorActive2 15s ease-in-out infinite;
+}
+
+.doc-indicator-3 {
+    animation: indicatorActive3 15s ease-in-out infinite;
+}
+
+@keyframes indicatorActive1 {
+
+    0%,
+    30% {
+        opacity: 1;
+        fill: var(--color-accent);
+        transform: scale(1.3);
+    }
+
+    33%,
+    100% {
+        opacity: 0.3;
+        fill: var(--color-soft);
+        transform: scale(1);
+    }
+}
+
+@keyframes indicatorActive2 {
+
+    0%,
+    30% {
+        opacity: 0.3;
+        fill: var(--color-soft);
+        transform: scale(1);
+    }
+
+    33%,
+    63% {
+        opacity: 1;
+        fill: var(--color-success);
+        transform: scale(1.3);
+    }
+
+    66%,
+    100% {
+        opacity: 0.3;
+        fill: var(--color-soft);
+        transform: scale(1);
+    }
+}
+
+@keyframes indicatorActive3 {
+
+    0%,
+    63% {
+        opacity: 0.3;
+        fill: var(--color-soft);
+        transform: scale(1);
+    }
+
+    66%,
+    96% {
+        opacity: 1;
+        fill: var(--color-warning);
+        transform: scale(1.3);
+    }
+
+    99%,
+    100% {
+        opacity: 0.3;
+        fill: var(--color-soft);
+        transform: scale(1);
+    }
+}
+
+/* Efeito de transição visual (flash) */
+.transition-flash {
+    animation: flashEffect 15s ease-in-out infinite;
+}
+
+@keyframes flashEffect {
+
+    0%,
+    31%,
+    33%,
+    64%,
+    66%,
+    97%,
+    100% {
+        opacity: 0;
+    }
+
+    32%,
+    65%,
+    98% {
+        opacity: 0.15;
+    }
+}
+
+/* ========== BRANDING ========== */
+
+.brand-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.brand-name {
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.brand-tagline {
+    font-size: var(--font-size-sm);
+    color: var(--color-soft);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+/* ========== PAINEL DE FORMULÁRIO (DIREITO) ========== */
+
+.form-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 3rem;
+    background: var(--color-bg-light);
+    position: relative;
+}
+
+.form-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(var(--color-light) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-light) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    opacity: 0;
+    animation: formEntrance 0.8s ease-out forwards;
+    animation-delay: 0.2s;
+}
+
+@keyframes formEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== FORMULÁRIO HEADER ========== */
+
+.form-header {
+    margin-bottom: 2rem;
+}
+
+.form-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+}
+
+.logo-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--color-light);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-medium);
+}
+
+.logo-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.logo-text {
+    font-family: var(--font-serif);
+    font-size: var(--font-size-2xl);
+    color: var(--color-darkest);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.form-title {
+    font-family: var(--font-serif);
+    font-size: var(--font-size-3xl);
+    color: var(--color-darkest);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-subtitle {
+    color: var(--color-medium);
+    font-size: var(--font-size-sm);
+}
+
+/* ========== INPUTS DO LOGIN ========== */
+
+.login-wrapper .input-group {
+    margin-bottom: 1.5rem;
+}
+
+.login-wrapper .input-label {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-medium);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.login-wrapper .input-wrapper {
+    position: relative;
+}
+
+.login-wrapper .input-field {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.8rem;
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-light);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-dark);
+    transition: var(--transition);
+    outline: none;
+}
+
+.login-wrapper .input-field:focus {
+    background: #fff;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px var(--color-accent-glow);
+}
+
+.login-wrapper .input-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    stroke: var(--color-soft);
+    transition: var(--transition);
+}
+
+.login-wrapper .input-field:focus~.input-icon {
+    stroke: var(--color-accent);
+}
+
+/* ========== PASSWORD TOGGLE ========== */
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: var(--color-soft);
+}
+
+.password-toggle:hover {
+    color: var(--color-medium);
+}
+
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ========== BOTÃO SUBMIT ========== */
+
+.login-wrapper .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-dark);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.login-wrapper .submit-btn:hover {
+    background: var(--color-darkest);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+}
+
+.login-wrapper .submit-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ========== GOOGLE BUTTON ========== */
+
+.social-login {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid var(--color-light);
+    border-radius: 0.75rem;
+    color: var(--color-dark);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.google-btn:hover:not(.disabled) {
+    background-color: var(--color-bg-light);
+    border-color: var(--color-soft);
+    transform: translateY(-1px);
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Google Button desabilitado */
+.google-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: var(--color-gray-100);
+    color: var(--color-soft);
+    border-color: var(--color-light);
+}
+
+.google-btn.disabled .google-icon path {
+    fill: var(--color-soft) !important;
+}
+
+/* ========== DIVIDERS ========== */
+
+.divider-text {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--color-soft);
+    font-size: var(--font-size-sm);
+    margin: 1.5rem 0;
+}
+
+.divider-text::before,
+.divider-text::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--color-light);
+}
+
+.divider-text::before {
+    margin-right: 0.5em;
+}
+
+.divider-text::after {
+    margin-left: 0.5em;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 2rem 0;
+    color: var(--color-soft);
+    font-size: var(--font-size-xs);
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(148, 163, 184, 0.3);
+}
+
+.divider span {
+    padding: 0 1rem;
+}
+
+/* ========== SECURITY BADGE ========== */
+
+.security-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--color-medium);
+    font-size: var(--font-size-xs);
+}
+
+.security-badge svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--color-soft);
+}
+
+/* ========== FOOTER LEGAL ========== */
+
+.footer-legal {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: var(--font-size-xs);
+    color: var(--color-soft);
+}
+
+/* ========== RESPONSIVIDADE ========== */
+
+@media (max-width: 900px) {
+    .login-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .visual-panel {
+        min-height: 40vh;
+        padding: 2rem;
+    }
+
+    .scene-container {
+        height: 300px;
+    }
+
+    .brand-name {
+        font-size: 3rem;
+    }
+
+    .form-panel {
+        padding: 2rem 1.5rem;
+    }
+
+    .form-container {
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.9);
+    }
+}

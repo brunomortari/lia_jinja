@@ -1,0 +1,125 @@
+{% extends "app.html" %}
+
+{% block content %}
+<div class="hub-container">
+    <!-- Greeting -->
+    <section class="greeting-section">
+        <h1 class="greeting-title">Bom dia, {{ usuario.nome.split()[0] }}.</h1>
+        <p class="greeting-subtitle">O que você quer fazer hoje?</p>
+    </section>
+
+    <!-- Main Grid -->
+    <div class="hub-grid">
+        <!-- Center Column: Actions & Activity -->
+        <div class="center-column">
+            <div class="dashboard-row">
+                <!-- Actions -->
+                <div class="dashboard-block">
+                    <div class="section-title">Início Rápido</div>
+                    <div class="actions-list">
+                        <a href="/pac" class="action-card-small">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"
+                                    height="20">
+                                    <path d="M12 5v14M5 12h14" />
+                                </svg>
+                            </div>
+                            <span>Novo Projeto</span>
+                        </a>
+
+                        <a href="/artefatos" class="action-card-small">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"
+                                    height="20">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <span>Artefatos</span>
+                        </a>
+
+                        <a href="/pac" class="action-card-small">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"
+                                    height="20">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                            <span>PAC 2025</span>
+                        </a>
+
+                        <a href="/projetos" class="action-card-small">
+                            <div class="action-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"
+                                    height="20">
+                                    <path
+                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <span>Projetos</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Activities -->
+                <div class="dashboard-block activity-block">
+                    <div class="section-title">Atividade Recente</div>
+                    <div class="activity-list compact">
+                        {% if atividades_recentes %}
+                        {% for atividade in atividades_recentes %}
+                        <div class="activity-item">
+                            <div class="activity-dot" style="background: {{ atividade.cor }};"></div>
+                            <div class="activity-details">
+                                <div class="activity-header">
+                                    <span class="activity-type" style="color: {{ atividade.cor }};">{{ atividade.tipo
+                                        }}</span>
+                                    <span class="activity-time">{{ atividade.data_fmt }}</span>
+                                </div>
+                                <div class="activity-desc">
+                                    {{ atividade.acao }} em <strong>{{ atividade.projeto }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="activity-item">
+                            <div class="activity-text-only">Nenhuma atividade recente.</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: News (Full Height) -->
+        <div class="right-column">
+            <div class="section-title">Últimas Notícias</div>
+            <div class="news-list-container">
+                {% if noticias %}
+                {% for noticia in noticias %}
+                <a href="{{ noticia.link }}" target="_blank" class="news-card-featured">
+                    <div class="news-meta">{{ noticia.data }}</div>
+                    <h4 class="news-title">{{ noticia.titulo }}</h4>
+                </a>
+                {% endfor %}
+                {% else %}
+                <div class="news-placeholder">Carregando notícias...</div>
+                {% endif %}
+
+                <a href="https://www.google.com/search?q=noticias+licitacao+brasil" target="_blank"
+                    class="news-more-link">
+                    Ver mais no Google →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/home.css') }}">
+{% endblock %}

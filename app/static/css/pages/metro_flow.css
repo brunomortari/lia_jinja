@@ -1,0 +1,623 @@
+/**
+ * Sistema LIA - Metro Flow Visual
+ * ================================
+ * Visual estilo linha de metrô para fluxo de artefatos
+ * Inspirado no design SVG animado do login
+ * 
+ * 4 Linhas (ramais):
+ * - Principal (Licitação) - roxo #805AD5
+ * - Adesão a Ata - verde #38A169  
+ * - Dispensa - laranja #DD6B20
+ * - Contratação Direta - rosa #D53F8C
+ * 
+ * Tronco compartilhado: azul #3182CE (DFD → ETP)
+ */
+
+/* ========== CONTAINER PRINCIPAL ========== */
+
+.metro-map-container {
+    background: var(--background-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2xl) var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    box-shadow: var(--shadow-lg);
+}
+
+.metro-map-wrapper {
+    min-width: 1200px;
+    height: 600px;
+    position: relative;
+    margin: 0 auto;
+}
+
+/* ========== SVG TRILHOS E LINHAS ========== */
+
+.metro-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.metro-track {
+    fill: none;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.25;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.metro-track.active {
+    opacity: 1;
+    stroke-width: 8;
+    filter: drop-shadow(0 0 12px currentColor);
+    animation: trackPulse 3s ease-in-out infinite;
+}
+
+@keyframes trackPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 8px currentColor);
+        opacity: 1;
+    }
+    50% {
+        filter: drop-shadow(0 0 20px currentColor);
+        opacity: 0.95;
+    }
+}
+
+/* Cores das linhas (via stroke) */
+.track-tronco { stroke: var(--color-info); }
+.track-principal { stroke: #805AD5; }
+.track-adesao { stroke: var(--color-success); }
+.track-dispensa { stroke: var(--color-warning); }
+.track-direta { stroke: #D53F8C; }
+
+/* Trilho duplo (efeito metrô) */
+.metro-track-double {
+    fill: none;
+    stroke: var(--text-tertiary);
+    stroke-width: 2;
+    opacity: 0.15;
+    stroke-dasharray: none;
+}
+
+/* ========== ESTAÇÕES ========== */
+
+.metro-station {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s var(--transition);
+}
+
+.station-node {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 4px solid;
+    background: var(--background-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.station-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 100px;
+    line-height: 1.3;
+    transition: color 0.3s;
+}
+
+.station-sublabel {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* Estados das estações */
+
+/* COMPLETED - preenchida, check icon */
+.metro-station.completed .station-node {
+    border-color: var(--color-success);
+    background: var(--color-success);
+    color: white;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.metro-station.completed .station-node::before {
+    content: '✓';
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.metro-station.completed .station-label {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+/* ACTIVE - pulsando, anel animado */
+.metro-station.active .station-node {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    animation: stationPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+}
+
+@keyframes stationPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7), 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(99, 102, 241, 0), 0 8px 24px rgba(99, 102, 241, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+}
+
+.metro-station.active .station-label {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+/* LOCKED - cinza, cadeado */
+.metro-station.locked .station-node {
+    border-color: var(--border-color);
+    background: var(--background-secondary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.metro-station.locked .station-node::before {
+    content: '🔒';
+    font-size: 18px;
+    filter: grayscale(1);
+    opacity: 0.6;
+}
+
+.metro-station.locked .station-label {
+    color: var(--text-tertiary);
+    opacity: 0.6;
+}
+
+/* HIDDEN - linha não ativa (apenas parcialmente visível) */
+.metro-station.hidden {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.metro-station.hidden .station-node {
+    border-color: var(--border-color);
+    background: transparent;
+    color: var(--text-tertiary);
+}
+
+/* Hover states */
+.metro-station:not(.locked):hover .station-node {
+    transform: scale(1.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.metro-station:not(.locked):hover .station-label {
+    color: var(--color-accent);
+}
+
+/* ========== ÍCONES DAS ESTAÇÕES POR TIPO ========== */
+
+.station-node[data-type="dfd"]::after { content: '📋'; }
+.station-node[data-type="etp"]::after { content: '📝'; }
+.station-node[data-type="pp"]::after { content: '💰'; }
+.station-node[data-type="pgr"]::after { content: '⚠️'; }
+.station-node[data-type="tr"]::after { content: '📄'; }
+.station-node[data-type="edital"]::after { content: '📜'; }
+.station-node[data-type="rdve"]::after { content: '🔍'; }
+.station-node[data-type="jva"]::after { content: '⚖️'; }
+.station-node[data-type="tafo"]::after { content: '✅'; }
+.station-node[data-type="trs"]::after { content: '📌'; }
+.station-node[data-type="ade"]::after { content: '⚡'; }
+.station-node[data-type="jpef"]::after { content: '📊'; }
+.station-node[data-type="ce"]::after { content: '✍️'; }
+.station-node[data-type="chk"]::after { content: '✔️'; }
+.station-node[data-type="minuta_contrato"]::after { content: '📑'; }
+.station-node[data-type="aviso_publicidade_direta"]::after { content: '📢'; }
+.station-node[data-type="justificativa_fornecedor_escolhido"]::after { content: '🎯'; }
+
+/* Quando completed ou active, esconde ícone para mostrar checkmark ou sigla */
+.metro-station.completed .station-node::after,
+.metro-station.active .station-node::after {
+    display: none;
+}
+
+/* ========== NÓ DE DECISÃO (após ETP) ========== */
+
+.decision-node {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    z-index: 15;
+}
+
+.decision-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 6px dashed var(--color-accent);
+    background: var(--background-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.4s;
+    animation: decisionPulse 3s ease-in-out infinite;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+@keyframes decisionPulse {
+    0%, 100% {
+        transform: scale(1);
+        border-color: var(--color-accent);
+    }
+    50% {
+        transform: scale(1.05);
+        border-color: var(--color-warning);
+    }
+}
+
+.decision-circle .icon {
+    font-size: 32px;
+}
+
+.decision-circle .label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.decision-node.resolved .decision-circle {
+    border-style: solid;
+    border-color: var(--color-success);
+    animation: none;
+}
+
+.decision-node.resolved .decision-circle .icon::before {
+    content: '✓';
+    color: var(--color-success);
+}
+
+/* ========== PORTARIA DESIGNAÇÃO (elemento lateral sutil) ========== */
+
+.portaria-sidecar {
+    position: absolute;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.portaria-sidecar:hover {
+    opacity: 1;
+}
+
+.portaria-connector {
+    width: 40px;
+    height: 2px;
+    background: var(--border-color);
+    position: relative;
+}
+
+.portaria-connector::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 4px 0 4px 6px;
+    border-color: transparent transparent transparent var(--border-color);
+}
+
+.portaria-badge {
+    background: var(--background-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.portaria-badge:hover {
+    background: var(--background-primary);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+}
+
+.portaria-badge .icon {
+    margin-right: 4px;
+}
+
+/* ========== LEGENDA ========== */
+
+.metro-legend {
+    display: flex;
+    gap: var(--spacing-xl);
+    justify-content: center;
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legend-line {
+    width: 40px;
+    height: 6px;
+    border-radius: 3px;
+}
+
+.legend-line.tronco { background: var(--color-info); }
+.legend-line.principal { background: #805AD5; }
+.legend-line.adesao { background: var(--color-success); }
+.legend-line.dispensa { background: var(--color-warning); }
+.legend-line.direta { background: #D53F8C; }
+
+.legend-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.legend-dot.completed {
+    background: var(--color-success);
+    border-color: var(--color-success);
+    color: white;
+}
+
+.legend-dot.completed::before {
+    content: '✓';
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.legend-dot.active {
+    border-color: var(--color-accent);
+    background: var(--background-primary);
+}
+
+.legend-dot.locked {
+    border-color: var(--border-color);
+    background: var(--background-secondary);
+    opacity: 0.5;
+}
+
+/* ========== TOOLTIPS ========== */
+
+.station-tooltip {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background-dark, #1e293b);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.station-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 6px 0 6px;
+    border-color: var(--background-dark, #1e293b) transparent transparent transparent;
+}
+
+.metro-station:hover .station-tooltip {
+    opacity: 1;
+}
+
+.tooltip-title {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.tooltip-status {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+/* ========== DIVISORES DE FASE ========== */
+
+.phase-divider {
+    margin: var(--spacing-2xl) 0;
+    padding: var(--spacing-lg) 0;
+    border-top: 2px solid var(--border-color);
+    position: relative;
+}
+
+.phase-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: inline-block;
+    background: var(--background-primary);
+    padding-right: var(--spacing-md);
+    position: relative;
+    top: -2px;
+}
+
+.phase-line {
+    display: inline-block;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-accent), transparent);
+    margin-left: var(--spacing-sm);
+    vertical-align: middle;
+}
+
+/* ========== RESPONSIVO ========== */
+
+@media (max-width: 1400px) {
+    .metro-map-wrapper {
+        min-width: 1000px;
+        height: 500px;
+    }
+    
+    .station-node {
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+    }
+    
+    .station-label {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .metro-map-container {
+        padding: var(--spacing-lg);
+    }
+    
+    .metro-legend {
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .metro-map-wrapper {
+        min-width: 800px;
+        height: 400px;
+    }
+    
+    .metro-legend {
+        font-size: 11px;
+    }
+    
+    .legend-line {
+        width: 30px;
+        height: 4px;
+    }
+}
+
+/* ========== ANIMAÇÕES ESPECIAIS ========== */
+
+/* Partículas fluindo pela linha ativa */
+@keyframes particleFlow {
+    0% {
+        offset-distance: 0%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        offset-distance: 100%;
+        opacity: 0;
+    }
+}
+
+.flow-particle {
+    offset-path: path('M 100 300 L 300 300 L 500 200');
+    animation: particleFlow 4s linear infinite;
+}
+
+/* Brilho suave nas estações completed */
+.metro-station.completed .station-node::before {
+    animation: checkGlow 2s ease-in-out infinite;
+}
+
+@keyframes checkGlow {
+    0%, 100% {
+        text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+    }
+}
+
+/* Efeito de "desbloqueio" quando estação fica ativa */
+@keyframes unlockStation {
+    0% {
+        transform: scale(0.8) rotate(-10deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.metro-station.just-unlocked {
+    animation: unlockStation 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

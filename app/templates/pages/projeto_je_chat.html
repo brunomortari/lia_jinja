@@ -1,0 +1,253 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}Justificativa de Excepcionalidade - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SEÇÃO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='Justificativa de Excepcionalidade',
+artifact_version=1,
+subtitle='Assistente para elaboração de Justificativa de Excepcionalidade conforme Lei 14.133/2021'
+) }}
+
+{# Welcome Screen - Rendered via JavaScript for centered display #}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='Justificativa de Excepcionalidade') }}
+{{ chat_input_area(placeholder='Descreva o motivo da contratação excepcional...') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='Justificativa de Excepcionalidade') }}
+
+{# Campos obrigatórios da JE - Acordeão colapsável #}
+<div class="context-card collapsed" id="cardDadosJE">
+    <div class="context-card-header" onclick="toggleContextCard('cardDadosJE')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Dados da Justificativa
+            <span class="context-badge" style="font-size: 0.6rem;">Preencha aqui ou via chat</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="required-fields-section"
+            style="margin-bottom: 0; margin-top: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Tipo de Contratação</label>
+                <select class="required-field-input" id="inputTipoContratacao">
+                    <option value="">Selecione...</option>
+                    <option value="Serviços">Serviços</option>
+                    <option value="Fornecimento">Fornecimento</option>
+                    <option value="Tecnologia da Informação">Tecnologia da Informação</option>
+                    <option value="Obras">Obras</option>
+                </select>
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Frequência</label>
+                <select class="required-field-input" id="inputFrequencia">
+                    <option value="">Selecione...</option>
+                    <option value="ANUAL">Anual</option>
+                    <option value="MENSAL">Mensal</option>
+                    <option value="Não se Aplica">Não se Aplica</option>
+                </select>
+            </div>
+
+            <div class="required-field-group" style="margin-bottom: 0;">
+                <label class="required-field-label">Prioridade (1-5)</label>
+                <input type="number" class="required-field-input" id="inputPrioridade" min="1" max="5" placeholder="1 a 5">
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: Projeto #}
+{{ context_card(
+id='cardProjeto',
+title='Projeto',
+icon='folder',
+collapsed=true,
+items=[
+{'label': 'Título', 'value': projeto.titulo},
+{'label': 'Requisitante', 'value': usuario.nome},
+{'label': 'Setor', 'value': usuario.setor or 'Não informado'}
+]
+) }}
+
+{# Card: Informações Legais #}
+<div class="context-card collapsed" id="cardLegais">
+    <div class="context-card-header" onclick="toggleContextCard('cardLegais')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
+                <text x="12" y="16" text-anchor="middle" font-size="10" fill="currentColor">ⓘ</text>
+            </svg>
+            Marco Legal
+            <span class="context-badge" style="font-size: 0.6rem;">Lei 14.133/2021</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <p style="font-size: 0.85rem; line-height: 1.4; color: #666;">
+            A <strong>Justificativa de Excepcionalidade</strong> permite contratações fora do PAC (Plano Anual de Contratações) em situações que atendam aos critérios da Lei 14.133/2021.
+        </p>
+        <p style="font-size: 0.85rem; line-height: 1.4; color: #666; margin-top: 0.5rem;">
+            Após aprovação, será criado um novo PAC com fase "EXCEPCIONAL".
+        </p>
+    </div>
+</div>
+
+{{ context_panel_end() }}
+
+{# ========== SEÇÃO WORKSPACE (GERAÇÃO) ========== #}
+{{ workspace_section(artifact_label='Justificativa de Excepcionalidade') }}
+
+{{ chat_layout_end() }}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+
+<script>
+    // ========== JE CONFIG ==========
+    const JE_CONFIG = {
+        projetoId: {{ projeto.id }},
+        apiBase: '/api/ia-native/justificativa_excepcionalidade',
+        artifactType: 'justificativa_excepcionalidade',
+        artifactLabel: 'Justificativa de Excepcionalidade',
+        generateMarker: '[GERAR_JE]',
+        
+        // Dados pré-preenchidos
+        projetoTitulo: {{ projeto.titulo | tojson }},
+        setorRequisitante: {{ (usuario.setor or "Unidade Requisitante") | tojson }},
+        responsavelRequisitante: {{ (usuario.nome or "") | tojson }},
+        
+        // Mode
+        faseInicial: 'preparation',
+        editarId: null,
+        je_editar: {% if projeto.itens_pac %}
+            {
+                id: 1,
+                tipo_contratacao: {{ (projeto.itens_pac[0].tipo_contratacao or "") | tojson if projeto.itens_pac else 'null' }},
+                frequencia: {{ (projeto.itens_pac[0].frequencia or "") | tojson if projeto.itens_pac else 'null' }},
+                prioridade: {{ (projeto.itens_pac[0].prioridade or 3) | tojson if projeto.itens_pac else '3' }},
+                descricao: {{ (projeto.itens_pac[0].descricao or "") | tojson if projeto.itens_pac else 'null' }},
+                justificativa_legal: {{ (projeto.itens_pac[0].justificativa_legal or "") | tojson if projeto.itens_pac else 'null' }},
+                justificativa_emergencia: {{ (projeto.itens_pac[0].justificativa_emergencia or "") | tojson if projeto.itens_pac else 'null' }},
+                impacto_inexecucao: {{ (projeto.itens_pac[0].impacto_inexecucao or "") | tojson if projeto.itens_pac else 'null' }}
+            }
+        {% else %} null{% endif %},
+        
+        // Endpoints
+        saveEndpoint: '/api/ia/artefato/salvar',
+        updateEndpoint: '/api/je/' + '{{ projeto.id }}',
+        
+        // Custom payload builders
+        buildSavePayload: function(finalData, status) {
+            return {
+                projeto_id: this.projetoId,
+                tipo_artefato: 'justificativa_excepcionalidade',
+                je_data: {
+                    descricao: finalData.descricao || '',
+                    justificativa_legal: finalData.justificativa_legal || '',
+                    justificativa_emergencia: finalData.justificativa_emergencia || '',
+                    impacto_inexecucao: finalData.impacto_inexecucao || '',
+                    custo_estimado: finalData.custo_estimado || '',
+                    cronograma: finalData.cronograma || '',
+                    responsavel: finalData.responsavel || '',
+                    termos_referencia: finalData.termos_referencia || ''
+                },
+                campos_sistema: {
+                    setor_requisitante: this.setorRequisitante,
+                    responsavel_requisitante: this.responsavelRequisitante,
+                    tipo_contratacao: finalData.tipo_contratacao || '',
+                    frequencia: finalData.frequencia || '',
+                    prioridade: finalData.prioridade || 3
+                },
+                status: status
+            };
+        },
+        
+        buildUpdatePayload: function(finalData, status) {
+            return {
+                descricao: finalData.descricao || '',
+                justificativa_legal: finalData.justificativa_legal || '',
+                justificativa_emergencia: finalData.justificativa_emergencia || '',
+                impacto_inexecucao: finalData.impacto_inexecucao || '',
+                custo_estimado: finalData.custo_estimado || '',
+                cronograma: finalData.cronograma || '',
+                responsavel: finalData.responsavel || '',
+                termos_referencia: finalData.termos_referencia || '',
+                tipo_contratacao: finalData.tipo_contratacao || '',
+                frequencia: finalData.frequencia || '',
+                prioridade: finalData.prioridade || 3,
+                status: status
+            };
+        },
+        
+        fallbackMessage: '🚨 **Bem-vindo ao Assistente de Justificativa de Excepcionalidade!**\n\nSou a **LIA**, sua assistente do TRE-GO para elaboração de Justificativa de Excepcionalidade conforme a **Lei 14.133/2021**.\n\n**⚖️ Por que estou aqui?**\nEsta justificativa permite você contratar **fora do PAC** quando há situações extraordinárias que justificam a excepcionalidade.\n\n**🎯 O que vamos fazer?**\n1. Fundamentar legalmente a excepcionalidade\n2. Demonstrar a urgência/emergência (se houver)\n3. Explicar o impacto se não executar\n4. Definir o tipo e frequência da contratação\n\n**💬 Vamos começar!**\nMe conta: **qual é a razão extraordinária para esta contratação ser excepcional?**'
+    };
+
+    // ========== JE FIELDS DEFINITION ==========
+    const JE_FIELDS = [
+        // Automatic fields (system)
+        { key: 'numero_je', label: 'Número da JE', rows: 1, icon: '🔢', type: 'auto', value: {{ ("JE-" ~ projeto.id | string ~ "-1") | tojson }} },
+        { key: 'setor_requisitante', label: 'Setor Requisitante', rows: 1, icon: '🏢', type: 'auto', value: {{ (usuario.setor or "Unidade Requisitante") | tojson }} },
+        { key: 'responsavel_requisitante', label: 'Responsável', rows: 1, icon: '👤', type: 'auto', value: {{ (usuario.nome or "") | tojson }} },
+
+        // AI-generated fields (editable + regenerable)
+        { key: 'descricao', label: 'Descrição da Necessidade', rows: 3, icon: '📝', type: 'ia' },
+        { key: 'justificativa_legal', label: 'Fundamento Legal', rows: 3, icon: '⚖️', type: 'ia' },
+        { key: 'justificativa_emergencia', label: 'Justificativa de Emergência', rows: 2, icon: '🚨', type: 'ia' },
+        { key: 'impacto_inexecucao', label: 'Impacto da Não Execução', rows: 2, icon: '⚠️', type: 'ia' },
+        { key: 'custo_estimado', label: 'Valor Estimado', rows: 1, icon: '💰', type: 'ia' },
+        { key: 'cronograma', label: 'Cronograma Proposto', rows: 2, icon: '📅', type: 'ia' },
+        { key: 'termos_referencia', label: 'Termos de Referência', rows: 3, icon: '📋', type: 'ia' },
+
+        // User fields (editable)
+        { key: 'tipo_contratacao', label: 'Tipo de Contratação', rows: 1, icon: '🎯', type: 'user' },
+        { key: 'frequencia', label: 'Frequência', rows: 1, icon: '🔄', type: 'user' },
+        { key: 'prioridade', label: 'Prioridade', rows: 1, icon: '⭐', type: 'user' },
+        { key: 'responsavel', label: 'Responsável Autoridade', rows: 1, icon: '👔', type: 'user' }
+    ];
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(JE_CONFIG, JE_FIELDS);
+    });
+</script>
+{% endblock %}
+

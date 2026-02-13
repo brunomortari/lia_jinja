@@ -1,0 +1,90 @@
+# Sistema LIA - Docker Compose 
+# ============================
+# Executa a aplicacao completa com Docker
+
+services:
+  # Banco de Dados PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: lia-db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - lia-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Cache e Sessions (CSRF, Rate Limiting)
+  redis:
+    image: redis:7-alpine
+    container_name: lia-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - lia-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Aplicacao Principal
+  lia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lia-app
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Sistema LIA
+      - DEBUG=${DEBUG}
+      # Constrói a URL interna do Docker usando as variáveis do .env
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - SECRET_KEY=${SECRET_KEY}
+      - REDIS_URL=redis://redis:6379/0
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_DEFAULT_MODEL=${OPENROUTER_DEFAULT_MODEL}
+      # O caminho agora reflete a estrutura de pacotes (/app/app/data)
+      - PAC_CSV_PATH=/app/app/data/DETALHAMENTOS.csv
+    volumes:
+      # Monta a pasta local 'app' dentro da pasta 'app' do container para permitir Hot Reload
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+      - ./tests:/app/tests
+      - ./pytest.ini:/app/pytest.ini
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    networks:
+      - lia-network
+
+volumes:
+  postgres-data:
+    name: lia-postgres-data
+  redis-data:
+    name: lia-redis-data
+
+networks:
+  lia-network:
+    name: lia-network
+    driver: bridge

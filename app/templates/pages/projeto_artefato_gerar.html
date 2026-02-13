@@ -1,0 +1,1379 @@
+{% extends "app.html" %}
+
+{% block content %}
+<!-- Header da pagina -->
+<div class="page-header-new">
+    <div class="page-header-content">
+        <div class="page-header-titles">
+            <h1 class="page-title">Proj {{ projeto.id }}: {{ projeto.titulo }}</h1>
+            <p class="page-subtitle">
+                Gerar {{ config.titulo }}
+                {% if proxima_versao %} v{{ proxima_versao }}{% endif %}
+            </p>
+        </div>
+        <a href="/projetos/{{ projeto.id }}" class="btn-back-elegant" title="Voltar para o projeto">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Voltar
+        </a>
+    </div>
+    <div class="page-header-divider-solid"></div>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+    </svg>
+    <span>{{ error }}</span>
+</div>
+{% endif %}
+
+<div class="split-container-new">
+    <!-- Left Column: Generation Form -->
+    <div class="main-column">
+        <div class="card artefato-section">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Instruções à IA
+                </h2>
+            </div>
+
+            <div class="artefato-form-container">
+
+                <!-- User Info Card -->
+                <div class="user-info-card"
+                    style="background: var(--bg-secondary); padding: var(--spacing-md); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-md);">
+                    <div class="user-avatar"
+                        style="width: 40px; height: 40px; background: var(--color-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">
+                        {{ usuario.nome[0]|upper }}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary);">{{ usuario.nome }}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">Setor: {{ usuario.setor or 'Não
+                            informado' }}</div>
+                    </div>
+                </div>
+
+                <p class="artefato-description">
+                    A IA irá analisar os dados do projeto e gerar automaticamente o documento,
+                    conforme a <strong>Lei 14.133/2021</strong> e normativos aplicáveis.
+                </p>
+
+                {% if tipo_artefato == 'riscos' and dfds_disponiveis and dfds_disponiveis|length > 0 %}
+                <!-- Seleção de DFD como base para PGR -->
+                <div class="artefato-dfd-section">
+                    <label class="form-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="label-icon">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Usar DFD como Base (Opcional)
+                    </label>
+                    <div class="dfd-options">
+                        <label class="dfd-option">
+                            <input type="radio" name="dfd_base" value="" checked>
+                            <div class="dfd-option-content">
+                                <span class="dfd-option-title">Nenhum DFD</span>
+                                <span class="dfd-option-desc">Gerar PGR apenas com dados do PAC</span>
+                            </div>
+                        </label>
+                        {% for dfd in dfds_disponiveis %}
+                        <label class="dfd-option">
+                            <input type="radio" name="dfd_base" value="{{ dfd.id }}">
+                            <div class="dfd-option-content">
+                                <span class="dfd-option-title">
+                                    DFD v{{ dfd.versao }}
+                                    <span class="dfd-status dfd-status-{{ dfd.status }}">{{ dfd.status }}</span>
+                                </span>
+                                <span class="dfd-option-desc">{{ dfd.descricao or 'Sem descricao' }}</span>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="artefato-prompt-section">
+                    <label for="prompt-adicional" class="form-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="label-icon">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        Comando do usuário
+                    </label>
+                    <textarea id="prompt-adicional" class="form-textarea" rows="5"
+                        placeholder="Atenção:&#10;Para gerar um DFD completo, por favor informe no campo de texto abaixo:&#10;&#10;Nome do Gestor do Contrato&#10;Nome do Fiscal do Contrato&#10;Código CATMAT/CATSER ou Família PdM"></textarea>
+                    <p class="form-hint">
+                        Estas informacoes serao combinadas com os dados do projeto para gerar um documento mais
+                        completo.
+                    </p>
+                </div>
+
+                <div class="artefato-actions">
+                    <button type="button" id="btn-gerar" class="btn btn-primary btn-lg"
+                        style="width: 100%; justify-content: center;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        Gerar {{ config.titulo }} com IA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Contexto Panel (Accordion Style) -->
+    <div class="sidebar-column context-panel">
+        <div class="context-panel-header">
+            <div class="context-panel-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Contexto
+            </div>
+        </div>
+
+        <div class="context-panel-body">
+            <!-- Accordion: Itens do PAC -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)" aria-expanded="true">
+                    <div class="accordion-header-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Itens do PAC</span>
+                        {% if itens_pac %}<span class="accordion-badge">{{ itens_pac|length }}</span>{% endif %}
+                    </div>
+                    <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="accordion-content" style="display: block;">
+                    {% if itens_pac and itens_pac|length > 0 %}
+                    <div class="pac-items-list">
+                        {% for item in itens_pac %}
+                        <div class="pac-card-item">
+                            <div class="pac-card-header">
+                                <span class="pac-card-id">#{{ item.id }}</span>
+                                <span class="pac-card-tipo badge-{{ item.tipo_contratacao|lower|replace(' ', '-') if item.tipo_contratacao else 'default' }}">
+                                    {{ item.tipo_contratacao or 'N/A' }}
+                                </span>
+                            </div>
+
+                            <!-- Descrição completa -->
+                            <h4 class="pac-card-title">{{ item.descricao or 'Sem descrição' }}</h4>
+
+                            <!-- Detalhamento -->
+                            {% if item.detalhamento %}
+                            <div class="pac-card-section">
+                                <strong>Detalhamento:</strong>
+                                <p>{{ item.detalhamento }}</p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Objetivo Estratégico -->
+                            {% if item.objetivo %}
+                            <div class="pac-card-section pac-card-objetivo">
+                                <strong>Objetivo Estratégico:</strong>
+                                <p>{{ item.objetivo }}</p>
+                            </div>
+                            {% endif %}
+
+                            <div class="pac-card-details">
+                                <!-- Tipo e Elemento de Despesa -->
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Tipo Contratação:</span>
+                                    <span class="pac-card-value">{{ item.tipo_contratacao or 'N/A' }}</span>
+                                </div>
+                                {% if item.elemento_despesa %}
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Elem. Despesa:</span>
+                                    <span class="pac-card-value">{{ item.elemento_despesa }}</span>
+                                </div>
+                                {% endif %}
+
+                                <div class="pac-card-divider"></div>
+
+                                <!-- Valores do PAC (totais previstos) -->
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Qtd PAC:</span>
+                                    <span class="pac-card-value">{{ item.qtd or 0 }}</span>
+                                </div>
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Valor Unit. PAC:</span>
+                                    <span class="pac-card-value">R$ {{ "%.2f"|format(item.valor_por_item or 0)|replace(".", ",") }}</span>
+                                </div>
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Total PAC:</span>
+                                    <span class="pac-card-value pac-card-highlight">R$ {{ "%.2f"|format(item.valor_estimado or 0)|replace(".", ",") }}</span>
+                                </div>
+
+                                <div class="pac-card-divider"></div>
+
+                                <!-- Valores do Projeto (alocados) -->
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Qtd Projeto:</span>
+                                    <span class="pac-card-value">{{ item.qtd_projeto or 0 }}</span>
+                                </div>
+                                <div class="pac-card-row">
+                                    <span class="pac-card-label">Subtotal Projeto:</span>
+                                    <span class="pac-card-value pac-card-subtotal">R$ {{ "%.2f"|format((item.qtd_projeto or 0) * (item.valor_por_item or 0))|replace(".", ",") }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="accordion-empty">
+                        <p>Nenhum item do PAC vinculado a este projeto.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Accordion: Resumo do Projeto -->
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)" aria-expanded="true">
+                    <div class="accordion-header-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        <span>Resumo</span>
+                    </div>
+                    <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="accordion-content" style="display: block;">
+                    <!-- Valores do Projeto -->
+                    <div class="summary-section-title">Este Projeto</div>
+                    <div class="summary-cards-grid">
+                        <div class="summary-card">
+                            <div class="summary-card-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                </svg>
+                            </div>
+                            <div class="summary-card-content">
+                                <span class="summary-card-label">Itens</span>
+                                <span class="summary-card-value">{{ total_itens|round|int if total_itens else 0 }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-card-icon summary-card-icon-money">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <div class="summary-card-content">
+                                <span class="summary-card-label">Valor Projeto</span>
+                                <span class="summary-card-value summary-card-value-money">R$ {{ "%.2f"|format(valor_estimado_total)|replace(".", ",") if valor_estimado_total else "0,00" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="artefato-loading" class="artefato-loading" style="display: none;">
+    <div class="artefato-loading-content">
+        <div class="artefato-loading-spinner"></div>
+        <h3>Gerando {{ config.titulo }}...</h3>
+        <p>A Inteligencia Artificial esta analisando os dados e gerando o documento.</p>
+        <p class="artefato-loading-hint">Isso pode levar alguns segundos.</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // ========== ACCORDION FUNCTIONS ==========
+    function toggleAccordion(button) {
+        const content = button.nextElementSibling;
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+        button.setAttribute('aria-expanded', !isExpanded);
+
+        if (isExpanded) {
+            content.style.display = 'none';
+        } else {
+            content.style.display = 'block';
+        }
+    }
+
+    const PROJETO_ID = {{ projeto.id }};
+    const TIPO_ARTEFATO = "{{ tipo_artefato }}";
+    const TITULO_ARTEFATO = "{{ config.titulo }}";
+
+    const btnGerar = document.getElementById('btn-gerar');
+    const promptAdicional = document.getElementById('prompt-adicional');
+    const artefatoLoading = document.getElementById('artefato-loading');
+
+    let artefatoGerado = null;
+    let dfdSelecionadoId = null;
+
+    // Gerar artefato
+    async function gerarArtefato() {
+        // Validação básica para DFD
+        if (TIPO_ARTEFATO === 'dfd') {
+            const promptVal = promptAdicional.value.trim();
+
+            // Opcional: Validar se parece ter o conteudo minimo
+            if (promptVal.length < 10) {
+                if (!confirm("Você forneceu poucas informações. Lembre-se de incluir Gestor, Fiscal e CATMAT. Deseja continuar mesmo assim?")) {
+                    return;
+                }
+            }
+
+            // Salvar prompt no sessionStorage para uso na página de streaming
+            sessionStorage.setItem('dfd_prompt_' + PROJETO_ID, promptVal);
+            window.location.href = `/projetos/${PROJETO_ID}/dfd/novo/editar`;
+            return;
+        }
+
+        artefatoLoading.style.display = 'flex';
+        btnGerar.disabled = true;
+
+        // Capturar DFD selecionado (se houver)
+        const dfdRadio = document.querySelector('input[name="dfd_base"]:checked');
+        dfdSelecionadoId = dfdRadio ? dfdRadio.value : null;
+
+        const payload = {
+            projeto: {
+                projeto_id: PROJETO_ID,
+                projeto_titulo: "{{ projeto.titulo|e }}",
+                artefato_base_id: dfdSelecionadoId || null
+            },
+            prompt_adicional: promptAdicional.value.trim(),
+            timestamp: new Date().toISOString()
+        };
+
+        try {
+            const response = await fetch(`/api/ia/${TIPO_ARTEFATO}/gerar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Erro ao gerar');
+            }
+
+            const resultado = await response.json();
+            artefatoGerado = resultado;
+
+            // Simplificação: Salvar e redirecionar imediatamente, pulando o preview
+            await salvarArtefato();
+
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao gerar ' + TITULO_ARTEFATO + ': ' + error.message);
+            artefatoLoading.style.display = 'none';
+            btnGerar.disabled = false;
+        }
+    }
+
+    // Salvar e ir para edicao
+    async function salvarArtefato() {
+        if (!artefatoGerado) return;
+
+        artefatoLoading.style.display = 'flex';
+
+        try {
+            // Se for DFD e já tiver ID (salvo automaticamente na geração), redirecionar direto
+            if (TIPO_ARTEFATO === 'dfd' && artefatoGerado.dfd_id) {
+                window.location.href = `/projetos/${PROJETO_ID}/dfd/${artefatoGerado.dfd_id}/editar`;
+                return;
+            }
+
+            let response;
+
+            // Cotação/Pesquisa de Preços usa endpoint diferente pois tem estrutura de múltiplos registros
+            if (TIPO_ARTEFATO === 'cotacao' || TIPO_ARTEFATO === 'pesquisa_precos') {
+                response = await fetch('/api/ia/cotacao/salvar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        projeto_id: PROJETO_ID,
+                        cotacao_data: artefatoGerado
+                    })
+                });
+            } else {
+                // Incluir artefatos_base apenas para riscos (PGR)
+                const artefatosBase = (TIPO_ARTEFATO === 'riscos' && dfdSelecionadoId)
+                    ? { dfd_ids: [parseInt(dfdSelecionadoId)] }
+                    : null;
+
+                // Adicionar artefatos_base ao objeto gerado para salvar
+                const dadosParaSalvar = { ...artefatoGerado };
+                if (artefatosBase) {
+                    dadosParaSalvar.artefatos_base = artefatosBase;
+                }
+
+                response = await fetch('/api/ia/artefato/salvar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        projeto_id: PROJETO_ID,
+                        artefato_data: dadosParaSalvar,
+                        prompt_adicional: promptAdicional.value.trim(),
+                        tipo_artefato: TIPO_ARTEFATO
+                    })
+                });
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Erro ao salvar');
+            }
+
+            const result = await response.json();
+
+            // Cotação/PP vai para a página de visualização
+            if (TIPO_ARTEFATO === 'cotacao' || TIPO_ARTEFATO === 'pesquisa_precos') {
+                window.location.href = `/projetos/${PROJETO_ID}/cotacao-page`;
+            } else {
+                // Para DFD, Riscos, ETP, TR, Edital: Redireciona para a edição do ID criado
+                // A API retorna chaves como "dfd_id", "riscos_id", "etp_id", etc.
+                // Tenta encontrar o ID de forma robusta (corrige o erro 404)
+                const artefatoId = result[`${TIPO_ARTEFATO}_id`] || result.id || (result.data && result.data.id);
+
+                if (artefatoId) {
+                    window.location.href = `/projetos/${PROJETO_ID}/${TIPO_ARTEFATO}/${artefatoId}/editar`;
+                } else {
+                    console.error('ID do artefato não encontrado na resposta:', result);
+                    alert('Artefato salvo, mas não foi possível redirecionar. Verifique a lista de projetos.');
+                    window.location.href = `/projetos/${PROJETO_ID}`;
+                }
+            }
+
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao salvar: ' + error.message);
+            artefatoLoading.style.display = 'none';
+            btnGerar.disabled = false;
+        }
+    }
+
+    // Event listeners
+    btnGerar.addEventListener('click', gerarArtefato);
+</script>
+
+<style>
+    /* ========== NEW HEADER STYLES ========== */
+    .page-header-new {
+        margin-bottom: 0;
+    }
+
+    .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: var(--spacing-md);
+    }
+
+    .page-header-titles {
+        flex: 1;
+    }
+
+    .page-header-titles .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 4px 0;
+    }
+
+    .page-header-titles .page-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .btn-back-elegant {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .btn-back-elegant:hover {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: white;
+    }
+
+    .btn-back-elegant svg {
+        flex-shrink: 0;
+    }
+
+    .page-header-divider-solid {
+        height: 2px;
+        background: var(--color-primary);
+    }
+
+    /* ========== SPLIT LAYOUT NEW ========== */
+    .split-container-new {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 0;
+        align-items: stretch;
+        min-height: calc(100vh - 200px);
+    }
+
+    .split-container-new .main-column {
+        padding: var(--spacing-lg);
+    }
+
+    @media (max-width: 1024px) {
+        .split-container-new {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ========== CONTEXT PANEL (RIGHT SIDE) ========== */
+    .context-panel {
+        background: var(--bg-secondary);
+        border-left: 1px solid var(--border);
+        border-radius: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+    }
+
+    .context-panel-header {
+        display: flex;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        background: linear-gradient(135deg, var(--color-primary) 0%, #1d5656 100%);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+    }
+
+    .context-panel-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+    }
+
+    .context-panel-title svg {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .context-panel-body {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .context-panel-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .context-panel-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .context-panel-body::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+
+    /* ========== ACCORDION STYLES ========== */
+    .accordion-item {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .accordion-item:last-child {
+        border-bottom: none;
+    }
+
+    .accordion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        background: var(--bg-secondary);
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .accordion-header:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .accordion-header-content {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    .accordion-header-content svg {
+        color: var(--color-primary);
+        flex-shrink: 0;
+    }
+
+    .accordion-badge {
+        background: var(--color-primary);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 4px;
+    }
+
+    .accordion-chevron {
+        color: var(--text-tertiary);
+        transition: transform 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .accordion-header[aria-expanded="false"] .accordion-chevron {
+        transform: rotate(-90deg);
+    }
+
+    .accordion-content {
+        padding: var(--spacing-md);
+        background: var(--bg-primary);
+    }
+
+    .accordion-empty {
+        padding: var(--spacing-md);
+        text-align: center;
+        color: var(--text-tertiary);
+        font-size: 0.875rem;
+    }
+
+    /* ========== PAC CARDS IN ACCORDION ========== */
+    .pac-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .pac-card-item {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pac-card-item:hover {
+        border-color: var(--color-primary);
+        box-shadow: 0 2px 8px rgba(44, 122, 123, 0.1);
+    }
+
+    .pac-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .pac-card-id {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        background: var(--bg-tertiary);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .pac-card-tipo {
+        font-size: 0.65rem;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: var(--color-gray-100);
+        color: var(--color-gray-700);
+    }
+
+    .pac-card-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 var(--spacing-sm) 0;
+        line-height: 1.4;
+    }
+
+    .pac-card-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .pac-card-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+    }
+
+    .pac-card-label {
+        color: var(--text-tertiary);
+    }
+
+    .pac-card-value {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .pac-card-subtotal {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    .pac-card-section {
+        margin-bottom: var(--spacing-sm);
+        font-size: 0.75rem;
+    }
+
+    .pac-card-section strong {
+        color: var(--color-primary);
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .pac-card-section p {
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .pac-card-objetivo {
+        background: rgba(44, 122, 123, 0.08);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        border-left: 3px solid var(--color-primary);
+    }
+
+    .pac-card-divider {
+        height: 1px;
+        background: var(--border);
+        margin: var(--spacing-sm) 0;
+    }
+
+    .pac-card-highlight {
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+
+    /* ========== SUMMARY CARDS ========== */
+    .summary-section-title {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .summary-cards-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .summary-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-sm);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .summary-card-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(44, 122, 123, 0.1);
+        border-radius: var(--radius-sm);
+        flex-shrink: 0;
+    }
+
+    .summary-card-icon svg {
+        color: var(--color-primary);
+    }
+
+    .summary-card-icon-money {
+        background: rgba(16, 185, 129, 0.1);
+    }
+
+    .summary-card-icon-money svg {
+        color: #10b981;
+    }
+
+    .summary-card-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+    }
+
+    .summary-card-label {
+        font-size: 0.65rem;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .summary-card-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    .summary-card-value-money {
+        color: #10b981;
+        font-size: 0.85rem;
+    }
+
+    /* ========== ORIGINAL STYLES (KEPT) ========== */
+    .artefato-section {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .pac-items-sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .pac-items-sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .pac-items-sidebar::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .card-icon {
+        width: 24px;
+        height: 24px;
+        stroke: var(--color-primary);
+    }
+
+    .card-badge {
+        background: var(--color-primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .card-body {
+        padding: var(--spacing-lg);
+    }
+
+    .card-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+    }
+
+    .info-text {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .artefato-form-container {
+        padding: var(--spacing-lg);
+    }
+
+    .artefato-description {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+        line-height: 1.6;
+    }
+
+    .artefato-prompt-section {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .label-icon {
+        width: 18px;
+        height: 18px;
+        stroke: var(--color-primary);
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        resize: vertical;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: var(--transition);
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(44, 122, 123, 0.1);
+    }
+
+    .form-hint {
+        font-size: 0.8125rem;
+        color: var(--text-tertiary);
+        margin-top: var(--spacing-sm);
+    }
+
+    .artefato-actions {
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-lg {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .btn-lg svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Loading */
+    .artefato-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .artefato-loading-content {
+        background: var(--bg-primary);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .artefato-loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--color-gray-200);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto var(--spacing-md);
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .artefato-loading-content h3 {
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .artefato-loading-content p {
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+    }
+
+    .artefato-loading-hint {
+        font-size: 0.8125rem !important;
+        color: var(--text-tertiary) !important;
+        margin-top: var(--spacing-sm);
+    }
+
+    /* Resultado */
+    .artefato-content {
+        padding: var(--spacing-lg);
+    }
+
+    .artefato-metadata {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .metadata-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .metadata-item svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .artefato-block {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .artefato-block:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .artefato-block-title {
+        color: var(--color-primary);
+        font-size: 1.125rem;
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--color-primary);
+    }
+
+    .artefato-texto {
+        color: var(--text-primary);
+        line-height: 1.7;
+        text-align: justify;
+    }
+
+    .artefato-lista {
+        padding-left: var(--spacing-lg);
+        color: var(--text-primary);
+    }
+
+    .artefato-lista li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .artefato-sub-block {
+        padding: var(--spacing-md);
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+    }
+
+    .sub-item {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .sub-item strong {
+        color: var(--text-secondary);
+    }
+
+    .sub-item pre {
+        background: var(--bg-primary);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-sm);
+        overflow-x: auto;
+        font-size: 0.8125rem;
+    }
+
+    /* Estilos para seleção de DFD */
+    .artefato-dfd-section {
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dfd-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .dfd-option {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition);
+        background: var(--bg-primary);
+    }
+
+    .dfd-option:hover {
+        border-color: var(--color-primary);
+        background: var(--bg-secondary);
+    }
+
+    .dfd-option input[type="radio"] {
+        margin-top: 4px;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--color-primary);
+    }
+
+    .dfd-option:has(input:checked) {
+        border-color: var(--color-primary);
+        background: rgba(44, 122, 123, 0.05);
+    }
+
+    .dfd-option-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .dfd-option-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .dfd-option-desc {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .dfd-option-date {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+    }
+
+    .dfd-status {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .dfd-status-rascunho {
+        background: var(--color-gray-100);
+        color: var(--color-gray-600);
+    }
+
+    .dfd-status-em_revisao {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .dfd-status-aprovado {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    /* PAC Items Grid */
+    .pac-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
+    }
+
+    .pac-detail-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        border: 1px solid var(--border);
+    }
+
+    .pac-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .pac-detail-id {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        font-weight: 500;
+    }
+
+    .pac-detail-tipo {
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: var(--color-gray-100);
+        color: var(--color-gray-700);
+    }
+
+    .badge-servicos,
+    .badge-serviços {
+        background: #E9D8FD;
+        color: #553C9A;
+    }
+
+    .badge-fornecimento {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+
+    .pac-detail-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-md);
+        line-height: 1.4;
+    }
+
+    .pac-detail-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .pac-info-row {
+        display: flex;
+        gap: var(--spacing-sm);
+        font-size: 0.8125rem;
+    }
+
+    .pac-info-label {
+        color: var(--text-tertiary);
+        min-width: 120px;
+    }
+
+    .pac-info-value {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    .pac-valor {
+        color: var(--color-primary);
+    }
+
+    .priority-badge {
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .priority-1 {
+        background: #FED7D7;
+        color: #C53030;
+    }
+
+    .priority-2 {
+        background: #FEEBC8;
+        color: #C05621;
+    }
+
+    .priority-3 {
+        background: #FEFCBF;
+        color: #975A16;
+    }
+
+    .priority-4 {
+        background: #C6F6D5;
+        color: #276749;
+    }
+
+    .priority-5 {
+        background: #E2E8F0;
+        color: #4A5568;
+    }
+
+    .pac-detail-justificativa,
+    .pac-detail-objetivo {
+        margin-top: var(--spacing-sm);
+        padding-top: var(--spacing-sm);
+        border-top: 1px solid var(--border);
+        font-size: 0.8125rem;
+    }
+
+    .pac-detail-justificativa strong,
+    .pac-detail-objetivo strong {
+        display: block;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+
+    .pac-detail-justificativa p,
+    .pac-detail-objetivo p {
+        color: var(--text-primary);
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,209 @@
+/**
+ * Sistema LIA - Componente: Cards
+ * ================================
+ */
+
+/* ========== CARD BASE ========== */
+
+.card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* ========== HEADER DO CARD ========== */
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border);
+}
+
+.card-header:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.card-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.card-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* ========== BODY DO CARD ========== */
+
+.card-body {
+    flex: 1;
+}
+
+/* ========== FOOTER DO CARD ========== */
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
+}
+
+/* ========== VARIANTES ========== */
+
+.card-flat {
+    box-shadow: none;
+}
+
+.card-raised {
+    box-shadow: var(--shadow-lg);
+}
+
+.card-clickable {
+    cursor: pointer;
+}
+
+.card-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ========== CARD COM BORDA COLORIDA ========== */
+
+.card-accent {
+    border-left: 4px solid var(--color-accent);
+}
+
+.card-success {
+    border-left: 4px solid var(--color-success);
+}
+
+.card-warning {
+    border-left: 4px solid var(--color-warning);
+}
+
+.card-error {
+    border-left: 4px solid var(--color-error);
+}
+
+/* ========== CARD ESTATÍSTICO ========== */
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.stat-card .stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-card .stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.stat-card .stat-change {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.stat-card .stat-change.positive {
+    color: var(--color-success);
+}
+
+.stat-card .stat-change.negative {
+    color: var(--color-error);
+}
+
+/* ========== CARD HORIZONTAL ========== */
+
+.card-horizontal {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-lg);
+}
+
+.card-horizontal .card-image {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.card-horizontal .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-horizontal .card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ========== GRID DE CARDS ========== */
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.cards-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.cards-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.cards-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+    .cards-grid-2,
+    .cards-grid-3,
+    .cards-grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .card-horizontal {
+        flex-direction: column;
+    }
+
+    .card-horizontal .card-image {
+        width: 100%;
+        height: 200px;
+    }
+}

@@ -1,0 +1,343 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}TR - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SEÇÃO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='TR',
+artifact_version=proxima_versao,
+subtitle='Assistente para elaboração do Termo de Referência (Lei 14.133/2021, art. 6º, XXIII)'
+) }}
+
+{# Welcome Screen - Rendered via JavaScript for centered display #}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='TR') }}
+{{ chat_input_area(placeholder='Descreva detalhes do modelo de execução ou inicie a geração...') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='TR') }}
+
+
+
+{# Campos opcionais do TR #}
+<div class="context-card collapsed" id="cardDadosTr">
+    <div class="context-card-header" onclick="toggleContextCard('cardDadosTr')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Dados Adicionais
+            <span class="context-badge" style="font-size: 0.6rem;">Preencha aqui ou via chat</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="required-fields-section"
+            style="margin-bottom: 0; margin-top: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Modelo de Execução</label>
+                <input type="text" class="required-field-input" id="inputModeloExecucao"
+                    placeholder="Ex: Entrega única, Execução continuada...">
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Prazo de Entrega</label>
+                <input type="text" class="required-field-input" id="inputPrazoEntrega"
+                    placeholder="Ex: 30 dias úteis após empenho">
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: ETP Base (Obrigatório para TR) #}
+{% if etp_context %}
+<div class="context-card collapsed" id="cardEtpBase">
+    <div class="context-card-header" onclick="toggleContextCard('cardEtpBase')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            ETP Base
+            <span class="context-badge" style="background: var(--success-alpha);">✓ Aprovado</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="context-item">
+            <div class="context-label">Solução</div>
+            <div class="context-value">{{ (etp_context.descricao_solucao or 'N/A')[:120] }}{% if
+                (etp_context.descricao_solucao or '')|length > 120 %}...{% endif %}</div>
+        </div>
+        <div class="context-item">
+            <div class="context-label">Viabilidade</div>
+            <div class="context-value">{{ (etp_context.viabilidade_contratacao or 'N/A')[:80] }}{% if
+                (etp_context.viabilidade_contratacao or '')|length > 80 %}...{% endif %}</div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="context-card" id="cardEtpBase" style="border-color: var(--danger-color);">
+    <div class="context-card-header">
+        <div class="context-card-title" style="color: var(--danger-color);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            ETP Pendente (Obrigatório)
+        </div>
+    </div>
+    <div class="context-card-body">
+        <div class="context-item">
+            <div class="context-value" style="color: var(--danger-color); font-size: 0.8rem;">
+                É necessário ter um ETP aprovado para gerar o TR.
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Card: DFD Base #}
+{% if dfd_context %}
+<div class="context-card collapsed" id="cardDfdBase">
+    <div class="context-card-header" onclick="toggleContextCard('cardDfdBase')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            DFD Base
+            <span class="context-badge" style="background: var(--success-alpha);">✓</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="context-item">
+            <div class="context-label">Objeto</div>
+            <div class="context-value">{{ (dfd_context.descricao_objeto or 'N/A')[:100] }}{% if
+                (dfd_context.descricao_objeto or '')|length > 100 %}...{% endif %}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Card: Cotação #}
+{% if cotacao_context %}
+{{ context_card(
+id='cardCotacao',
+title='Pesquisa de Preços',
+icon='dollar',
+collapsed=true,
+items=[
+{'label': 'Valor Total', 'value': 'R$ ' ~ ("%.2f"|format(cotacao_context.valor_total)|replace(".", ",") if
+cotacao_context.valor_total else "0,00"), 'highlight': true}
+]
+) }}
+{% endif %}
+
+{# Card: PGR (Riscos) #}
+{% if pgr_context %}
+<div class="context-card collapsed" id="cardPgr">
+    <div class="context-card-header" onclick="toggleContextCard('cardPgr')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            PGR (Riscos)
+            <span class="context-badge" style="background: var(--success-alpha);">✓</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="context-item">
+            <div class="context-label">Riscos Identificados</div>
+            <div class="context-value">{{ pgr_context.quantidade_riscos or 0 }} riscos mapeados</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# Card: Itens do PAC #}
+<div class="context-card collapsed" id="cardPac">
+    <div class="context-card-header" onclick="toggleContextCard('cardPac')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Itens do PAC
+            <span class="context-badge">{{ itens_pac|length }}</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        {% for item in itens_pac[:3] %}
+        <div class="context-item">
+            <div class="context-label">Item #{{ item.id }}</div>
+            <div class="context-value">{{ (item.descricao or item.objeto or 'Sem descrição')[:80] }}{% if
+                (item.descricao or item.objeto or '')|length > 80 %}...{% endif %}</div>
+        </div>
+        {% endfor %}
+        {% if itens_pac|length > 3 %}
+        <div class="context-item">
+            <div class="context-value" style="color: var(--text-muted-chat); font-size: 0.8rem;">
+                + {{ itens_pac|length - 3 }} mais itens...
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Card: Resumo Financeiro #}
+{{ context_card(
+id='cardResumo',
+title='Resumo Financeiro',
+icon='dollar',
+collapsed=true,
+items=[
+{'label': 'Total de Itens', 'value': (total_itens|round|int if total_itens else itens_pac|length) ~ ' unidades'},
+{'label': 'Valor Estimado', 'value': 'R$ ' ~ ("%.2f"|format(valor_estimado_total)|replace(".", ",") if
+valor_estimado_total else "0,00"), 'highlight': true}
+]
+) }}
+
+{{ context_panel_end() }}
+
+{# ========== SEÇÃO WORKSPACE (GERAÇÃO) ========== #}
+{{ workspace_section(artifact_label='TR') }}
+
+{{ chat_layout_end() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+<script>
+    console.log('[TR Chat] Inicializando interface...');
+
+    // ========== TR-SPECIFIC CONFIGURATION ==========
+    const TR_CONFIG = {
+        projetoId: {{ projeto.id|default (0) }},
+    apiBase: '/api/ia-native/tr',
+        artifactType: 'tr',
+            artifactLabel: 'TR',
+                generateMarker: '[GERAR_TR]',
+                    setorRequisitante: {{ (usuario.setor or "Unidade Requisitante")| tojson }},
+    responsavelRequisitante: {{ (usuario.nome or "")| tojson }},
+    valorEstimado: {{ valor_estimado_total |default (0) }},
+    // Edit mode
+    faseInicial: {{ (fase_inicial or "preparation")| tojson }},
+    editarId: {{ (tr_editar.id if tr_editar else None)| tojson }},
+    editarVersao: {{ (tr_editar.versao if tr_editar else None)| tojson }},
+    editarStatus: {{ (tr_editar.status if tr_editar else "")| tojson }},
+    // Existing data for editing
+    editarDados: {% if tr_editar %} {
+        definicao_objeto: {{ tr_editar.definicao_objeto | tojson |default ('""') }},
+        justificativa: {{ tr_editar.justificativa | tojson |default ('""') }},
+        especificacao_tecnica: {{ tr_editar.especificacao_tecnica | tojson |default ('""') }},
+        obrigacoes: {{ tr_editar.obrigacoes | tojson |default ('""') }},
+        criterios_aceitacao: {{ tr_editar.criterios_aceitacao | tojson |default ('""') }}
+    } {% else %} null{% endif %},
+    // Custom input fields
+    getExtraData: function() {
+        return {
+            modelo_execucao: document.getElementById('inputModeloExecucao')?.value || '',
+            prazo_entrega: document.getElementById('inputPrazoEntrega')?.value || ''
+        };
+    },
+    // Endpoints
+    saveEndpoint: '/api/ia/artefato/salvar',
+        updateEndpoint: '/api/tr/' + '{id}',
+            // Custom payload builders
+            buildSavePayload: function(finalData, status) {
+                return {
+                    projeto_id: this.projetoId,
+                    tipo_artefato: 'tr',
+                    tr_data: {
+                        definicao_objeto: finalData.definicao_objeto || '',
+                        justificativa: finalData.justificativa || '',
+                        especificacao_tecnica: finalData.especificacao_tecnica || '',
+                        obrigacoes: finalData.obrigacoes || '',
+                        criterios_aceitacao: finalData.criterios_aceitacao || ''
+                    },
+                    status: status
+                };
+            },
+    buildUpdatePayload: function(finalData, status) {
+        return {
+            definicao_objeto: finalData.definicao_objeto || '',
+            justificativa: finalData.justificativa || '',
+            especificacao_tecnica: finalData.especificacao_tecnica || '',
+            obrigacoes: finalData.obrigacoes || '',
+            criterios_aceitacao: finalData.criterios_aceitacao || '',
+            status: status
+        };
+    },
+    fallbackMessage: 'Olá! Sou a **LIA**, sua assistente para elaboração do **TR** (Termo de Referência) conforme a Lei 14.133/2021.\n\nVou usar os dados do ETP aprovado como base para especificações técnicas.\n\n**Há algum detalhe específico sobre o modelo de execução** (prazo de entrega, local, forma de suporte) que preciso considerar?\n\nOu posso iniciar a geração com os dados que já temos?'
+    };
+
+    // ========== TR FIELDS DEFINITION (5 campos obrigatórios) ==========
+    const TR_FIELDS = [
+        // Automatic fields (system)
+        { key: 'numero_tr', label: 'Número do TR', rows: 1, icon: '🔢', type: 'auto', value: {{ ("TR-" ~projeto.id |default(0) | string ~ "-" ~proxima_versao |default(1) | string) | tojson }}},
+    { key: 'setor_requisitante', label: 'Setor Requisitante', rows: 1, icon: '🏢', type: 'auto', value: {{ (usuario.setor or "Unidade Requisitante")| tojson }} },
+    { key: 'valor_estimado_pac', label: 'Valor Estimado (PAC)', rows: 1, icon: '💰', type: 'auto', value: {{ ("R$ " ~ "%.2f" | format(valor_estimado_total |default(0)) | replace(".", ","))| tojson }} },
+
+    // AI-generated fields (editable + regenerable) - 5 campos do TR
+    { key: 'definicao_objeto', label: 'Definição do Objeto (TR-01)', rows: 5, icon: '📋', type: 'ia' },
+    { key: 'justificativa', label: 'Justificativa e Fundamentação (TR-02)', rows: 4, icon: '⚖️', type: 'ia' },
+    { key: 'especificacao_tecnica', label: 'Especificação Técnica (TR-03)', rows: 6, icon: '🔧', type: 'ia' },
+    { key: 'obrigacoes', label: 'Obrigações das Partes (TR-04)', rows: 5, icon: '📝', type: 'ia' },
+    { key: 'criterios_aceitacao', label: 'Critérios de Aceitação e Pagamento (TR-05)', rows: 4, icon: '✓', type: 'ia' }
+    ];
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(TR_CONFIG, TR_FIELDS);
+    });
+</script>
+{% endblock %}

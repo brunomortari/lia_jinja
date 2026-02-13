@@ -1,0 +1,1057 @@
+/**
+ * Sistema LIA - Pesquisa de Preços CATMAT/CATSERV
+ * CSS com suporte a tema Dark/Light
+ */
+
+/* ========== VARIÁVEIS DO TEMA ========== */
+:root {
+    /* Cores Gov.br */
+    --gov-blue: #071D41;
+    --gov-blue-light: #1351B4;
+    --gov-green: #168821;
+    --gov-yellow: #FFCD07;
+    --gov-red: #E52207;
+    --gov-purple: #6f42c1;
+    --gov-teal: #20c997;
+}
+
+/* Tema Light (padrão) */
+[data-theme="light"],
+:root {
+    --compras-bg: #f8f9fa;
+    --compras-bg-card: #ffffff;
+    --compras-text: #333333;
+    --compras-text-muted: #6c757d;
+    --compras-border: #dee2e6;
+    --compras-primary: #1351B4;
+    --compras-chart-bg: #ffffff;
+    --compras-chart-grid: rgba(0, 0, 0, 0.1);
+    --compras-chart-text: #666666;
+    --compras-table-hover: #f5f5f5;
+    --compras-shadow: rgba(0, 0, 0, 0.08);
+}
+
+/* Tema Dark */
+[data-theme="dark"] {
+    --compras-bg: #1a1a2e;
+    --compras-bg-card: #16213e;
+    --compras-text: #e4e4e4;
+    --compras-text-muted: #a0a0a0;
+    --compras-border: #2a2a4a;
+    --compras-primary: #4dabf7;
+    --compras-chart-bg: #16213e;
+    --compras-chart-grid: rgba(255, 255, 255, 0.1);
+    --compras-chart-text: #a0a0a0;
+    --compras-table-hover: #1f3460;
+    --compras-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* ========== LAYOUT GERAL ========== */
+.compras-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    color: var(--compras-text);
+}
+
+/* ========== CARDS ESTATÍSTICOS SECUNDÁRIOS ========== */
+.stat-card-secondary {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.stat-card-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--compras-shadow);
+}
+
+.stat-label-sm {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--compras-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.stat-value-sm {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--compras-primary);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* ========== TOGGLE SWITCH PERSONALIZADO ========== */
+.outlier-toggle {
+    position: relative;
+}
+
+.toggle-switch-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--gov-red);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch-input:checked+.toggle-switch-label .toggle-track {
+    background: var(--gov-green);
+}
+
+.toggle-switch-input:checked+.toggle-switch-label .toggle-track::after {
+    transform: translateX(20px);
+}
+
+/* Toggle label text (outside the toggle) */
+.toggle-label-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s;
+}
+
+/* Highlight active state */
+.toggle-switch-input:not(:checked)~.toggle-label-text:first-of-type {
+    color: var(--gov-red) !important;
+    font-weight: 700 !important;
+}
+
+.toggle-switch-input:checked~.toggle-label-text:last-of-type {
+    color: var(--gov-green) !important;
+    font-weight: 700 !important;
+}
+
+/* ========== CARDS DE GRÁFICOS ========== */
+.chart-card {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chart-title {
+    color: var(--compras-primary);
+    font-size: 0.95rem;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+}
+
+/* ========== TABELA ========== */
+#tabelaPrecos {
+    background: var(--compras-bg-card);
+    color: var(--compras-text);
+}
+
+#tabelaPrecos thead {
+    background: linear-gradient(135deg, var(--gov-blue) 0%, var(--gov-blue-light) 100%);
+}
+
+#tabelaPrecos tbody tr:hover {
+    background: var(--compras-table-hover);
+}
+
+#tabelaPrecos .table-price {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--compras-primary);
+    white-space: nowrap;
+}
+
+.table-text-truncate {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Botões de ações da tabela - FIX para não sobrepor */
+#tabelaPrecos td:last-child {
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+#tabelaPrecos td:last-child .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.5rem;
+    margin: 0 2px;
+    vertical-align: middle;
+}
+
+/* Linha de outlier */
+.outlier-row {
+    background: rgba(255, 205, 7, 0.15) !important;
+}
+
+.outlier-row:hover {
+    background: rgba(255, 205, 7, 0.25) !important;
+}
+
+/* Linha selecionada */
+.selected-row {
+    background: rgba(22, 136, 33, 0.1) !important;
+}
+
+.selected-row:hover {
+    background: rgba(22, 136, 33, 0.2) !important;
+}
+
+/* ========== BADGES CV ========== */
+.badge-cv-baixo {
+    background: var(--gov-green) !important;
+    color: white !important;
+}
+
+.badge-cv-medio {
+    background: var(--gov-yellow) !important;
+    color: #333 !important;
+}
+
+.badge-cv-alto {
+    background: var(--gov-red) !important;
+    color: white !important;
+}
+
+/* ========== CARDS PRINCIPAIS ========== */
+.border-left-success {
+    border-left: 4px solid var(--gov-green) !important;
+}
+
+.border-left-info {
+    border-left: 4px solid var(--gov-blue-light) !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid var(--gov-yellow) !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid var(--gov-red) !important;
+}
+
+.border-left-primary {
+    border-left: 4px solid var(--gov-blue) !important;
+}
+
+/* Cards de estatísticas principais */
+.card.shadow.h-100 {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+}
+
+.card.shadow.h-100 .h5 {
+    color: var(--compras-text);
+}
+
+.card.shadow.h-100 .text-gray-300 {
+    color: var(--compras-border) !important;
+}
+
+/* ========== CARDS DE FORMULÁRIO ========== */
+.card.shadow.mb-4 {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+}
+
+.card-header {
+    background: var(--compras-bg-card);
+    border-bottom: 1px solid var(--compras-border);
+}
+
+.card-body {
+    background: var(--compras-bg-card);
+}
+
+/* ========== FORM CONTROLS ========== */
+.form-control,
+.form-select {
+    background: var(--compras-bg-card);
+    border-color: var(--compras-border);
+    color: var(--compras-text);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background: var(--compras-bg-card);
+    border-color: var(--compras-primary);
+    color: var(--compras-text);
+}
+
+.form-label {
+    color: var(--compras-text);
+}
+
+/* ========== MODAL ========== */
+.modal-content {
+    background: var(--compras-bg-card);
+    color: var(--compras-text);
+    border: 1px solid var(--compras-border);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--compras-border);
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, var(--gov-blue) 0%, var(--gov-blue-light) 100%);
+    border-radius: 16px 16px 0 0;
+}
+
+.modal-header .modal-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: 0.3px;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.modal-body h6 {
+    color: var(--gov-blue-light);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+}
+
+.modal-body .form-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--compras-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.35rem;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(19, 81, 180, 0.15);
+}
+
+.modal-body .form-control[readonly] {
+    background: var(--compras-bg);
+    font-weight: 500;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--compras-border);
+    padding: 1rem 1.5rem;
+    gap: 0.5rem;
+}
+
+.modal-footer .btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+/* Modal Detalhes - Específico */
+#modalDetalhes .modal-body .row {
+    margin-bottom: 0.5rem;
+}
+
+#modalDetalhes .modal-body strong {
+    color: var(--compras-text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+}
+
+#modalDetalhes .modal-body .col-md-6,
+#modalDetalhes .modal-body .col-md-8,
+#modalDetalhes .modal-body .col-md-4 {
+    font-size: 0.95rem;
+}
+
+/* Modal Relatório - Estatísticas destacadas */
+#modalRelatorio #relMedia,
+#modalRelatorio #relMediana {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gov-blue-light);
+    background: var(--compras-bg);
+}
+
+/* Tabela dentro do modal */
+.modal-body .table {
+    font-size: 0.85rem;
+}
+
+.modal-body .table thead {
+    background: var(--compras-bg);
+}
+
+.modal-body .table th {
+    font-weight: 600;
+    color: var(--compras-text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* ========== LINK PNCP ========== */
+.link-pncp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--gov-green);
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.link-pncp:hover {
+    background: #146c1b;
+    transform: translateY(-1px);
+    color: white;
+}
+
+/* ========== BOTÕES ========== */
+.btn-primary {
+    background: var(--gov-blue-light);
+    border-color: var(--gov-blue-light);
+}
+
+.btn-primary:hover {
+    background: var(--gov-blue);
+    border-color: var(--gov-blue);
+}
+
+.btn-success {
+    background: var(--gov-green);
+    border-color: var(--gov-green);
+}
+
+.btn-outline-primary {
+    color: var(--compras-primary);
+    border-color: var(--compras-primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--compras-primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--compras-text-muted);
+    border-color: var(--compras-border);
+}
+
+/* ========== ALERTAS ========== */
+.alert-danger {
+    background: rgba(229, 34, 7, 0.1);
+    border-color: var(--gov-red);
+    color: var(--gov-red);
+}
+
+/* ========== DROPDOWN ========== */
+.dropdown-menu {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+}
+
+.dropdown-item {
+    color: var(--compras-text);
+}
+
+.dropdown-item:hover {
+    background: var(--compras-table-hover);
+    color: var(--compras-text);
+}
+
+/* ========== FILTROS AVANÇADOS ========== */
+#filtrosAvancados .card-body {
+    background: var(--compras-bg);
+}
+
+/* ========== PAGINAÇÃO ========== */
+.pagination-info {
+    color: var(--compras-text-muted);
+}
+
+/* ========== RESPONSIVO ========== */
+@media (max-width: 1200px) {
+    .stat-value-sm {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stat-label-sm {
+        font-size: 0.7rem;
+    }
+
+    .stat-value-sm {
+        font-size: 1rem;
+    }
+
+    .toggle-track {
+        width: 50px;
+        height: 24px;
+    }
+
+    .toggle-track::after {
+        width: 18px;
+        height: 18px;
+    }
+
+    .toggle-switch-input:checked+.toggle-switch-label .toggle-track::after {
+        transform: translateX(26px);
+    }
+
+    /* Botões de ação menores em mobile */
+    #tabelaPrecos td:last-child .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* ========== TEXTO MUTED ========== */
+.text-muted {
+    color: var(--compras-text-muted) !important;
+}
+
+.text-gray-800 {
+    color: var(--compras-text) !important;
+}
+
+/* ========== SPINNER LOADING ========== */
+.spinner-border {
+    color: var(--compras-primary);
+}
+
+/* ========== TABLE CHECKBOX ========== */
+.table-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--gov-green);
+}
+
+/* ========== SORTABLE COLUMNS ========== */
+#tabelaPrecos th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+#tabelaPrecos th.sortable:hover {
+    background: rgba(19, 81, 180, 0.1);
+}
+
+#tabelaPrecos th.sortable i {
+    margin-left: 4px;
+    opacity: 0.7;
+}
+
+/* ========== COLLAPSE BG ========== */
+.bg-light {
+    background: var(--compras-bg) !important;
+}
+
+/* ========== NOVOS ESTILOS DO SISTEMA (PADRONIZAÇÃO) ========== */
+
+/* Page Header New */
+.page-header-new {
+    margin-bottom: 2rem;
+}
+
+.page-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1rem;
+}
+
+.page-header-titles {
+    flex: 1;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--compras-text);
+    margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+    font-size: 0.9rem;
+    color: var(--compras-text-muted);
+    margin: 0;
+}
+
+.btn-back-elegant {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+    border-radius: 8px;
+    color: var(--compras-text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-back-elegant:hover {
+    background: var(--compras-primary);
+    border-color: var(--compras-primary);
+    color: white;
+}
+
+.page-header-divider-solid {
+    height: 2px;
+    background: var(--compras-primary);
+}
+
+/* Artefato Section (Card Style) */
+.artefato-section {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-border);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px var(--compras-shadow);
+}
+
+.artefato-section .card-header {
+    background: var(--compras-bg);
+    border-bottom: 1px solid var(--compras-border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.artefato-section .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--compras-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.artefato-section .card-body {
+    padding: 1.5rem;
+}
+
+/* Cesta de Itens */
+.basket-container {
+    background: var(--compras-bg-card);
+    border: 1px solid var(--compras-primary);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    display: none;
+    /* Inicialmente oculto */
+}
+
+.basket-header {
+    background: linear-gradient(135deg, var(--gov-blue-light) 0%, var(--gov-blue) 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.basket-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.basket-body {
+    padding: 0;
+}
+
+.basket-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.basket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--compras-border);
+    transition: background 0.2s;
+}
+
+.basket-item:last-child {
+    border-bottom: none;
+}
+
+.basket-item:hover {
+    background: var(--compras-table-hover);
+}
+
+.basket-item-info {
+    flex: 1;
+}
+
+.basket-item-code {
+    font-weight: 700;
+    color: var(--compras-primary);
+    font-size: 0.9rem;
+    background: rgba(19, 81, 180, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.basket-item-desc {
+    font-weight: 500;
+    color: var(--compras-text);
+}
+
+.basket-item-stats {
+    font-size: 0.85rem;
+    color: var(--compras-text-muted);
+    margin-top: 4px;
+}
+
+.basket-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Filtros Inline (movidos para perto da tabela) */
+.filters-inline {
+    background: var(--compras-bg);
+    border-bottom: 1px solid var(--compras-border);
+    padding: 1rem;
+}
+
+/* Fix Search Form Alignment and Heights */
+#searchForm .form-control,
+#searchForm .form-select,
+#searchForm .btn {
+    height: 42px !important;
+    min-height: 42px !important;
+    font-size: 0.95rem;
+}
+
+#searchForm label {
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    display: block;
+}
+
+/* ==================== MODAL MINIMALISTA (Estilo Login/Inicio) ==================== */
+.modal-minimalist {
+    background: #ffffff;
+    border-radius: var(--radius-xl, 16px);
+    overflow: hidden;
+    /* Para respeitar o border-radius */
+}
+
+/* Tipografia */
+.text-darkest {
+    color: var(--color-darkest, #0f172a) !important;
+}
+
+.text-medium-dark {
+    color: var(--color-medium-dark, #334155) !important;
+}
+
+.text-accent {
+    color: var(--color-accent, #334155) !important;
+}
+
+.text-accent-light {
+    color: var(--color-accent-light, #5f748d) !important;
+}
+
+.text-soft {
+    color: var(--color-soft, #94a3b8) !important;
+}
+
+.font-serif {
+    font-family: var(--font-serif, 'Playfair Display', serif);
+}
+
+.ls-1 {
+    letter-spacing: 0.05em;
+}
+
+/* Inputs Minimalistas */
+.input-minimalist,
+.form-select.input-minimalist {
+    background-color: var(--color-bg-light, #f8fafc);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg, 12px);
+    color: var(--color-dark, #1e293b);
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.input-minimalist:focus,
+.form-select.input-minimalist:focus {
+    background-color: #ffffff;
+    border-color: var(--color-accent-light, #5f748d);
+    box-shadow: 0 0 0 4px rgba(51, 65, 85, 0.1);
+    /* accent glow */
+    outline: none;
+}
+
+/* Botões Minimalistas */
+.btn-minimalist {
+    border-radius: var(--radius-lg, 12px);
+    transition: all 0.2s ease;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.btn-minimalist:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.btn-minimalist.shadow-md {
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.hover-dark:hover {
+    color: var(--color-darkest, #0f172a) !important;
+    background-color: var(--color-gray-200, #e2e8f0);
+}
+
+/* Sombras Utilitárias */
+.shadow-2xl {
+    box-shadow: var(--shadow-2xl, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
+}
+
+.shadow-inner-sm {
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Cores de Fundo Suaves */
+.bg-soft-blue {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* info-light com alpha */
+.bg-soft-green {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* success com alpha */
+
+/* Custom Checkbox List */
+.custom-check .form-check-input {
+    border: 2px solid var(--color-soft, #94a3b8);
+    cursor: pointer;
+    width: 1.25em;
+    height: 1.25em;
+}
+
+.custom-check .form-check-input:checked {
+    background-color: var(--color-accent, #334155);
+    border-color: var(--color-accent, #334155);
+}
+
+/* Custom Table */
+.custom-table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--color-light, #e2e8f0);
+}
+
+.custom-table tbody td {
+    border-bottom: 1px solid var(--color-gray-100, #f1f5f9);
+    vertical-align: middle;
+}
+
+/* ==================== MODAL V2 (Split Layout - Dark Sidebar) ==================== */
+
+/* Custom Scrollbar Light */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Custom Scrollbar Dark */
+.custom-scrollbar-dark::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Backgrounds & Text */
+.bg-darkest {
+    background-color: #0f172a !important;
+}
+
+.bg-fafafa {
+    background-color: #fafafa !important;
+}
+
+.text-success-dark {
+    color: #065f46 !important;
+}
+
+/* Focused Border for Select */
+.focused-border-info:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1) !important;
+}
+
+/* Item PAC Card & DFD Card */
+.item-pac-card,
+.dfd-card,
+.dfd-select-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Base subtle background */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.item-pac-card:hover,
+.dfd-card:hover,
+.dfd-select-card:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Selected State for DFD & PAC */
+.ia-contexto-dfd:checked~label {
+    box-shadow: inset 0 0 0 2px var(--color-info, #0ea5e9);
+    border-radius: inherit;
+    background-color: transparent;
+}
+
+.ia-contexto-dfd:checked~div i {
+    color: #38bdf8 !important;
+}
+
+/* Fix text colors inside cards */
+.dfd-select-card .text-white,
+.item-pac-card .text-white {
+    color: #f8fafc !important;
+}
+
+.ia-contexto-dfd:checked~div .p-2 {
+    background-color: rgba(56, 189, 248, 0.2) !important;
+}
+
+.ia-contexto-dfd:checked~div .p-2 {
+    background-color: rgba(56, 189, 248, 0.2) !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.transition-all {
+    transition: all 0.2s ease;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    /* compatibility fix */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Modal Content Overflow Fix */
+.modal-content.overflow-hidden {
+    overflow: hidden !important;
+}
+
+/* Spinner Size Refinement */
+.spinner-border {
+    border-width: 3px;
+}

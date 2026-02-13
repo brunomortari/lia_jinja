@@ -1,0 +1,294 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}Edital - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SEÇÃO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='Edital',
+artifact_version=proxima_versao,
+subtitle='Assistente para elaboração do Edital de Licitação'
+) }}
+
+{# Welcome Screen - Rendered via JavaScript for centered display #}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='Edital') }}
+{{ chat_input_area(placeholder='Descreva as configurações desejadas para o Edital...') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='Edital') }}
+
+
+
+{# Campos opcionais do Edital #}
+<div class="context-card" id="cardDadosEdital">
+    <div class="context-card-header" onclick="toggleContextCard('cardDadosEdital')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Configurações do Edital
+            <span class="context-badge" style="font-size: 0.6rem;">Preencha aqui ou via chat</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="required-fields-section"
+            style="margin-bottom: 0; margin-top: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Modalidade</label>
+                <select class="required-field-input" id="inputModalidade">
+                    <option value="Pregão Eletrônico" selected>Pregão Eletrônico (Padrão)</option>
+                    <option value="Concorrência">Concorrência</option>
+                    <option value="Concurso">Concurso</option>
+                    <option value="Leilão">Leilão</option>
+                    <option value="Diálogo Competitivo">Diálogo Competitivo</option>
+                </select>
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Critério de Julgamento</label>
+                <select class="required-field-input" id="inputCriterio">
+                    <option value="Menor Preço" selected>Menor Preço (Padrão)</option>
+                    <option value="Maior Desconto">Maior Desconto</option>
+                    <option value="Melhor Técnica">Melhor Técnica</option>
+                    <option value="Técnica e Preço">Técnica e Preço</option>
+                    <option value="Maior Lance">Maior Lance</option>
+                    <option value="Maior Retorno Econômico">Maior Retorno Econômico</option>
+                </select>
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Modo de Disputa</label>
+                <select class="required-field-input" id="inputModoDisputa">
+                    <option value="Aberto" selected>Aberto (Padrão)</option>
+                    <option value="Fechado">Fechado</option>
+                    <option value="Aberto e Fechado">Aberto e Fechado</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: Projeto #}
+{{ context_card(
+id='cardProjeto',
+title='Projeto',
+icon='folder',
+collapsed=true,
+items=[
+{'label': 'Título', 'value': projeto.titulo},
+{'label': 'Requisitante', 'value': usuario.nome},
+{'label': 'Setor', 'value': usuario.setor or 'Não informado'}
+]
+) }}
+
+{# Card: Documentos Base #}
+<div class="context-card collapsed" id="cardDocumentos">
+    <div class="context-card-header" onclick="toggleContextCard('cardDocumentos')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Documentos Base
+            <span class="context-badge">{{ documentos_aprovados|length }}</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        {% if dfd_aprovado %}
+        <div class="context-item">
+            <div class="context-label">DFD</div>
+            <div class="context-value" style="color: #10b981;">Aprovado v{{ dfd_aprovado.versao }}</div>
+        </div>
+        {% endif %}
+        {% if cotacao_aprovada %}
+        <div class="context-item">
+            <div class="context-label">Cotação</div>
+            <div class="context-value" style="color: #10b981;">Aprovada v{{ cotacao_aprovada.versao }}</div>
+        </div>
+        {% endif %}
+        {% if pgr_aprovado %}
+        <div class="context-item">
+            <div class="context-label">PGR</div>
+            <div class="context-value" style="color: #10b981;">Aprovado v{{ pgr_aprovado.versao }}</div>
+        </div>
+        {% endif %}
+        {% if etp_aprovado %}
+        <div class="context-item">
+            <div class="context-label">ETP</div>
+            <div class="context-value" style="color: #10b981;">Aprovado v{{ etp_aprovado.versao }}</div>
+        </div>
+        {% endif %}
+        {% if tr_aprovado %}
+        <div class="context-item">
+            <div class="context-label">TR</div>
+            <div class="context-value" style="color: #10b981;">Aprovado v{{ tr_aprovado.versao }}</div>
+        </div>
+        {% endif %}
+        {% if not documentos_aprovados %}
+        <div class="context-item">
+            <div class="context-value" style="color: var(--text-muted-chat); font-size: 0.8rem;">
+                Nenhum documento aprovado
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Card: Resumo Financeiro #}
+{{ context_card(
+id='cardResumo',
+title='Resumo Financeiro',
+icon='dollar',
+collapsed=true,
+items=[
+{'label': 'Total de Itens', 'value': (total_itens|round|int if total_itens else itens_pac|length) ~ ' unidades'},
+{'label': 'Valor Estimado', 'value': 'R$ ' ~ ("%.2f"|format(valor_estimado_total)|replace(".", ",") if
+valor_estimado_total else "0,00"), 'highlight': true}
+]
+) }}
+
+{{ context_panel_end() }}
+
+{# ========== SEÇÃO WORKSPACE (GERAÇÃO) ========== #}
+{{ workspace_section(artifact_label='Edital') }}
+
+{{ chat_layout_end() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+<script>
+    console.log('[Edital Chat] Inicializando interface...');
+
+    // ========== EDITAL-SPECIFIC CONFIGURATION ==========
+        const EDITAL_CONFIG = {
+            projetoId: {{ projeto.id|default(0) }},
+            apiBase: '/api/ia-native/edital',
+            artifactType: 'edital',
+            artifactLabel: 'Edital',
+            generateMarker: '[GERAR_EDITAL]',
+            setorRequisitante: {{ (usuario.setor or "Unidade Requisitante")|tojson }},
+            responsavelRequisitante: {{ (usuario.nome or "")|tojson }},
+            valorEstimado: {{ valor_estimado_total|default(0) }},
+            // Edit mode
+            faseInicial: {{ (fase_inicial or "preparation")|tojson }},
+            editarId: {{ (edital_editar.id if edital_editar else None)|tojson }},
+            editarVersao: {{ (edital_editar.versao if edital_editar else None)|tojson }},
+            editarStatus: {{ (edital_editar.status if edital_editar else "")|tojson }},
+            // Existing data for editing
+            editarDados: {% if edital_editar %}{
+                objeto: {{ edital_editar.objeto|tojson|default('""') }},
+                condicoes_participacao: {{ edital_editar.condicoes_participacao|tojson|default('""') }},
+                criterios_julgamento: {{ edital_editar.criterios_julgamento|tojson|default('""') }},
+                fase_lances: {{ edital_editar.fase_lances|tojson|default('""') }}
+            }{% else %}null{% endif %},
+    // Endpoints
+    saveEndpoint: '/api/ia/artefato/salvar',
+        updateEndpoint: '/api/edital/' + '{id}',
+            // Custom payload builders
+            buildSavePayload: function(finalData, status) {
+                return {
+                    projeto_id: this.projetoId,
+                    tipo_artefato: 'edital',
+                    edital_data: {
+                        objeto: finalData.objeto || '',
+                        condicoes_participacao: finalData.condicoes_participacao || '',
+                        criterios_julgamento: finalData.criterios_julgamento || '',
+                        fase_lances: finalData.fase_lances || ''
+                    },
+                    campos_sistema: {
+                        setor_requisitante: this.setorRequisitante,
+                        responsavel_requisitante: this.responsavelRequisitante,
+                        valor_estimado: this.valorEstimado,
+                        modalidade: document.getElementById('inputModalidade')?.value || 'Pregão Eletrônico',
+                        criterio_julgamento: document.getElementById('inputCriterio')?.value || 'Menor Preço',
+                        modo_disputa: document.getElementById('inputModoDisputa')?.value || 'Aberto'
+                    },
+                    campos_usuario: {
+                        modalidade: document.getElementById('inputModalidade')?.value || null,
+                        criterio_julgamento: document.getElementById('inputCriterio')?.value || null,
+                        modo_disputa: document.getElementById('inputModoDisputa')?.value || null
+                    },
+                    status: status
+                };
+            },
+    buildUpdatePayload: function(finalData, status) {
+        return {
+            objeto: finalData.objeto || '',
+            condicoes_participacao: finalData.condicoes_participacao || '',
+            criterios_julgamento: finalData.criterios_julgamento || '',
+            fase_lances: finalData.fase_lances || '',
+            status: status
+        };
+    },
+    // Custom form data getter for chat
+    getFormData: function() {
+        return {
+            modalidade: document.getElementById('inputModalidade')?.value || 'Pregão Eletrônico',
+            criterio: document.getElementById('inputCriterio')?.value || 'Menor Preço',
+            modo_disputa: document.getElementById('inputModoDisputa')?.value || 'Aberto'
+        };
+    },
+    fallbackMessage: 'Olá! Sou a **LIA**, sua assistente para elaboração do Edital de Licitação conforme a Lei 14.133/2021.\n\nO Edital padrão utiliza **Pregão Eletrônico** com critério de **menor preço** e disputa **aberta**.\n\n**Deseja usar as configurações padrão ou tem requisitos específicos?**'
+    };
+
+    // ========== EDITAL FIELDS DEFINITION ==========
+        const EDITAL_FIELDS = [
+            // Automatic fields (system)
+            { key: 'numero_edital', label: 'Número do Edital', rows: 1, icon: '🔢', type: 'auto', value: {{ ("PE-" ~projeto.id |default(0) | string ~ "/" ~proxima_versao |default(1) | string) | tojson }} },
+            { key: 'setor_requisitante', label: 'Setor Requisitante', rows: 1, icon: '🏢', type: 'auto', value: {{ (usuario.setor or "Unidade Requisitante")|tojson }} },
+            { key: 'responsavel_requisitante', label: 'Responsável pela Demanda', rows: 1, icon: '👤', type: 'auto', value: {{ (usuario.nome or "")|tojson }} },
+            { key: 'valor_estimado', label: 'Valor Estimado', rows: 1, icon: '💰', type: 'auto', value: {{ ("R$ " ~ "%.2f"|format(valor_estimado_total|default(0))|replace(".", ","))|tojson }} },
+    
+        // AI-generated fields (editable + regenerable)
+        { key: 'objeto', label: 'Objeto da Licitação', rows: 4, icon: '📦', type: 'ia' },
+        { key: 'condicoes_participacao', label: 'Condições de Participação', rows: 5, icon: '📋', type: 'ia' },
+        { key: 'criterios_julgamento', label: 'Critérios de Julgamento', rows: 4, icon: '⚖️', type: 'ia' },
+        { key: 'fase_lances', label: 'Sessão Pública e Recursos', rows: 5, icon: '🎯', type: 'ia' },
+    
+        // User fields (editable from sidebar)
+        { key: 'modalidade', label: 'Modalidade', rows: 1, icon: '📄', type: 'user' },
+        { key: 'criterio_julgamento_user', label: 'Critério de Julgamento', rows: 1, icon: '🏆', type: 'user' },
+        { key: 'modo_disputa', label: 'Modo de Disputa', rows: 1, icon: '🔄', type: 'user' }
+        ];
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(EDITAL_CONFIG, EDITAL_FIELDS);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,873 @@
+{% extends "app.html" %}
+
+{% block page_title %}Pesquisa de Preços - {{ projeto.titulo if projeto else 'LIA' }}{% endblock %}
+
+{% block head %}
+<!-- Bootstrap 5 CSS e FontAwesome (Necessários para esta página) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', path='css/compras.css') }}?v=3.0">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- ID do Projeto para o JS -->
+    <input type="hidden" id="projetoId" value="{{ projeto.id }}">
+
+    <!-- Header da pagina -->
+    <div class="page-header-new">
+        <div class="page-header-content">
+            <div class="page-header-titles">
+                <h1 class="page-title">Proj {{ projeto.id }}: {{ projeto.titulo }}</h1>
+                <p class="page-subtitle">Pesquisa de Preços v{{ proxima_versao }} (Compras.gov.br)</p>
+            </div>
+            <a href="/projetos/{{ projeto.id }}" class="btn-back-elegant" title="Voltar para o projeto">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Voltar
+            </a>
+        </div>
+        <div class="page-header-divider-solid"></div>
+    </div>
+
+    <!-- Queue Container for Multi-Item Research -->
+    <div id="queueContainer" class="alert alert-info d-none mb-4 shadow-sm" role="alert">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-layer-group me-2"></i>
+                <strong>Fila de Pesquisa:</strong>
+                <span id="queueCount">0</span> itens pendentes
+            </div>
+            <div>
+                <button class="btn btn-sm btn-light text-primary fw-bold me-2" id="btnNextQueue">
+                    Próximo da Fila <i class="fas fa-arrow-right ms-1"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-info" id="btnClearQueue">Limpar</button>
+            </div>
+        </div>
+        <div id="queueList" class="mt-2 text-small text-truncate" style="font-size: 0.85em; opacity: 0.8;">
+            <!-- Itens listados aqui -->
+        </div>
+    </div>
+
+    <!-- Formulário de Pesquisa -->
+    <div class="artefato-section">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title m-0">
+                <i class="fas fa-search"></i> Parâmetros de Busca
+            </h5>
+            <button class="btn btn-sm btn-secondary text-white fw-bold opacity-50" id="btnLevantamento"
+                title="Levantamento de Soluções com IA (Em Breve)" disabled>
+                <i class="fas fa-bolt me-1"></i> Levantamento de Soluções (Em Breve)
+            </button>
+        </div>
+        <div class="card-body">
+            <form id="searchForm" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="codigoCatmat" class="form-label fw-bold small text-uppercase text-muted mb-2">Código
+                            Item</label>
+                        <a href="https://catalogo.compras.gov.br/cnbs-web/busca" target="_blank"
+                            class="small text-primary text-decoration-none mb-2" title="Consultar no Compras.gov.br">
+                            <i class="fas fa-external-link-alt me-1"></i>Catálogo
+                        </a>
+                    </div>
+                    <input type="number" class="form-control" id="codigoCatmat" placeholder="Ex: 618302" required>
+                </div>
+                <div class="col-md-2">
+                    <label for="tipoCatalogo" class="form-label fw-bold small text-uppercase text-muted">Tipo</label>
+                    <select class="form-select" id="tipoCatalogo">
+                        <option value="material">Material (CATMAT)</option>
+                        <option value="servico">Serviço (CATSERV)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="estado" class="form-label fw-bold small text-uppercase text-muted">UF</label>
+                    <select class="form-select" id="estado">
+                        <option value="">Todas</option>
+                        <option value="AC">Acre</option>
+                        <option value="AL">Alagoas</option>
+                        <option value="AP">Amapá</option>
+                        <option value="AM">Amazonas</option>
+                        <option value="BA">Bahia</option>
+                        <option value="CE">Ceará</option>
+                        <option value="DF">Distrito Federal</option>
+                        <option value="ES">Espírito Santo</option>
+                        <option value="GO">Goiás</option>
+                        <option value="MA">Maranhão</option>
+                        <option value="MT">Mato Grosso</option>
+                        <option value="MS">Mato Grosso do Sul</option>
+                        <option value="MG">Minas Gerais</option>
+                        <option value="PA">Pará</option>
+                        <option value="PB">Paraíba</option>
+                        <option value="PR">Paraná</option>
+                        <option value="PE">Pernambuco</option>
+                        <option value="PI">Piauí</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="RN">Rio Grande do Norte</option>
+                        <option value="RS">Rio Grande do Sul</option>
+                        <option value="RO">Rondônia</option>
+                        <option value="RR">Roraima</option>
+                        <option value="SC">Santa Catarina</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="SE">Sergipe</option>
+                        <option value="TO">Tocantins</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label d-block text-white" style="user-select: none;">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i> Pesquisar Preços
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label d-block text-white" style="user-select: none;">&nbsp;</label>
+                    <button type="button" id="btnLimpar" class="btn btn-outline-secondary w-100">
+                        Limpar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5 d-none">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p class="mt-2 text-muted">Consultando dados no Compras.gov.br...</p>
+    </div>
+
+    <!-- Mensagem de Erro -->
+    <div id="mensagemErro" class="alert alert-danger d-none" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> <span id="textoErro"></span>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultados" class="d-none">
+
+        <!-- Cabeçalho do Item -->
+        <div class="card mb-4 border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <div
+                            class="text-xs font-weight-bold text-primary text-uppercase mb-1 d-flex align-items-center gap-2">
+                            <span id="badgeTipo" class="badge bg-primary">CATMAT</span>
+                            <span id="itemCodigo" class="h5 mb-0 font-weight-bold text-gray-800"></span>
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800 mt-2" id="descricaoItem"></div>
+                        <div class="text-muted small mt-1" id="itemClasse"></div>
+                    </div>
+                    <div class="col-auto">
+                        <span id="badgeTotalRegistros" class="badge bg-secondary p-2" style="font-size: 1rem;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas (Grid com espaçamento g-3) -->
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Média</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="precoMedio">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calculator fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Mediana</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="precoMediana">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-balance-scale fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Menor Preço</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="precoMinimo">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Maior Preço</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="precoMaximo">-</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha de Estatísticas Secundárias -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="card stat-card-secondary shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <div class="stat-label-sm">1º Quartil (Q1)</div>
+                        <div class="stat-value-sm" id="precoQ1">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="card stat-card-secondary shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <div class="stat-label-sm">3º Quartil (Q3)</div>
+                        <div class="stat-value-sm" id="precoQ3">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="card stat-card-secondary shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <div class="stat-label-sm">Desvio Padrão</div>
+                        <div class="stat-value-sm" id="desvioPadrao">-</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="card stat-card-secondary shadow-sm h-100">
+                    <div class="card-body text-center py-3">
+                        <div class="stat-label-sm">Coef. Variação</div>
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <span class="stat-value-sm" id="coeficienteVariacao">-</span>
+                            <span id="badgeCV" class="badge"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card stat-card-secondary shadow-sm h-100">
+                    <div class="card-body py-3 px-3">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="stat-label-sm">Outliers</div>
+                                <span class="stat-value-sm" id="qtdOutliers">0</span>
+                            </div>
+                            <div class="outlier-toggle d-flex align-items-center gap-2">
+                                <span class="toggle-label-text text-muted small">Excluir</span>
+                                <input type="checkbox" id="toggleOutliers" class="toggle-switch-input">
+                                <label for="toggleOutliers" class="toggle-switch-label">
+                                    <span class="toggle-track"></span>
+                                </label>
+                                <span class="toggle-label-text text-success small fw-bold">Incluir</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-muted small">
+                            Limites: <span id="limiteInferior">-</span> / <span id="limiteSuperior">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm chart-card">
+                    <div class="card-header py-3 bg-transparent border-0">
+                        <h6 class="m-0 fw-bold chart-title">Distribuição de Preços (Histograma)</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="chart-container" style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="chartHistograma"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm chart-card">
+                    <div class="card-header py-3 bg-transparent border-0">
+                        <h6 class="m-0 fw-bold chart-title">Box Plot</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="chart-container" style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="chartBoxPlot"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm chart-card">
+                    <div class="card-header py-3 bg-transparent border-0">
+                        <h6 class="m-0 fw-bold chart-title">Evolução Temporal</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="chart-container" style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="chartTimeline"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm chart-card">
+                    <div class="card-header py-3 bg-transparent border-0">
+                        <h6 class="m-0 fw-bold chart-title">Distribuição por Estado</h6>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="chart-container" style="position: relative; height: 280px; width: 100%;">
+                            <canvas id="chartEstados"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Resultados -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Detalhamento dos Itens</h6>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#filtrosInline">
+                        <i class="fas fa-filter me-1"></i> Filtros
+                    </button>
+                    <span id="contadorSelecionados" class="badge bg-primary me-2">0</span>
+                    <button class="btn btn-sm btn-success me-1" id="btnGerarRelatorio">
+                        <i class="fas fa-file-invoice-dollar me-1"></i> Gerar Relatório
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown">
+                            Exportar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="btnExportJson">JSON</a></li>
+                            <li><a class="dropdown-item" href="#" id="btnExportCsv">CSV</a></li>
+                            <li><a class="dropdown-item" href="#" id="btnExportarCotacaoJson">Cotação (JSON)</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger ms-1" id="btnLimparSelecao">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filtros Inline -->
+                <div class="collapse mb-3" id="filtrosInline">
+                    <div class="filters-inline rounded bg-light p-3 border">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-uppercase mb-1">Fornecedor</label>
+                                <input type="text" class="form-control form-control-sm" id="filtroFornecedor"
+                                    style="height: 38px;">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-uppercase mb-1">UF</label>
+                                <select class="form-select form-select-sm" id="filtroUF" style="height: 38px;">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-uppercase mb-1">Preço Mín</label>
+                                <input type="number" class="form-control form-control-sm" id="filtroPrecoMin"
+                                    style="height: 38px;">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold text-uppercase mb-1">Preço Máx</label>
+                                <input type="number" class="form-control form-control-sm" id="filtroPrecoMax"
+                                    style="height: 38px;">
+                            </div>
+                            <div class="col-md-3">
+                                <!-- Combined Dates for better spacing if needed, but keeping separate cols as requested -->
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-uppercase mb-1">Data Início</label>
+                                        <input type="date" class="form-control form-control-sm" id="filtroDataInicio"
+                                            style="height: 38px;">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-uppercase mb-1">Data Fim</label>
+                                        <input type="date" class="form-control form-control-sm" id="filtroDataFim"
+                                            style="height: 38px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                                <button class="btn btn-primary btn-sm px-4" id="btnAplicarFiltros"
+                                    style="height: 38px;">
+                                    <i class="fas fa-filter me-1"></i> Aplicar
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm px-4" id="btnLimparFiltros"
+                                    style="height: 38px;">
+                                    <i class="fas fa-eraser me-1"></i> Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="tabelaPrecos" width="100%" cellspacing="0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 30px;"><input type="checkbox" id="checkTodos" class="table-checkbox">
+                                </th>
+                                <th data-sort="uasg" class="sortable">UASG <i class="fas fa-sort text-muted small"></i>
+                                </th>
+                                <th data-sort="uf" class="sortable">UF <i class="fas fa-sort text-muted small"></i></th>
+                                <th data-sort="data" class="sortable">Data <i
+                                        class="fas fa-sort-down text-primary small"></i></th>
+                                <th data-sort="fornecedor" class="sortable">Fornecedor <i
+                                        class="fas fa-sort text-muted small"></i></th>
+                                <th data-sort="preco" class="sortable">Preço <i
+                                        class="fas fa-sort text-muted small"></i>
+                                </th>
+                                <th data-sort="quantidade" class="sortable">Qtd. <i
+                                        class="fas fa-sort text-muted small"></i></th>
+                                <th data-sort="unidade" class="sortable">Unid. <i
+                                        class="fas fa-sort text-muted small"></i>
+                                </th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted small" id="paginationInfo"></div>
+                    <div class="d-flex align-items-center">
+                        <select class="form-select form-select-sm me-2" id="pageSize" style="width: 70px;">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-secondary me-1" id="btnPrevPage">Anterior</button>
+                        <button class="btn btn-sm btn-outline-secondary" id="btnNextPage">Próximo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalLoading" class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Carregando detalhes...</p>
+                </div>
+                <div id="modalError" class="alert alert-danger d-none"></div>
+
+                <div id="conteudoDetalhes">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="linkPncp" target="_blank" class="btn btn-success d-none">
+                    <i class="fas fa-external-link-alt me-1"></i> Ver no PNCP
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Relatório -->
+<div class="modal fade" id="modalRelatorio" tabindex="-1" data-bs-focus="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Relatório de Cotação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" tabindex="-1"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-2">
+                        <label class="form-label small">Código</label>
+                        <input type="text" class="form-control form-control-sm" id="relCodigo" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Tipo</label>
+                        <input type="text" class="form-control form-control-sm" id="relTipoCatalogo" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Descrição Item</label>
+                        <input type="text" class="form-control form-control-sm" id="relDescricao">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Unidade</label>
+                        <input type="text" class="form-control form-control-sm" id="relUnidadeMedida">
+                    </div>
+                </div>
+
+                <h6 class="border-bottom pb-2 mb-3">Estatísticas da Seleção (<span id="relQtdItens">0</span> itens)</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Média</label>
+                        <input type="text" class="form-control" id="relMedia" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Mediana</label>
+                        <input type="text" class="form-control" id="relMediana" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Mínimo</label>
+                        <input type="text" class="form-control form-control-sm" id="relMinimo" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Máximo</label>
+                        <input type="text" class="form-control form-control-sm" id="relMaximo" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">1º Quartil</label>
+                        <input type="text" class="form-control form-control-sm" id="relQ1" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">3º Quartil</label>
+                        <input type="text" class="form-control form-control-sm" id="relQ3" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Desvio Padrão</label>
+                        <input type="text" class="form-control form-control-sm" id="relDesvio" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">CV (%)</label>
+                        <input type="text" class="form-control form-control-sm" id="relCV" readonly>
+                    </div>
+                </div>
+
+                <h6 class="border-bottom pb-2 mb-3">Dados da Cotação</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label class="form-label small">Objeto</label>
+                        <input type="text" class="form-control form-control-sm" id="relObjeto">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Justificativa</label>
+                        <textarea class="form-control form-control-sm" id="relJustificativa" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Responsável</label>
+                        <input type="text" class="form-control form-control-sm" id="relResponsavel">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Setor</label>
+                        <input type="text" class="form-control form-control-sm" id="relSetor">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small">Observações Gerais</label>
+                        <textarea class="form-control form-control-sm" id="relObservacoes" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <h6 class="border-bottom pb-2 mb-3">Itens Selecionados</h6>
+                <div class="table-responsive" style="max-height: 300px;">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fornecedor</th>
+                                <th>CNPJ</th>
+                                <th>Preço</th>
+                                <th>Qtd</th>
+                                <th>Unid.</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoRelatorio">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-info text-white" id="btnImprimirRelatorio">
+                    <i class="fas fa-print me-1"></i> Imprimir / PDF
+                </button>
+                <button type="button" class="btn btn-success" id="btnSalvarPesquisa">
+                    <i class="fas fa-save me-1"></i> Salvar no Projeto
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="btnBaixarJsonModal">JSON</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Levantamento de Soluções IA -->
+<!-- Modal Levantamento de Soluções IA (V2 Redesign) -->
+<div class="modal fade" id="modalLevantamento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95vw;">
+        <!-- Aumentado para quase tela cheia -->
+        <div class="modal-content border-0 rounded-4 overflow-hidden shadow-2xl" style="height: 85vh;">
+            <div class="row g-0 h-100">
+
+                <!-- Coluna Principal (Esquerda - Branco) -->
+                <div class="col-lg-8 bg-white d-flex flex-column h-100 position-relative">
+                    <!-- Header Interno -->
+                    <div class="px-5 py-4 border-bottom border-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="fw-bold text-darkest font-serif mb-1">
+                                    <i class="fas fa-magic me-2 text-accent"></i>Levantamento de Soluções
+                                </h4>
+                                <p class="text-muted small mb-0">Descreva sua necessidade e deixe a IA sugerir itens do
+                                    catálogo.</p>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Content -->
+                    <div class="px-5 py-4 flex-grow-1 overflow-auto custom-scrollbar">
+
+                        <!-- Passo 1: Prompt -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-darkest mb-2 text-uppercase small ls-1">1. Instruções
+                                para a IA</label>
+                            <div class="position-relative">
+                                <textarea id="iaPrompt"
+                                    class="form-control input-minimalist bg-light border-0 p-4 shadow-inner-sm"
+                                    style="height: 200px; resize: none; font-size: 1rem; line-height: 1.6;"
+                                    placeholder="Descreva detalhadamente o que você precisa comprar..."></textarea>
+                                <div class="position-absolute bottom-0 end-0 p-3 opacity-50">
+                                    <i class="fas fa-pen-fancy text-accent"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Area de Resultados (Inicialmente Oculta) -->
+                        <div id="iaResultadosContainer" class="d-none mt-5">
+                            <h6
+                                class="fw-bold mb-3 text-darkest text-uppercase small ls-1 px-1 border-start border-4 border-accent ps-2">
+                                3. Soluções Sugeridas</h6>
+
+                            <!-- Loading -->
+                            <div id="iaLoading" class="text-center py-5 d-none">
+                                <div class="spinner-border text-accent mb-3" role="status"
+                                    style="width: 3rem; height: 3rem;"></div>
+                                <h6 class="text-darkest fw-bold">Analisando Catálogo...</h6>
+                                <p class="text-muted small">Cruzando sua descrição com itens do PAC e Histórico.</p>
+                            </div>
+
+                            <!-- Conteúdo Resultados -->
+                            <div id="iaResultadosContent" class="d-none">
+                                <div
+                                    class="alert bg-soft-green border-0 mb-4 py-3 px-4 text-success-dark rounded-3 d-flex align-items-center shadow-sm">
+                                    <i class="fas fa-check-circle fs-4 me-3"></i>
+                                    <span id="iaAnalise" class="fw-medium"></span>
+                                </div>
+
+                                <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                                    <div class="table-responsive" style="max-height: 400px;">
+                                        <table class="table custom-table table-hover align-middle mb-0">
+                                            <thead class="bg-light text-secondary sticky-top">
+                                                <tr>
+                                                    <th style="width: 50px;" class="text-center">
+                                                        <input class="form-check-input" type="checkbox"
+                                                            id="checkTodosIA">
+                                                    </th>
+                                                    <th style="width: 100px;">Código</th>
+                                                    <th>Descrição do Item</th>
+                                                    <th class="text-nowrap">Grupo / Classe / PDM</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="iaTabelaResultado" class="border-top-0">
+                                                <!-- Results will be injected here via JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- End of Scrollable Content -->
+
+                    <!-- Footer Action -->
+                    <div
+                        class="px-5 py-3 border-top border-light bg-fafafa d-flex justify-content-between align-items-center">
+                        <span class="text-muted small"><i class="fas fa-info-circle me-1"></i> A IA utiliza dados
+                            oficiais do Compras.gov.br</span>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light text-muted fw-bold px-4 hover-dark rounded-pill"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-dark btn-minimalist px-5 shadow-lg rounded-pill"
+                                id="btnGerarSolucoes">
+                                <i class="fas fa-sparkles me-2 text-warning"></i> Gerar Soluções
+                            </button>
+                            <button type="button"
+                                class="btn btn-success btn-minimalist text-white shadow-lg btn-sm px-4 rounded-pill d-none"
+                                id="btnAdicionarFila">
+                                <i class="fas fa-plus-circle me-1"></i> Adicionar à Fila
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Fim da Coluna Principal (Esquerda) -->
+
+                <!-- Sidebar Contexto (Direita - Escuro) -->
+                <div
+                    class="col-lg-4 bg-darkest text-white h-100 d-flex flex-column border-start border-secondary border-opacity-25 shadow-lg position-relative overflow-hidden">
+
+                    <div class="p-4 border-bottom border-light border-opacity-10 position-relative z-1">
+                        <h5 class="fw-bold mb-1 text-white"><i class="far fa-compass me-2 text-info"></i>2. Contexto do
+                            Projeto</h5>
+                        <p class="text-light text-opacity-50 small mb-0">Defina o escopo para maior precisão.</p>
+                    </div>
+
+                    <div class="p-4 flex-grow-1 overflow-auto custom-scrollbar-dark position-relative z-1">
+
+                        <!-- DFD Section -->
+                        <div class="mb-5">
+                            <label class="form-label text-info small fw-bold text-uppercase ls-1 mb-3">Documento de
+                                Formalização (DFD)</label>
+
+                            <!-- DFD Selection Cards (Radio) -->
+                            <div class="d-flex flex-column gap-3 mb-3">
+                                <div class="dfd-card position-relative rounded-3 transition-all p-3 cursor-pointer">
+                                    <input class="form-check-input position-absolute top-0 end-0 m-3 ia-contexto-dfd"
+                                        type="radio" name="dfdSelection" value="" id="dfdNone" checked>
+                                    <label class="stretched-link" for="dfdNone"></label>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-secondary bg-opacity-25 p-2 rounded-circle me-3">
+                                            <i class="fas fa-ban text-light text-opacity-75"></i>
+                                        </div>
+                                        <div>
+                                            <span class="d-block text-white fw-medium">Sem DFD Vinculado</span>
+                                            <small class="text-white text-opacity-50">Pesquisa genérica</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% for dfd in dfds %}
+                                <div
+                                    class="dfd-select-card position-relative rounded-3 transition-all p-3 cursor-pointer">
+                                    <input class="form-check-input position-absolute top-0 end-0 m-3 ia-contexto-dfd"
+                                        type="radio" name="dfdSelection" value="{{ dfd.id }}" id="dfd{{ dfd.id }}">
+                                    <label class="stretched-link" for="dfd{{ dfd.id }}"></label>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-info bg-opacity-25 p-2 rounded-circle me-3">
+                                            <i class="fas fa-file-contract text-info"></i>
+                                        </div>
+                                        <div>
+                                            <span class="d-block text-white fw-medium">DFD v{{ dfd.versao }}</span>
+                                            <small class="text-white text-opacity-50">Criado em {{
+                                                dfd.data_criacao.strftime('%d/%m/%Y') }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- PAC Items Section -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label text-warning small fw-bold text-uppercase ls-1 mb-0">Itens do
+                                    PAC Vinculados</label>
+                                <span class="badge bg-warning text-dark rounded-pill">{{ itens_pac|length }}</span>
+                            </div>
+
+                            <div class="d-flex flex-column gap-2">
+                                {% if itens_pac %}
+                                {% for item in itens_pac %}
+                                <div class="item-pac-card position-relative rounded-3 transition-all">
+                                    <input class="form-check-input position-absolute top-0 start-0 m-3 ia-contexto-pac"
+                                        type="checkbox" value="{{ item.id }}" id="pacItem{{ item.id }}" checked
+                                        style="z-index: 2; cursor: pointer;">
+                                    <label class="d-block p-3 ps-5 cursor-pointer w-100 h-100 mb-0"
+                                        for="pacItem{{ item.id }}">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="badge bg-light text-dark bg-opacity-25 mb-1"
+                                                style="font-size: 0.7rem;">Item PAC #{{ item.id }}</span>
+                                            <small class="text-success fw-bold">R$ --</small>
+                                        </div>
+                                        <p class="text-white small mb-0 fw-medium text-truncate-2">{{ item.descricao }}
+                                        </p>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <div
+                                    class="text-center py-4 border border-dashed border-light border-opacity-10 rounded-3">
+                                    <i class="fas fa-box-open text-white text-opacity-25 fs-2 mb-2"></i>
+                                    <p class="text-white text-opacity-50 small mb-0">Nenhum item vinculado.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Sidebar Footer -->
+                    <div class="p-4 bg-dark border-top border-light border-opacity-10 position-relative z-1">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fas fa-lightbulb text-warning fs-4"></i>
+                            <p class="text-white text-opacity-75 small mb-0">
+                                Selecione os itens do PAC mais relevantes para focar a busca da IA.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Bootstrap 5 JS Bundle (Inclui Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', path='js/compras.js') }}?v=4.0"></script>
+<script>
+    // Correção para o loading global: garante que ele desapareça
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+        if (typeof App !== 'undefined' && App.hideLoading) App.hideLoading();
+    });
+</script>
+{% endblock %}

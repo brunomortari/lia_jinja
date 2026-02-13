@@ -1,0 +1,205 @@
+/**
+ * Sistema LIA - Componente: Tabs
+ * ===============================
+ */
+
+/* ========== CONTAINER DE TABS ========== */
+
+.tabs {
+    display: flex;
+    gap: var(--spacing-lg);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--spacing-lg);
+}
+
+.tabs-vertical {
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    padding-right: var(--spacing-md);
+}
+
+/* ========== TAB INDIVIDUAL ========== */
+
+.tab {
+    position: relative;
+    padding: var(--spacing-md) 0;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: var(--text-primary);
+}
+
+.tab.active {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+/* ========== INDICADOR DE TAB ATIVA ========== */
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-accent);
+    border-radius: var(--radius-full);
+}
+
+.tabs-vertical .tab.active::after {
+    bottom: 0;
+    left: auto;
+    right: calc(-1 * var(--spacing-md) - 1px);
+    width: 2px;
+    height: 100%;
+}
+
+/* ========== VARIANTE PILLS ========== */
+
+.tabs-pills {
+    gap: var(--spacing-sm);
+    border-bottom: none;
+    background: var(--color-gray-100);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-lg);
+    width: fit-content;
+}
+
+.tabs-pills .tab {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+.tabs-pills .tab.active {
+    background: var(--bg-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.tabs-pills .tab.active::after {
+    display: none;
+}
+
+/* ========== VARIANTE BOXED ========== */
+
+.tabs-boxed {
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    width: fit-content;
+}
+
+.tabs-boxed .tab {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-right: 1px solid var(--border);
+}
+
+.tabs-boxed .tab:last-child {
+    border-right: none;
+}
+
+.tabs-boxed .tab.active {
+    background: var(--color-accent);
+    color: white;
+}
+
+.tabs-boxed .tab.active::after {
+    display: none;
+}
+
+/* ========== TAB COM ÍCONE ========== */
+
+.tab-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.tab-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ========== TAB COM BADGE ========== */
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: var(--spacing-sm);
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--color-gray-200);
+    color: var(--color-gray-700);
+    border-radius: var(--radius-full);
+}
+
+.tab.active .tab-badge {
+    background: var(--color-accent);
+    color: white;
+}
+
+/* ========== CONTEÚDO DAS TABS ========== */
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: tabFadeIn 0.3s ease;
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== TABS RESPONSIVAS ========== */
+
+@media (max-width: 768px) {
+    .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab {
+        flex-shrink: 0;
+    }
+}
+
+/* ========== TABS ESTICADAS ========== */
+
+.tabs-stretched {
+    width: 100%;
+}
+
+.tabs-stretched .tab {
+    flex: 1;
+    text-align: center;
+}

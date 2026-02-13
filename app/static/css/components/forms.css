@@ -1,0 +1,284 @@
+/**
+ * Sistema LIA - Componente: Formulários
+ * ======================================
+ */
+
+/* ========== GRUPO DE FORMULÁRIO ========== */
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* ========== LABELS ========== */
+
+.form-label,
+label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-label-required::after {
+    content: '*';
+    color: var(--color-error);
+    margin-left: var(--spacing-xs);
+}
+
+/* ========== INPUTS ========== */
+
+.form-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="datetime-local"],
+textarea,
+select {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: var(--input-bg, var(--bg-secondary));
+    border: 2px solid var(--input-border, var(--border));
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.form-input:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--input-focus-border, var(--color-accent));
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+.form-input:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+    background: var(--color-gray-100);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.form-input::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted, var(--color-gray-400));
+}
+
+/* ========== TEXTAREA ========== */
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ========== SELECT ========== */
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-md) center;
+    padding-right: calc(var(--spacing-md) * 2 + 12px);
+}
+
+/* ========== INPUT COM ÍCONE ========== */
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper .input-icon {
+    position: absolute;
+    left: var(--spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted, var(--color-gray-400));
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.input-wrapper .input-icon-right {
+    left: auto;
+    right: var(--spacing-md);
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.input-wrapper input {
+    padding-left: calc(var(--spacing-md) * 2 + 18px);
+}
+
+.input-wrapper.has-icon-right input {
+    padding-right: calc(var(--spacing-md) * 2 + 18px);
+}
+
+.input-wrapper input:focus ~ .input-icon {
+    color: var(--color-accent);
+}
+
+/* ========== ESTADOS DE VALIDAÇÃO ========== */
+
+.form-input.is-valid,
+input.is-valid {
+    border-color: var(--color-success);
+}
+
+.form-input.is-valid:focus,
+input.is-valid:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.form-input.is-invalid,
+input.is-invalid {
+    border-color: var(--color-error);
+}
+
+.form-input.is-invalid:focus,
+input.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* ========== MENSAGENS ========== */
+
+.form-hint {
+    display: block;
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.form-error {
+    display: block;
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--color-error);
+}
+
+.form-success {
+    display: block;
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--color-success);
+}
+
+/* ========== CHECKBOX E RADIO ========== */
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--color-accent);
+}
+
+.form-check-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* ========== SWITCH TOGGLE ========== */
+
+.form-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+}
+
+.form-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.form-switch .switch-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--color-gray-300);
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+}
+
+.form-switch .switch-slider::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-switch input:checked + .switch-slider {
+    background: var(--color-accent);
+}
+
+.form-switch input:checked + .switch-slider::before {
+    transform: translateX(20px);
+}
+
+/* ========== TAMANHOS ========== */
+
+.form-input-sm,
+input.form-input-sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-xs);
+}
+
+.form-input-lg,
+input.form-input-lg {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: var(--font-size-base);
+}
+
+/* ========== FORM INLINE ========== */
+
+.form-inline {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-md);
+}
+
+.form-inline .form-group {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

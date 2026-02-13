@@ -1,0 +1,232 @@
+{% extends "app.html" %}
+
+{% block extra_css %}
+<style>
+    .dev-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .action-button {
+        padding: 16px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(56, 161, 105, 0.4);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #4a5568;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+    }
+    
+    .progress-indicator {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+    
+    .progress-step {
+        flex: 1;
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        position: relative;
+    }
+    
+    .progress-step.active {
+        background: linear-gradient(90deg, #3182ce 0%, #2c5282 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <!-- Header com Badge de Desenvolvimento -->
+    <div class="text-center mb-12">
+        <div class="dev-badge mb-6">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+            </svg>
+            EM DESENVOLVIMENTO
+        </div>
+        
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Pesquisa Profunda de Atas</h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Sistema inteligente de busca e análise de atas de registro de preços para otimizar o processo de adesão
+        </p>
+    </div>
+
+    <!-- Indicador de Progresso -->
+    <div class="progress-indicator max-w-3xl mx-auto mb-12">
+        <div class="progress-step active"></div>
+        <div class="progress-step"></div>
+        <div class="progress-step"></div>
+    </div>
+
+    <!-- Cards de Funcionalidades Futuras -->
+    <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+        <div class="feature-card text-center">
+            <div class="text-5xl mb-4">🔍</div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Busca Inteligente</h3>
+            <p class="text-gray-600 text-sm">
+                IA analisa milhares de atas para encontrar as melhores opções
+            </p>
+        </div>
+        
+        <div class="feature-card text-center">
+            <div class="text-5xl mb-4">📊</div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Comparação Automática</h3>
+            <p class="text-gray-600 text-sm">
+                Compare preços, prazos e condições de múltiplas atas
+            </p>
+        </div>
+        
+        <div class="feature-card text-center">
+            <div class="text-5xl mb-4">✅</div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Validação Legal</h3>
+            <p class="text-gray-600 text-sm">
+                Verificação automática de requisitos da Lei 14.133/2021
+            </p>
+        </div>
+    </div>
+
+    <!-- Botões de Decisão -->
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-10">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Como deseja prosseguir?
+        </h2>
+        
+        <p class="text-gray-600 mb-8 text-center">
+            Enquanto desenvolvemos a funcionalidade completa de pesquisa, você pode escolher se deseja aderir a uma ata existente ou seguir com outro processo.
+        </p>
+        
+        <div class="flex flex-col md:flex-row gap-4">
+            <button onclick="aderirAta()" class="action-button btn-primary flex-1">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Aderir a Ata
+            </button>
+            
+            <button onclick="naoAderir()" class="action-button btn-secondary flex-1">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Não Aderir a Ata
+            </button>
+        </div>
+        
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex gap-3">
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                <div class="text-sm text-blue-800">
+                    <strong>Em breve:</strong> Sistema completo de pesquisa com integração ao PNCP, análise de vantajosidade e geração automática de documentos para adesão.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Roadmap -->
+    <div class="max-w-3xl mx-auto mt-16">
+        <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">Roadmap de Desenvolvimento</h3>
+        <div class="space-y-4">
+            <div class="flex items-start gap-4 p-4 bg-green-50 rounded-lg">
+                <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Fase 1: Decisão de Adesão ✓</h4>
+                    <p class="text-sm text-gray-600">Fluxo de decisão entre aderir ou não a atas</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
+                <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0 font-bold">2</div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Fase 2: Integração PNCP</h4>
+                    <p class="text-sm text-gray-600">Busca automática de atas no Portal Nacional de Contratações Públicas</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-lg opacity-60">
+                <div class="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center flex-shrink-0 font-bold">3</div>
+                <div>
+                    <h4 class="font-semibold text-gray-800">Fase 3: Análise com IA</h4>
+                    <p class="text-sm text-gray-600">Comparação inteligente de preços e condições</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function aderirAta() {
+        // Futuramente: navegar para tela de pesquisa de atas
+        // Por enquanto: atualizar ETP para modalidade adesao_ata
+        alert('🎯 Funcionalidade em desenvolvimento!\n\nEm breve você poderá:\n• Buscar atas no PNCP\n• Comparar preços automaticamente\n• Validar requisitos legais\n• Gerar documentos de adesão\n\nPor enquanto, o sistema registrará sua escolha por adesão a ata.');
+        window.location.href = "{{ url_for('projeto_dashboard', projeto_id=projeto.id) }}";
+    }
+    
+    function naoAderir() {
+        // Volta para dashboard - usuário escolherá outro fluxo
+        if (confirm('Confirma que não deseja aderir a uma ata?\n\nVocê será redirecionado para escolher outra modalidade (Licitação, Dispensa ou Contratação Direta).')) {
+            window.location.href = "{{ url_for('projeto_dashboard', projeto_id=projeto.id) }}";
+        }
+    }
+</script>
+{% endblock %}

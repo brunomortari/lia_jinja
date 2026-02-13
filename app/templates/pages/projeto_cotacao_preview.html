@@ -1,0 +1,355 @@
+{% extends "app.html" %}
+
+{% block content %}
+<!-- Header da pagina -->
+<div class="page-header">
+    <div class="page-header-left">
+        <a href="/projetos/{{ projeto.id }}/cotacao-page" class="btn-back" title="Voltar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </a>
+        <div>
+            <h1 class="page-title">Curadoria da Pesquisa de Preços</h1>
+            <p class="page-subtitle">Projeto: {{ projeto.titulo }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="card artefato-section">
+    <div class="card-body">
+        <p class="info-text">Revise e edite os dados abaixo. Se estiverem corretos, clique em "Aprovar e Salvar" para
+            registrar as informações no banco de dados.</p>
+
+        {% set content = cotacao_data.content_blocks or cotacao_data %}
+
+        <!-- Itens Pesquisados (Apenas para referência) -->
+        <div class="dfd-block">
+            <h3 class="dfd-block-title">Itens Pesquisados</h3>
+            <ul>
+                {% for item in content.itens_pesquisados %}
+                <li><strong>Item {{ item.item }}:</strong> {{ item.descricao }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Cotações de Fornecedores (Editável) -->
+        <div class="dfd-block">
+            <h3 class="dfd-block-title">Cotações de Fornecedores</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fornecedor</th>
+                            <th>CNPJ</th>
+                            <th>Item</th>
+                            <th class="text-right">Valor Unitário (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cotacao in content.cotacoes_recebidas.cotacoes %}
+                        {% set cotacao_idx = loop.index0 %}
+                        {% for item in cotacao.itens %}
+                        <tr>
+                            {% if loop.first %}
+                            <td rowspan="{{ cotacao.itens|length }}" class="v-align-top">
+                                <input type="text" value="{{ cotacao.fornecedor }}"
+                                    data-path="cotacoes_recebidas.cotacoes.{{ cotacao_idx }}.fornecedor"
+                                    class="form-input">
+                            </td>
+                            <td rowspan="{{ cotacao.itens|length }}" class="v-align-top">
+                                <input type="text" value="{{ cotacao.cnpj }}"
+                                    data-path="cotacoes_recebidas.cotacoes.{{ cotacao_idx }}.cnpj" class="form-input">
+                            </td>
+                            {% endif %}
+                            <td>Item {{ item.item }}</td>
+                            <td class="text-right">
+                                <input type="number" step="0.01" value="{{ '%.2f'|format(item.valor_unitario) }}"
+                                    data-path="cotacoes_recebidas.cotacoes.{{ cotacao_idx }}.itens.{{ loop.index0 }}.valor_unitario"
+                                    class="form-input text-right">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-state-cell">Nenhuma cotação de fornecedor encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Contratações Similares (Editável) -->
+        <div class="dfd-block">
+            <h3 class="dfd-block-title">Contratações Similares (PNCP)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Órgão</th>
+                            <th>Contrato</th>
+                            <th>Item</th>
+                            <th class="text-right">Valor Unitário (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contrato in content.contratacoes_similares.contratos %}
+                        {% set contrato_idx = loop.index0 %}
+                        {% for item in contrato.itens %}
+                        <tr>
+                            {% if loop.first %}
+                            <td rowspan="{{ contrato.itens|length }}" class="v-align-top">
+                                <input type="text" value="{{ contrato.orgao }}"
+                                    data-path="contratacoes_similares.contratos.{{ contrato_idx }}.orgao"
+                                    class="form-input">
+                            </td>
+                            <td rowspan="{{ contrato.itens|length }}" class="v-align-top">
+                                <input type="text" value="{{ contrato.numero_contrato }}"
+                                    data-path="contratacoes_similares.contratos.{{ contrato_idx }}.numero_contrato"
+                                    class="form-input">
+                            </td>
+                            {% endif %}
+                            <td>Item {{ item.item }}</td>
+                            <td class="text-right">
+                                <input type="number" step="0.01" value="{{ '%.2f'|format(item.valor_unitario) }}"
+                                    data-path="contratacoes_similares.contratos.{{ contrato_idx }}.itens.{{ loop.index0 }}.valor_unitario"
+                                    class="form-input text-right">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-state-cell">Nenhuma contratação similar encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Botão de Ação -->
+        <div class="artefato-actions">
+            <a href="/projetos/{{ projeto.id }}/cotacao-page" class="btn btn-secondary">
+                Cancelar
+            </a>
+            <button id="btn-salvar-cotacao" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Aprovar e Salvar no Banco de Dados
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Armazena os dados da IA em um local escondido para o JS pegar -->
+<script id="cotacao-data-script" type="application/json">
+    {{ cotacao_data_json | safe }}
+</script>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnSalvar = document.getElementById('btn-salvar-cotacao');
+
+        // Pega os dados completos da cotação que foram embutidos na página
+        const cotacaoDataElement = document.getElementById('cotacao-data-script');
+        let editableCotacaoData = JSON.parse(cotacaoDataElement.textContent);
+
+        /**
+         * Define um valor em um objeto aninhado usando um caminho de string (ex: 'a.b.c').
+         * @param {object} obj - O objeto a ser modificado.
+         * @param {string} path - O caminho para a propriedade.
+         * @param {*} value - O valor a ser definido.
+         */
+        function setObjectValueByPath(obj, path, value) {
+            const keys = path.split('.');
+            let current = obj;
+            for (let i = 0; i < keys.length - 1; i++) {
+                const key = keys[i];
+                // Se a chave for um número, trata como índice de array
+                const nextKey = keys[i + 1];
+                const isNextKeyNumeric = !isNaN(parseInt(nextKey, 10));
+
+                if (!current[key]) {
+                    current[key] = isNextKeyNumeric ? [] : {};
+                }
+                current = current[key];
+            }
+
+            const finalKey = keys[keys.length - 1];
+            // Converte para número se for um campo de valor
+            if (finalKey.includes('valor') || finalKey.includes('quantidade')) {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue)) {
+                    current[finalKey] = numValue;
+                    return;
+                }
+            }
+            current[finalKey] = value;
+        }
+
+        // Adiciona event listeners a todos os inputs editáveis
+        document.querySelectorAll('input[data-path]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const path = e.target.dataset.path;
+                const value = e.target.value;
+
+                // Atualiza o objeto de dados em memória
+                setObjectValueByPath(editableCotacaoData.content_blocks, path, value);
+                console.log('Dados atualizados:', editableCotacaoData);
+            });
+        });
+
+        // Ação do botão de salvar
+        btnSalvar.addEventListener('click', async function () {
+            if (!editableCotacaoData) {
+                alert("Erro: Dados da cotação não encontrados.");
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<div class="loading-spinner-small" style="border-top-color: white; margin-right: 8px;"></div>Salvando...';
+
+            const projetoId = {{ projeto.id }
+        };
+
+        try {
+            // Envia os dados (possivelmente modificados) para o endpoint de salvamento versionado
+            const response = await fetch('/api/ia/pesquisa-precos/salvar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    projeto_id: projetoId,
+                    cotacao_data: editableCotacaoData // Envia o objeto JS atualizado
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Erro no servidor');
+            }
+
+            const resultadoSalvar = await response.json();
+
+            // Exibe uma notificação de sucesso
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: resultadoSalvar.message
+            });
+
+            // Aguarda um pouco e redireciona para a página de cotação do projeto
+            setTimeout(() => {
+                window.location.href = '/projetos/' + projetoId + '/cotacao-page';
+            }, 1500);
+
+        } catch (error) {
+            console.error("Erro ao salvar cotação:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Ocorreu um erro ao salvar a pesquisa: ' + error.message,
+            });
+            this.disabled = false;
+            this.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Aprovar e Salvar no Banco de Dados';
+        }
+    });
+});
+</script>
+<style>
+    .dfd-block {
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dfd-block:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .dfd-block-title {
+        color: var(--color-primary);
+        font-size: 1.125rem;
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--color-primary);
+        font-weight: 600;
+    }
+
+    .dfd-block ul {
+        list-style-position: inside;
+        padding-left: var(--spacing-sm);
+    }
+
+    .dfd-block li {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: var(--spacing-md);
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    thead {
+        background: var(--bg-secondary);
+    }
+
+    th {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .v-align-top {
+        vertical-align: top;
+    }
+</style>
+{% endblock %}

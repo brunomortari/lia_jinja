@@ -1,0 +1,258 @@
+{% extends "app.html" %}
+{% from "components/artifact_chat_macros.html" import
+chat_layout_start,
+chat_section_start,
+chat_welcome,
+chat_messages_area,
+chat_auth_bar,
+chat_input_area,
+chat_section_end,
+context_panel_start,
+context_card,
+context_panel_end,
+workspace_section,
+chat_layout_end
+%}
+
+{% block title %}DFD - Chat com IA | {{ projeto.titulo }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/artifact_chat.css') }}">
+{% endblock %}
+
+{% block content %}
+{# ========== LAYOUT DO CHAT ========== #}
+{{ chat_layout_start() }}
+
+{# ========== SEÇÃO DE CHAT (ESQUERDA) ========== #}
+{{ chat_section_start(
+projeto=projeto,
+artifact_label='DFD',
+artifact_version=proxima_versao,
+subtitle='Assistente para elaboração do Documento de Formalização da Demanda'
+) }}
+
+{# Welcome Screen - Rendered via JavaScript for centered display #}
+
+{{ chat_messages_area() }}
+{{ chat_auth_bar(artifact_label='DFD') }}
+{{ chat_input_area(placeholder='Descreva sua necessidade de contratação...') }}
+
+{{ chat_section_end() }}
+
+{# ========== PAINEL DE CONTEXTO (DIREITA) ========== #}
+{{ context_panel_start(artifact_label='DFD') }}
+
+
+
+{# Campos obrigatórios do DFD - Acordeão colapsável #}
+<div class="context-card collapsed" id="cardDadosDFD">
+    <div class="context-card-header" onclick="toggleContextCard('cardDadosDFD')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Dados do DFD
+            <span class="context-badge" style="font-size: 0.6rem;">Preencha aqui ou via chat</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="required-fields-section"
+            style="margin-bottom: 0; margin-top: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Gestor do Contrato</label>
+                <input type="text" class="required-field-input" id="inputGestor" placeholder="Nome do gestor...">
+            </div>
+
+            <div class="required-field-group">
+                <label class="required-field-label">Fiscal do Contrato</label>
+                <input type="text" class="required-field-input" id="inputFiscal" placeholder="Nome do fiscal...">
+            </div>
+
+            <div class="required-field-group" style="margin-bottom: 0;">
+                <label class="required-field-label">Data Limite (prazo)</label>
+                <input type="date" class="required-field-input" id="inputDataLimite">
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Card: Projeto #}
+{{ context_card(
+id='cardProjeto',
+title='Projeto',
+icon='folder',
+collapsed=true,
+items=[
+{'label': 'Título', 'value': projeto.titulo},
+{'label': 'Requisitante', 'value': usuario.nome},
+{'label': 'Setor', 'value': usuario.setor or 'Não informado'}
+]
+) }}
+
+{# Card: Itens do PAC #}
+<div class="context-card collapsed" id="cardPac">
+    <div class="context-card-header" onclick="toggleContextCard('cardPac')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Itens do PAC
+            <span class="context-badge">{{ itens_pac|length }}</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <div class="financial-summary-mini">
+            <div class="fin-item">
+                <span class="fin-label">Total Itens</span>
+                <span class="fin-value">{{ (total_itens|round|int if total_itens else itens_pac|length) }}</span>
+            </div>
+            <div class="fin-item">
+                <span class="fin-label">Valor Estimado</span>
+                <span class="fin-value highlight">R$ {{ "%.2f"|format(valor_estimado_total)|replace(".", ",") if
+                    valor_estimado_total else "0,00" }}</span>
+            </div>
+        </div>
+        <div class="context-divider"></div>
+        {% for item in itens_pac %}
+        <div class="context-item pac-item-detailed">
+            <div class="context-label">Item {{ item.id }} - {{ (item.descricao or item.objeto or 'Sem descrição') }}
+            </div>
+            <div class="pac-item-meta">
+                <span>Qtd: {{ item.quantidade|default(1) }}</span>
+                <span>Unid: {{ item.unidade_fornecimento|default('Un') }}</span>
+                <span>Unit: R$ {{ "%.2f"|format(item.valor_unitario|float)|replace(".", ",") if item.valor_unitario else
+                    "0,00" }}</span>
+            </div>
+            <div class="pac-item-total">
+                Total: R$ {{ "%.2f"|format((item.valor_total or (item.quantidade|default(1) *
+                item.valor_unitario|default(0)))|float)|replace(".", ",") }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{{ context_panel_end() }}
+
+{# ========== SEÇÃO WORKSPACE (GERAÇÃO) ========== #}
+{{ workspace_section(artifact_label='DFD') }}
+
+{{ chat_layout_end() }}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', path='js/pages/artifact_chat.js') }}"></script>
+<script>
+    console.log('[DFD Chat] Inicializando interface...');
+
+    // ========== DFD-SPECIFIC CONFIGURATION ==========
+    const DFD_CONFIG = {
+        projetoId: {{ projeto.id|default (0) }},
+    apiBase: '/api/ia-native/dfd',
+        artifactType: 'dfd',
+            artifactLabel: 'DFD',
+                generateMarker: '[GERAR_DFD]',
+                    setorRequisitante: {{ (usuario.setor or "Unidade Requisitante")| tojson }},
+    responsavelRequisitante: {{ (usuario.nome or "")| tojson }},
+    valorEstimado: {{ (valor_estimado_total or 0)| tojson }},
+    // Edit mode
+    faseInicial: {{ (fase_inicial or "preparation")| tojson }},
+    editarId: {{ (dfd_editar.id if dfd_editar else None)| tojson }},
+    editarVersao: {{ (dfd_editar.versao if dfd_editar else None)| tojson }},
+    editarStatus: {{ (dfd_editar.status if dfd_editar else "")| tojson }},
+    // Existing data for editing
+    editarDados: {% if dfd_editar %} {
+        descricao_objeto_padronizada: {{ dfd_editar.descricao_objeto | tojson }},
+        justificativa_tecnica: {{ dfd_editar.justificativa | tojson }},
+        analise_alinhamento: {{ dfd_editar.alinhamento_estrategico | tojson }},
+        prioridade_sugerida: {{ dfd_editar.grau_prioridade | tojson }},
+        data_pretendida: {{ dfd_editar.cronograma | tojson }},
+        responsavel_gestor: {{ dfd_editar.responsavel_gestor | tojson }},
+        responsavel_fiscal: {{ dfd_editar.responsavel_fiscal | tojson }}
+    } {% else %} null{% endif %},
+    // Endpoints
+    saveEndpoint: '/api/ia/artefato/salvar',
+        updateEndpoint: '/api/dfd/' + '{id}',
+            // Custom payload builders
+            buildSavePayload: function(finalData, status) {
+                return {
+                    projeto_id: this.projetoId,
+                    tipo_artefato: 'dfd',
+                    artefato_data: {
+                        descricao_objeto_padronizada: finalData.descricao_objeto_padronizada || '',
+                        justificativa_tecnica: finalData.justificativa_tecnica || '',
+                        id_item_pca: null,
+                        prioridade_sugerida: finalData.prioridade_sugerida || '',
+                        analise_alinhamento: finalData.analise_alinhamento || ''
+                    },
+                    campos_sistema: {
+                        setor_requisitante: this.setorRequisitante,
+                        responsavel_requisitante: this.responsavelRequisitante,
+                        valor_estimado: this.valorEstimado,
+                        grau_prioridade: finalData.prioridade_sugerida || '',
+                        alinhamento_pca: finalData.analise_alinhamento || '',
+                        alinhamento_estrategico: finalData.analise_alinhamento || ''
+                    },
+                    campos_usuario: {
+                        data_pretendida: finalData.data_pretendida || null,
+                        responsavel_gestor: finalData.responsavel_gestor || null,
+                        responsavel_fiscal: finalData.responsavel_fiscal || null
+                    },
+                    status: status
+                };
+            },
+    buildUpdatePayload: function(finalData, status) {
+        return {
+            descricao_objeto: finalData.descricao_objeto_padronizada || '',
+            justificativa: finalData.justificativa_tecnica || '',
+            alinhamento_estrategico: finalData.analise_alinhamento || '',
+            grau_prioridade: finalData.prioridade_sugerida || '',
+            cronograma: finalData.data_pretendida || null,
+            responsavel_gestor: finalData.responsavel_gestor || null,
+            responsavel_fiscal: finalData.responsavel_fiscal || null,
+            status: status
+        };
+    },
+    fallbackMessage: 'Olá! Sou a **LIA**, sua assistente para elaboração do DFD conforme a Lei 14.133/2021.\n\nVou te ajudar a elaborar um documento completo e bem fundamentado. Para começar:\n\n**Me conta: qual problema ou necessidade motivou essa contratação?**\n\nDurante nossa conversa, vou te perguntar sobre prazo, gestor e fiscal do contrato.'
+    };
+
+    // ========== DFD FIELDS DEFINITION ==========
+    const DFD_FIELDS = [
+        // Automatic fields (system)
+        { key: 'numero_dfd', label: 'Número do DFD', rows: 1, icon: '🔢', type: 'auto', value: {{ ("DFD-" ~projeto.id |default(0) | string ~ "-" ~proxima_versao |default(1) | string) | tojson }}},
+    { key: 'setor_requisitante', label: 'Setor Requisitante', rows: 1, icon: '🏢', type: 'auto', value: {{ (usuario.setor or "Unidade Requisitante")| tojson }} },
+    { key: 'responsavel_requisitante', label: 'Responsável pela Demanda', rows: 1, icon: '👤', type: 'auto', value: {{ (usuario.nome or "")| tojson }} },
+    { key: 'valor_estimado', label: 'Estimativa Preliminar', rows: 1, icon: '💰', type: 'auto', value: {{ ("R$ " ~ "%.2f" | format(valor_estimado_total |default(0)) | replace(".", ","))| tojson }} },
+
+    // AI-generated fields (editable + regenerable)
+    { key: 'descricao_objeto_padronizada', label: 'Descrição do Objeto', rows: 3, icon: '📦', type: 'ia' },
+    { key: 'justificativa_tecnica', label: 'Justificativa da Necessidade', rows: 4, icon: '📋', type: 'ia' },
+    { key: 'analise_alinhamento', label: 'Alinhamento Estratégico', rows: 2, icon: '🎯', type: 'ia' },
+    { key: 'prioridade_sugerida', label: 'Grau de Prioridade', rows: 1, icon: '⚡', type: 'ia' },
+
+    // User fields (editable)
+    { key: 'data_pretendida', label: 'Data Pretendida', rows: 1, icon: '📅', type: 'user' },
+    { key: 'responsavel_gestor', label: 'Gestor do Contrato', rows: 1, icon: '👔', type: 'user' },
+    { key: 'responsavel_fiscal', label: 'Fiscal do Contrato', rows: 1, icon: '👥', type: 'user' }
+    ];
+
+    // ========== INITIALIZATION ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        initArtifactChat(DFD_CONFIG, DFD_FIELDS);
+    });
+</script>
+{% endblock %}

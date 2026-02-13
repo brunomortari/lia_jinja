@@ -1,0 +1,821 @@
+{% extends "app.html" %}
+
+{% block content %}
+<!-- Header da pagina -->
+<div class="page-header">
+    <div class="page-header-left">
+        <a href="/projetos/{{ projeto.id }}" class="btn-back" title="Voltar para o projeto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </a>
+        <div>
+            <h1 class="page-title">{{ projeto.titulo }}</h1>
+            <p class="page-subtitle">Editar Pesquisa de Precos (PP)</p>
+        </div>
+    </div>
+    <div class="page-header-right">
+        <span class="versao-badge">Versao {{ pesquisa.versao }}</span>
+        <button type="button" id="btn-nova-versao" class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M12 5v14M5 12h14" />
+            </svg>
+            Nova Versao
+        </button>
+    </div>
+</div>
+
+<!-- Barra de acoes -->
+<div class="card pp-actions-bar">
+    <div class="actions-left">
+        <span class="status-indicator">
+            <span class="status-dot status-{{ pesquisa.status }}"></span>
+            {{ pesquisa.status|replace('_', ' ')|title }}
+        </span>
+        <span class="separator">|</span>
+        <span class="last-update">Atualizado em {{ pesquisa.data_atualizacao.strftime('%d/%m/%Y %H:%M') if
+            pesquisa.data_atualizacao else 'N/A' }}</span>
+    </div>
+    <div class="actions-right">
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-aprovar" {% if pesquisa.status=='aprovado'
+            %}disabled{% endif %}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            {% if pesquisa.status == 'aprovado' %}Aprovado{% else %}Aprovar{% endif %}
+        </button>
+    </div>
+</div>
+
+<!-- Cards de Edicao -->
+<div class="pp-editor">
+    <!-- Card: Informacoes do Item -->
+    <div class="pp-field-card">
+        <div class="field-header">
+            <div class="field-info">
+                <h3 class="field-label">Informacoes do Item</h3>
+                <p class="field-description">Dados do item pesquisado no CATMAT/CATSERV</p>
+            </div>
+        </div>
+        <div class="field-content">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Codigo</label>
+                    <input type="text" class="field-input" id="campo-codigo" value="{{ item_info.codigo or '' }}"
+                        readonly>
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <input type="text" class="field-input" id="campo-tipo" value="{{ item_info.tipo or '' }}" readonly>
+                </div>
+                <div class="form-group flex-grow">
+                    <label>Descricao</label>
+                    <input type="text" class="field-input campo-editavel" id="campo-descricao"
+                        data-campo="item_descricao" value="{{ pesquisa.item_descricao or item_info.descricao or '' }}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Estatisticas -->
+    <div class="pp-field-card">
+        <div class="field-header">
+            <div class="field-info">
+                <h3 class="field-label">Estatisticas da Cotacao</h3>
+                <p class="field-description">Resumo estatistico dos precos encontrados</p>
+            </div>
+        </div>
+        <div class="field-content">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-label">Quantidade de Itens</span>
+                    <span class="stat-value">{{ pesquisa.quantidade_itens_encontrados or estatisticas.quantidade_itens
+                        or 0 }}</span>
+                </div>
+                <div class="stat-item stat-highlight">
+                    <span class="stat-label">Preco Medio</span>
+                    <span class="stat-value">R$ {{ "%.2f"|format(pesquisa.preco_medio or estatisticas.media or 0)
+                        }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Preco Minimo</span>
+                    <span class="stat-value">R$ {{ "%.2f"|format(estatisticas.minimo or 0) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Preco Maximo</span>
+                    <span class="stat-value">R$ {{ "%.2f"|format(estatisticas.maximo or 0) }}</span>
+                </div>
+                <div class="stat-item stat-highlight-secondary">
+                    <span class="stat-label">Mediana</span>
+                    <span class="stat-value">R$ {{ "%.2f"|format(estatisticas.mediana or 0) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Dados do Documento -->
+    <div class="pp-field-card">
+        <div class="field-header">
+            <div class="field-info">
+                <h3 class="field-label">Dados do Documento</h3>
+                <p class="field-description">Informacoes do cabecalho da pesquisa de precos</p>
+            </div>
+            <div class="field-actions">
+                <button type="button" class="btn btn-ghost btn-sm btn-salvar-documento" title="Salvar alteracoes"
+                    style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
+                    </svg>
+                    Salvar
+                </button>
+            </div>
+        </div>
+        <div class="field-content">
+            <div class="form-row">
+                <div class="form-group flex-grow">
+                    <label>Objeto</label>
+                    <input type="text" class="field-input campo-editavel" id="campo-objeto" data-campo="objeto"
+                        value="{{ doc_header.objeto or '' }}" placeholder="Objeto da pesquisa de precos...">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group flex-grow">
+                    <label>Justificativa</label>
+                    <textarea class="field-textarea campo-editavel" id="campo-justificativa" data-campo="justificativa"
+                        rows="3"
+                        placeholder="Justificativa da pesquisa...">{{ doc_header.justificativa or '' }}</textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Responsavel</label>
+                    <input type="text" class="field-input campo-editavel" id="campo-responsavel"
+                        data-campo="responsavel" value="{{ doc_header.responsavel or '' }}"
+                        placeholder="Nome do responsavel">
+                </div>
+                <div class="form-group">
+                    <label>Setor</label>
+                    <input type="text" class="field-input campo-editavel" id="campo-setor" data-campo="setor"
+                        value="{{ doc_header.setor or '' }}" placeholder="Setor requisitante">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group flex-grow">
+                    <label>Observacoes</label>
+                    <textarea class="field-textarea campo-editavel" id="campo-observacoes" data-campo="observacoes"
+                        rows="2" placeholder="Observacoes adicionais...">{{ doc_header.observacoes or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Fornecedores Selecionados -->
+    <div class="pp-field-card">
+        <div class="field-header">
+            <div class="field-info">
+                <h3 class="field-label">Fornecedores Cotados</h3>
+                <p class="field-description">Lista de fornecedores e precos selecionados</p>
+            </div>
+        </div>
+        <div class="field-content">
+            <div class="table-responsive">
+                <table class="pp-table">
+                    <thead>
+                        <tr>
+                            <th>Fornecedor</th>
+                            <th>CNPJ</th>
+                            <th>Preco Unit.</th>
+                            <th>Quantidade</th>
+                            <th>Unidade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-fornecedores">
+                        {% for item in itens_cotados %}
+                        <tr>
+                            <td>{{ item.fornecedor or item.nomeFornecedor or '-' }}</td>
+                            <td>{{ item.cnpj or item.niFornecedor or '-' }}</td>
+                            <td class="preco">R$ {{ "%.2f"|format(item.preco_unitario or item.precoUnitario or 0) }}
+                            </td>
+                            <td>{{ item.quantidade or '-' }}</td>
+                            <td>{{ item.unidade or item.siglaUnidadeFornecimento or '-' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Nenhum fornecedor selecionado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card: Valor Total -->
+    <div class="pp-field-card pp-valor-total">
+        <div class="field-header">
+            <div class="field-info">
+                <h3 class="field-label">Valor Total Estimado</h3>
+                <p class="field-description">Valor total da cotacao (baseado na media)</p>
+            </div>
+        </div>
+        <div class="field-content">
+            <div class="valor-total-display">
+                <span class="valor-label">Valor Total:</span>
+                <span class="valor-numero">R$ {{ "%.2f"|format(pesquisa.valor_total_cotacao or estatisticas.media or 0)
+                    }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botoes de Acao -->
+<div class="pp-footer-actions">
+    <a href="/projetos/{{ projeto.id }}/pesquisa_precos" class="btn btn-outline-secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Nova Pesquisa
+    </a>
+    <button type="button" class="btn btn-info" id="btn-exportar-pdf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        Exportar PDF
+    </button>
+    <button type="button" class="btn btn-lg {{ 'btn-success' if pesquisa.status != 'aprovado' else 'btn-secondary' }}"
+        id="btn-aprovar-final" {% if pesquisa.status=='aprovado' %}disabled{% endif %}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        {% if pesquisa.status == 'aprovado' %}Aprovado{% else %}Aprovar Pesquisa{% endif %}
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    const PESQUISA_ID = {{ pesquisa.id }};
+    const PROJETO_ID = {{ projeto.id }};
+
+    // Armazenar valores originais
+    const valoresOriginais = {};
+    document.querySelectorAll('.campo-editavel').forEach(el => {
+        valoresOriginais[el.dataset.campo] = el.value;
+    });
+
+    // Detectar alteracoes
+    document.querySelectorAll('.campo-editavel').forEach(el => {
+        el.addEventListener('input', function () {
+            const btnSalvar = document.querySelector('.btn-salvar-documento');
+            const hasChanges = Array.from(document.querySelectorAll('.campo-editavel'))
+                .some(field => field.value !== valoresOriginais[field.dataset.campo]);
+
+            if (hasChanges) {
+                btnSalvar.style.display = 'inline-flex';
+            } else {
+                btnSalvar.style.display = 'none';
+            }
+        });
+    });
+
+    // Salvar documento
+    document.querySelector('.btn-salvar-documento')?.addEventListener('click', async function () {
+        const btn = this;
+        btn.disabled = true;
+
+        try {
+            const campos = {};
+            document.querySelectorAll('.campo-editavel').forEach(el => {
+                campos[el.dataset.campo] = el.value;
+            });
+
+            // Construir document_header atualizado
+            const docHeader = {
+                objeto: campos.objeto || '',
+                justificativa: campos.justificativa || '',
+                responsavel: campos.responsavel || '',
+                setor: campos.setor || '',
+                observacoes: campos.observacoes || ''
+            };
+
+            const response = await fetch(`/api/pesquisa_precos/${PESQUISA_ID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    item_descricao: campos.item_descricao,
+                    document_header: docHeader
+                })
+            });
+
+            if (!response.ok) throw new Error('Erro ao salvar');
+
+            // Atualizar valores originais
+            document.querySelectorAll('.campo-editavel').forEach(el => {
+                valoresOriginais[el.dataset.campo] = el.value;
+            });
+
+            btn.style.display = 'none';
+            mostrarNotificacao('Alteracoes salvas com sucesso!', 'success');
+
+        } catch (error) {
+            mostrarNotificacao('Erro ao salvar: ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    // Aprovar pesquisa
+    document.getElementById('btn-aprovar-final')?.addEventListener('click', async function () {
+        if (this.disabled) return;
+        if (!confirm('Aprovar esta pesquisa de precos?')) return;
+
+        this.disabled = true;
+
+        try {
+            const response = await fetch(`/api/pesquisa_precos/${PESQUISA_ID}/aprovar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Erro ao aprovar');
+
+            mostrarNotificacao('Pesquisa aprovada com sucesso!', 'success');
+            setTimeout(() => window.location.href = `/projetos/${PROJETO_ID}`, 1000);
+
+        } catch (error) {
+            mostrarNotificacao('Erro ao aprovar: ' + error.message, 'error');
+            this.disabled = false;
+        }
+    });
+
+    // Exportar PDF
+    document.getElementById('btn-exportar-pdf')?.addEventListener('click', function () {
+        // Abrir PDF gerado pela API
+        const pdfUrl = `/api/export/pdf/pesquisa_precos/${PESQUISA_ID}`;
+        window.open(pdfUrl, '_blank');
+    });
+
+    // Nova versao
+    document.getElementById('btn-nova-versao')?.addEventListener('click', async function () {
+        if (!confirm('Criar uma nova versao? A versao atual sera salva no historico.')) return;
+
+        try {
+            const response = await fetch(`/api/pesquisa_precos/${PESQUISA_ID}/nova-versao`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) throw new Error('Erro ao criar versao');
+
+            const result = await response.json();
+            mostrarNotificacao(`Nova versao ${result.versao} criada!`, 'success');
+            setTimeout(() => location.reload(), 1000);
+
+        } catch (error) {
+            mostrarNotificacao('Erro: ' + error.message, 'error');
+        }
+    });
+
+    function mostrarNotificacao(mensagem, tipo) {
+        const notif = document.createElement('div');
+        notif.className = `notificacao notificacao-${tipo}`;
+        notif.innerHTML = `
+            <span>${mensagem}</span>
+            <button onclick="this.parentElement.remove()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        `;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 5000);
+    }
+</script>
+
+<style>
+    /* Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .page-header-left {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .page-header-right {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .btn-back {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        transition: var(--transition);
+    }
+
+    .btn-back:hover {
+        background: var(--color-primary);
+        color: white;
+    }
+
+    .btn-back svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .versao-badge {
+        background: #319795;
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Barra de acoes */
+    .pp-actions-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .actions-left {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .status-dot.status-rascunho {
+        background: var(--color-warning);
+    }
+
+    .status-dot.status-em_revisao {
+        background: var(--color-info);
+    }
+
+    .status-dot.status-aprovado {
+        background: var(--color-success);
+    }
+
+    .separator {
+        color: var(--text-tertiary);
+    }
+
+    .last-update {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    /* Editor */
+    .pp-editor {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .pp-field-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        transition: var(--transition);
+    }
+
+    .pp-field-card:hover {
+        box-shadow: var(--shadow-sm);
+    }
+
+    .field-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .field-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .field-description {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .field-content {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Form rows */
+    .form-row {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .form-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-group {
+        min-width: 150px;
+    }
+
+    .form-group.flex-grow {
+        flex: 1;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .field-textarea,
+    .field-input {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        resize: vertical;
+        transition: var(--transition);
+    }
+
+    .field-textarea:focus,
+    .field-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px rgba(44, 122, 123, 0.1);
+    }
+
+    .field-input[readonly] {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    /* Stats row */
+    .stats-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+    }
+
+    .stat-item {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md) var(--spacing-lg);
+        text-align: center;
+        min-width: 140px;
+        flex: 1;
+    }
+
+    .stat-item.stat-highlight {
+        background: linear-gradient(135deg, #168821 0%, #1a9c28 100%);
+        border: none;
+    }
+
+    .stat-item.stat-highlight .stat-label,
+    .stat-item.stat-highlight .stat-value {
+        color: white;
+    }
+
+    .stat-item.stat-highlight-secondary {
+        background: linear-gradient(135deg, #1351B4 0%, #1967d2 100%);
+        border: none;
+    }
+
+    .stat-item.stat-highlight-secondary .stat-label,
+    .stat-item.stat-highlight-secondary .stat-value {
+        color: white;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--spacing-xs);
+        display: block;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* Table */
+    .pp-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .pp-table thead {
+        background: var(--bg-tertiary);
+    }
+
+    .pp-table th {
+        padding: var(--spacing-sm) var(--spacing-md);
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .pp-table td {
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+    }
+
+    .pp-table td.preco {
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-weight: 600;
+        color: var(--color-primary);
+    }
+
+    /* Valor total */
+    .pp-valor-total {
+        border-left: 4px solid #319795;
+    }
+
+    .valor-total-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--spacing-md);
+        background: linear-gradient(135deg, rgba(49, 151, 149, 0.1) 0%, rgba(49, 151, 149, 0.05) 100%);
+        border-radius: var(--radius-md);
+    }
+
+    .valor-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .valor-numero {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #319795;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    /* Footer actions */
+    .pp-footer-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Notificacoes */
+    .notificacao {
+        position: fixed;
+        bottom: var(--spacing-lg);
+        right: var(--spacing-lg);
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        box-shadow: var(--shadow-lg);
+        z-index: 2000;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notificacao-success {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+
+    .notificacao-error {
+        background: #FED7D7;
+        color: #C53030;
+    }
+
+    .notificacao button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        color: inherit;
+        opacity: 0.7;
+    }
+
+    .notificacao button:hover {
+        opacity: 1;
+    }
+
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .page-header-right {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .pp-actions-bar {
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .form-row {
+            flex-direction: column;
+        }
+
+        .stats-row {
+            flex-direction: column;
+        }
+
+        .pp-footer-actions {
+            flex-direction: column;
+        }
+
+        .pp-footer-actions .btn {
+            width: 100%;
+        }
+    }
+
+    /* Print */
+    @media print {
+
+        .page-header-right,
+        .pp-actions-bar .actions-right,
+        .pp-footer-actions,
+        .btn-salvar-documento {
+            display: none !important;
+        }
+
+        .pp-field-card {
+            break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}

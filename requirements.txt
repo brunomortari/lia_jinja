@@ -1,0 +1,61 @@
+# Sistema LIA - Requirements Simplificado
+# =========================================
+
+# Core
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+
+# Auth COMPLETO (substitui todo código custom)
+fastapi-users[sqlalchemy]==12.1.2
+fastapi-users[oauth]==12.1.2
+
+# Admin Interface (substitui a gestão de usuários)
+sqladmin==0.16.0
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+PyJWT==2.8.0
+
+# Templates (mantém)
+jinja2==3.1.2
+
+# PDF Export
+weasyprint==60.1
+
+# PDF Text Extraction
+pypdf>=4.0
+pymupdf>=1.24.0 # Optional, better quality
+python-docx>=1.1.0
+
+# HTTP Client
+httpx==0.25.1
+
+# OpenAI SDK (para OpenRouter)
+openai==1.55.0
+
+# Rate Limiting
+slowapi==0.1.9
+
+# Redis (CSRF/Sessions/Cache)
+redis==5.0.1
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-timeout==2.2.0
+pytest-cov==4.1.0
+aiosqlite==0.19.0

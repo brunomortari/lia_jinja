@@ -1,0 +1,505 @@
+﻿{% extends "app.html" %}
+{% from "components/macros.html" import artefato_section %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/pages/projeto_dashboard.css') }}">
+<style>
+/* ═══ LAYOUT DUAS COLUNAS ═══ */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.5rem;
+    align-items: start;
+}
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .flow-sidebar { position: static !important; order: -1; }
+}
+
+/* ═══ PAINEL LATERAL (STEPPER) ═══ */
+.flow-sidebar {
+    position: sticky;
+    top: 80px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    padding: 1.5rem;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+.flow-sidebar::-webkit-scrollbar { width: 3px; }
+.flow-sidebar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+
+.flow-sidebar-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Stepper com visual de activity */
+.stepper {
+    position: relative;
+    padding-left: 0;
+}
+
+.step {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.step:last-child {
+    margin-bottom: 0;
+}
+
+/* Linha conectora vertical */
+.step::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 24px;
+    bottom: -24px;
+    width: 2px;
+    background: #E2E8F0;
+}
+
+.step:last-child::before {
+    display: none;
+}
+
+.step[data-state="completed"]::before {
+    background: #10B981;
+}
+
+.step[data-state="active"]::before {
+    background: linear-gradient(180deg, #6366F1 0%, #E2E8F0 100%);
+}
+
+/* Dot */
+.step-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.step[data-state="completed"] .step-dot {
+    background: #10B981;
+    border-color: #10B981;
+    color: white;
+}
+
+.step[data-state="active"] .step-dot {
+    background: #6366F1;
+    border-color: #6366F1;
+    color: white;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.step[data-state="locked"] .step-dot {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: #94A3B8;
+}
+
+.step[data-state="locked"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    50% { box-shadow: 0 0 0 6px rgba(99,102,241,0.08); }
+}
+
+/* Conteúdo da step */
+.step-row {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.step-sigla {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.step-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #334155;
+    margin-top: 0.15rem;
+}
+
+.step[data-state="completed"] .step-sigla {
+    color: #10B981;
+}
+
+.step[data-state="completed"] .step-name {
+    color: #065F46;
+}
+
+.step[data-state="active"] .step-sigla {
+    color: #6366F1;
+}
+
+.step[data-state="active"] .step-name {
+    color: #312E81;
+    font-weight: 600;
+}
+
+.step[data-state="locked"] .step-sigla,
+.step[data-state="locked"] .step-name {
+    color: #94A3B8;
+}
+
+.step-status-icon {
+    font-size: 0.7rem;
+}
+
+/* Branch separator */
+.branch-sep {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0.5rem 0 0.5rem 0;
+    padding-left: 0;
+}
+
+.branch-sep-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.branch-sep-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+/* Highlighted step */
+.step.is-highlight {
+    background: #F5F3FF;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+}
+
+/* PD action */
+.pd-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #F5F3FF;
+    color: #7C3AED;
+    border: 1px solid #DDD6FE;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.pd-action:hover { background: #EDE9FE; border-color: #C4B5FD; }
+
+/* Branch badge no header */
+.branch-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Artifact container spacing */
+.artifacts-container {
+    min-height: 400px;
+}
+
+/* Back button - estilo igual ao dos chats */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748B;
+    background: transparent;
+    border: 1px solid #E2E8F0;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    margin-top: 6px;
+}
+.back-btn:hover {
+    background: #F1F5F9;
+    color: #334155;
+    border-color: #6366F1;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+
+    {# ── HEADER: Back button + Title + Branch badge ── #}
+    <div class="flex items-start gap-4 mb-1">
+        <a href="/projetos" class="back-btn" title="Voltar aos projetos">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"></path>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Voltar
+        </a>
+        <div class="flex-1" style="margin-left: -0.5rem;">
+            <h1 class="text-3xl font-bold text-gray-900 mb-1">{{ projeto.titulo }}</h1>
+            {% if projeto.descricao %}
+            <p class="text-gray-500 text-sm">{{ projeto.descricao }}</p>
+            {% endif %}
+        </div>
+        {% if active_branch %}
+        <div class="branch-badge" style="background: {{ branch_info.cor_bg }}; color: {{ branch_info.cor_text }};">
+            <span style="width:8px;height:8px;border-radius:50%;background:{{ branch_info.cor }};display:inline-block;"></span>
+            {{ branch_info.label }}
+        </div>
+        {% endif %}
+    </div>
+    <div style="height: 2rem;"></div>
+
+    {# ── GRID: Cards (esquerda) + Stepper (direita) ── #}
+    <div class="dashboard-grid">
+
+        {# ════ COLUNA ESQUERDA: ARTIFACT CARDS ════ #}
+        <div class="artifacts-container">
+            {% set card_counter = namespace(count=0) %}
+            {% for etapa in etapas %}
+                {% set tipo = etapa.tipo %}
+                {% set relation_name = tipo_para_relation.get(tipo) %}
+                {% set artefatos_list = projeto[relation_name] if relation_name else [] %}
+                {% set status_info = artefatos_status.get(tipo, {"liberado": false, "faltando": []}) %}
+
+                {# Vertical divider between cards #}
+                {% if card_counter.count > 0 %}
+                <div style="height: 2px; background: linear-gradient(90deg, transparent, #E2E8F0, transparent); margin: 2rem 0;"></div>
+                {% endif %}
+                {% set card_counter.count = card_counter.count + 1 %}
+
+                {# JEP: card especial #}
+                {% if tipo == 'jep' %}
+                <div id="card-jep" class="artefato-card" style="border-left: 4px solid #E53E3E; background: linear-gradient(135deg, #FFF5F5 0%, #FED7D7 100%); margin-bottom: 1.5rem;">
+                    <div class="artefato-header">
+                        <div class="artefato-icon" style="background-color: #E53E3E !important;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="24" height="24">
+                                <polygon points="12 2 22 22 2 22"></polygon>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="artefato-info">
+                            <h3 style="color: #C53030;">Justificativa de Excepcionalidade</h3>
+                            <div class="artefato-meta">
+                                <span class="badge" style="background: #FED7D7; color: #9B2C2C;">OBRIGATÓRIO — Sem PAC</span>
+                                <span class="text-muted">
+                                    {{ artefatos_list|length if artefatos_list else 0 }} versão(ões)
+                                </span>
+                            </div>
+                            <p style="font-size: 0.8rem; color: #9B2C2C; margin-top: 6px;">
+                                ⚠️ Contratações fora do PAC exigem justificativa formal (Lei 14.133/2021, Art. 12, VII).
+                            </p>
+                        </div>
+                    </div>
+                    <div class="artefato-actions">
+                        {% set jep_locked = artefatos_list and artefatos_list[0].protocolo_sei %}
+                        {% if not jep_locked %}
+                        <a href="/projetos/{{ projeto.id }}/jep" class="btn btn-sm" style="background: #E53E3E; color: white;">
+                            {% if artefatos_list %}✏️ Editar{% else %}＋ Criar{% endif %}
+                        </a>
+                        {% else %}
+                        <span class="text-muted" style="font-size: 0.85rem;">🔒 Publicado no SEI</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# DFD: card + Portaria de Designação #}
+                {% elif tipo == 'dfd' %}
+                <div id="card-dfd">
+                    {{ artefato_section(
+                        projeto_id=projeto.id,
+                        tipo='dfd',
+                        titulo='Documento de Formalização da Demanda',
+                        artefatos=projeto.dfds,
+                        liberado=status_info.get('liberado', false),
+                        faltando=status_info.get('faltando', [])
+                    ) }}
+                    {% set dfd_has_approved = projeto.dfds and projeto.dfds|length > 0 and projeto.dfds[0].status in ('aprovado', 'publicado', 'concluido') %}
+                    {% if dfd_has_approved %}
+                    <div style="margin: -0.75rem 0 1.5rem 0; padding: 0.5rem 1rem; background: #F5F3FF; border-radius: 0 0 12px 12px; border: 1px solid #EDE9FE; border-top: none;">
+                        <a href="/api/portaria-designacao/{{ projeto.id }}/print" class="pd-action" target="_blank">
+                            📋 Ver Portaria de Designação (PDF)
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# Demais: card genérico #}
+                {% else %}
+                <div id="card-{{ tipo }}">
+                    {{ artefato_section(
+                        projeto_id=projeto.id,
+                        tipo=tipo,
+                        titulo=etapa.titulo,
+                        artefatos=artefatos_list,
+                        liberado=status_info.get('liberado', false),
+                        faltando=status_info.get('faltando', [])
+                    ) }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {# ════ COLUNA DIREITA: STEPPER COMPACTO ════ #}
+        <aside class="flow-sidebar">
+            <div class="flow-sidebar-title">Fluxo</div>
+
+            <div class="stepper">
+                {% set ns = namespace(last_branch=None) %}
+                {% set branch_ui = {
+                    'adesao': {'cor': '#10B981', 'label': 'ADESÃO'},
+                    'dispensa': {'cor': '#F97316', 'label': 'DISPENSA'},
+                    'licitacao': {'cor': '#8B5CF6', 'label': 'LICITAÇÃO'},
+                    'direta': {'cor': '#EC4899', 'label': 'CONTRATAÇÃO DIRETA'}
+                } %}
+
+                {% for etapa in etapas %}
+                    {# Branch separator #}
+                    {% if etapa.branch and etapa.branch != ns.last_branch %}
+                    <div class="branch-sep">
+                        <span class="branch-sep-dot" style="background: {{ branch_ui[etapa.branch].cor }};"></span>
+                        <span class="branch-sep-label" style="color: {{ branch_ui[etapa.branch].cor }};">
+                            {{ branch_ui[etapa.branch].label }}
+                        </span>
+                    </div>
+                    {% set ns.last_branch = etapa.branch %}
+                    {% endif %}
+
+                    {# Step #}
+                    <div class="step{% if etapa.estado == 'active' %} is-highlight{% endif %}"
+                         data-state="{{ etapa.estado }}"
+                         data-tipo="{{ etapa.tipo }}"
+                         onclick="{% if etapa.estado != 'locked' %}scrollToCard('{{ etapa.tipo }}'){% endif %}">
+                        <div class="step-dot">
+                            {% if etapa.estado == 'completed' %}✓
+                            {% elif etapa.estado == 'active' %}●
+                            {% else %}{{ loop.index }}{% endif %}
+                        </div>
+                        <div class="step-row">
+                            <div class="step-header">
+                                <span class="step-sigla" style="{% if etapa.branch %}color:{{ branch_ui[etapa.branch].cor }};{% endif %}">
+                                    {{ etapa.sigla }}
+                                </span>
+                                {% if etapa.estado == 'completed' %}
+                                <span class="step-status-icon" title="Concluído">✅</span>
+                                {% elif etapa.estado == 'active' %}
+                                <span class="step-status-icon" title="Em andamento">🔵</span>
+                                {% endif %}
+                            </div>
+                            <span class="step-name" title="{{ etapa.titulo }}">{{ etapa.titulo }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {# FIM #}
+                {% if active_branch %}
+                <div class="step" data-state="locked" style="opacity: 0.35;">
+                    <div class="step-dot" style="border-color:#10B981;background:#F0FDF4;font-size:8px;">🏁</div>
+                    <div class="step-row">
+                        <span class="step-name" style="font-style:italic;color:#94A3B8;font-size:0.72rem;">Conclusão</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+    </div>{# /dashboard-grid #}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const projetoId = {{ projeto.id }};
+
+    function scrollToCard(tipo) {
+        const card = document.getElementById('card-' + tipo);
+        if (!card) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.style.transition = 'box-shadow 0.3s';
+        card.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.3)';
+        setTimeout(() => { card.style.boxShadow = ''; }, 800);
+        // highlight active step
+        document.querySelectorAll('.step.is-highlight').forEach(s => {
+            if (s.dataset.tipo !== tipo) s.classList.remove('is-highlight');
+        });
+        const step = document.querySelector('.step[data-tipo="' + tipo + '"]');
+        if (step) step.classList.add('is-highlight');
+    }
+
+    // Keyboard nav
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const steps = Array.from(document.querySelectorAll('.step:not([data-state="locked"])'));
+        if (!steps.length) return;
+        const idx = steps.findIndex(s => s.classList.contains('is-highlight'));
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = (idx + 1) % steps.length;
+            steps.forEach(s => s.classList.remove('is-highlight'));
+            steps[next].classList.add('is-highlight');
+            steps[next].click();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prev = (idx - 1 + steps.length) % steps.length;
+            steps.forEach(s => s.classList.remove('is-highlight'));
+            steps[prev].classList.add('is-highlight');
+            steps[prev].click();
+        }
+    });
+</script>
+<script src="{{ url_for('static', path='js/metro_flow.js') }}?v={{ range(10000,99999) | random }}"></script>
+{% endblock %}
