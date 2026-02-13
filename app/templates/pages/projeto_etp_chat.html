@@ -77,6 +77,48 @@ subtitle='Assistente para elaboração do Estudo Técnico Preliminar (Lei 14.133
     </div>
 </div>
 
+{# Card: Modalidade Sugerida (regula o fluxo do processo) #}
+<div class="context-card" id="cardModalidade">
+    <div class="context-card-header" onclick="toggleContextCard('cardModalidade')">
+        <div class="context-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+                <line x1="4" y1="21" x2="20" y2="21"></line>
+            </svg>
+            Modalidade Sugerida
+            <span class="context-badge" style="font-size: 0.6rem; background: #3182CE;">Fluxo</span>
+        </div>
+        <svg class="context-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+    <div class="context-card-body">
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 12px 0;">
+            Define o caminho do processo licitatório. Esta escolha determina quais artefatos serão gerados.
+        </p>
+        <div class="required-fields-section" style="margin: 0; padding: 0; background: transparent;">
+            <div class="required-field-group">
+                <label class="required-field-label">Modalidade de Contratação</label>
+                <select class="required-field-input" id="selectModalidadeSugerida" onchange="onModalidadeChange(this.value)" style="cursor: pointer;">
+                    <option value="">-- Selecione a modalidade --</option>
+                    <option value="adesao_ata" {% if etp_editar and etp_editar.modalidade_sugerida == 'adesao_ata' %}selected{% endif %}>
+                        Adesão a Ata de Registro de Preço
+                    </option>
+                    <option value="licitacao_normal" {% if etp_editar and etp_editar.modalidade_sugerida == 'licitacao_normal' %}selected{% endif %}>
+                        Licitação Normal
+                    </option>
+                    <option value="dispensa_valor_baixo" {% if etp_editar and etp_editar.modalidade_sugerida == 'dispensa_valor_baixo' %}selected{% endif %}>
+                        Dispensa por Valor Baixo
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <div id="modalidadeInfo" style="display: none; margin-top: 12px; padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem;">
+        </div>
+    </div>
+</div>
+
 {# Card: Adesão de Ata de Registro #}
 <div class="context-card collapsed" id="cardAdesaoAta">
     <div class="context-card-header" onclick="toggleContextCard('cardAdesaoAta')">
@@ -291,13 +333,15 @@ cotacao_context.valor_total_cotacao else "0,00"), 'highlight': true},
         providencias_previas: {{ etp_editar.providencias_previas | tojson |default ('""') }},
         impactos_ambientais: {{ etp_editar.impactos_ambientais | tojson |default ('""') }},
         analise_riscos: {{ etp_editar.analise_riscos | tojson |default ('""') }},
-        viabilidade_contratacao: {{ etp_editar.viabilidade_contratacao | tojson |default ('""') }}
+        viabilidade_contratacao: {{ etp_editar.viabilidade_contratacao | tojson |default ('""') }},
+        modalidade_sugerida: {{ etp_editar.modalidade_sugerida | tojson |default ('""') }}
     } {% else %} null{% endif %},
     // Endpoints
     saveEndpoint: '/api/ia/artefato/salvar',
         updateEndpoint: '/api/etp/' + '{id}',
             // Custom payload builders
             buildSavePayload: function(finalData, status) {
+                const modalidade = document.getElementById('selectModalidadeSugerida');
                 return {
                     projeto_id: this.projetoId,
                     tipo_artefato: 'etp',
@@ -316,12 +360,14 @@ cotacao_context.valor_total_cotacao else "0,00"), 'highlight': true},
                         providencias_previas: finalData.providencias_previas || '',
                         impactos_ambientais: finalData.impactos_ambientais || '',
                         analise_riscos: finalData.analise_riscos || '',
-                        viabilidade_contratacao: finalData.viabilidade_contratacao || ''
+                        viabilidade_contratacao: finalData.viabilidade_contratacao || '',
+                        modalidade_sugerida: modalidade ? modalidade.value : ''
                     },
                     status: status
                 };
             },
     buildUpdatePayload: function(finalData, status) {
+        const modalidade = document.getElementById('selectModalidadeSugerida');
         return {
             descricao_necessidade: finalData.descricao_necessidade || '',
             area_requisitante: finalData.area_requisitante || '',
@@ -338,6 +384,7 @@ cotacao_context.valor_total_cotacao else "0,00"), 'highlight': true},
             impactos_ambientais: finalData.impactos_ambientais || '',
             analise_riscos: finalData.analise_riscos || '',
             viabilidade_contratacao: finalData.viabilidade_contratacao || '',
+            modalidade_sugerida: modalidade ? modalidade.value : '',
             status: status
         };
     },
@@ -497,8 +544,59 @@ cotacao_context.valor_total_cotacao else "0,00"), 'highlight': true},
         }).catch(err => console.error('Erro ao desmarcar ata:', err));
     }
 
+    // ========== MODALIDADE SUGERIDA ==========
+    const MODALIDADE_INFO = {
+        'adesao_ata': {
+            label: 'Adesão a Ata de Registro de Preço',
+            color: '#805AD5',
+            artefatos: ['RDVE', 'JVA', 'TAFO'],
+            descricao: 'Fluxo simplificado via adesão a ata existente. Artefatos: Relatório de Vantagem Econômica, Justificativa da Vantagem e Termo de Aceite.'
+        },
+        'licitacao_normal': {
+            label: 'Licitação Normal',
+            color: '#3182CE',
+            artefatos: ['PP', 'PGR', 'TR', 'ED', 'MC'],
+            descricao: 'Fluxo completo de licitação. Artefatos: Pesquisa de Preço, Plano de Gestão de Riscos, Termo de Referência, Edital e Minuta de Contrato.'
+        },
+        'dispensa_valor_baixo': {
+            label: 'Dispensa por Valor Baixo',
+            color: '#DD6B20',
+            artefatos: ['TRS', 'ADE', 'JPEF', 'CE'],
+            descricao: 'Fluxo de dispensa para valores abaixo do limite legal. Artefatos: TR Simplificado, Aviso de Dispensa, Justificativa de Preço e Certidão de Enquadramento.'
+        }
+    };
+
+    function onModalidadeChange(value) {
+        const infoDiv = document.getElementById('modalidadeInfo');
+        if (!value || !MODALIDADE_INFO[value]) {
+            infoDiv.style.display = 'none';
+            return;
+        }
+
+        const info = MODALIDADE_INFO[value];
+        infoDiv.style.display = 'block';
+        infoDiv.style.borderColor = info.color;
+        infoDiv.style.background = `${info.color}10`;
+        infoDiv.innerHTML = `
+            <div style="font-weight: 600; color: ${info.color}; margin-bottom: 6px;">${info.label}</div>
+            <div style="color: var(--text-secondary); margin-bottom: 8px;">${info.descricao}</div>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                ${info.artefatos.map(a => `<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: ${info.color}; color: white; font-size: 0.7rem; font-weight: 600;">${a}</span>`).join('')}
+            </div>
+        `;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         initArtifactChat(ETP_CONFIG, ETP_FIELDS);
+
+        // Carregar valor existente da modalidade no select
+        if (ETP_CONFIG.editarDados && ETP_CONFIG.editarDados.modalidade_sugerida) {
+            const select = document.getElementById('selectModalidadeSugerida');
+            if (select) {
+                select.value = ETP_CONFIG.editarDados.modalidade_sugerida;
+                onModalidadeChange(select.value);
+            }
+        }
     });
 </script>
 {% endblock %}

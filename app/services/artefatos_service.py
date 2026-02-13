@@ -184,6 +184,8 @@ def mapear_campos_artefato(tipo: str, content: Dict[str, Any]) -> Dict[str, Any]
             "riscos_criticos": riscos if isinstance(riscos, list) else None,
             # ETP-15: Viabilidade da Contratação
             "viabilidade_contratacao": _to_text(content.get('viabilidade_contratacao', '')),
+            # Modalidade Sugerida (regula o fluxo do processo)
+            "modalidade_sugerida": content.get('modalidade_sugerida', ''),
         }
 
     elif tipo == "tr":
